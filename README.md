@@ -169,7 +169,6 @@ Said plainly, so nobody discovers it after deploying:
   state, and the OpenLDAP bootstrap fixtures are missing. Point the API at a directory you already
   have.
 - **No CI.** Tests run locally; there is no workflow in the repository yet.
-- **`openapi.yaml` in the root is stale.** Use the Swagger UI the API generates at `/swagger`.
 - **Route prefixes are inconsistent** — some controllers are under `/api/v1/…`, others under
   `/api/…`. This will be unified, and it will be a breaking change when it is.
 - **Password policy, account lockout and group membership editing from the user screen** are not

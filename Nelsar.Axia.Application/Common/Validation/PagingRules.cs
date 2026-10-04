@@ -37,11 +37,11 @@ internal static class PagingRules
     public const int MinimumPageSize = 1;
 
     /// <summary>
-    /// 200, because that is the number <c>openapi.yaml</c> has been publishing as the maximum for
-    /// every paged endpoint since before this rule existed. The bound was documented and simply
-    /// never enforced — clients were told 200 and handed whatever they asked for — so this is the
-    /// implementation catching up with its own contract rather than a new limit being imposed. If
-    /// it ever moves, it moves in both places.
+    /// 200, because that is the number the API's published specification had been giving as the
+    /// maximum for every paged endpoint since before this rule existed. The bound was documented
+    /// and simply never enforced — clients were told 200 and handed whatever they asked for — so
+    /// this is the implementation catching up with its own contract rather than a new limit being
+    /// imposed. The specification is generated from the code now, so the two cannot disagree.
     /// </summary>
     public const int MaximumPageSize = 200;
 

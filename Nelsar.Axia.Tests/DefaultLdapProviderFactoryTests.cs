@@ -285,8 +285,12 @@ public class DefaultLdapProviderFactoryTests
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Ldap:Providers:branch:Server"] = "127.0.0.1",
-                ["Ldap:Providers:branch:Port"] = "389",
+                // A .invalid host (RFC 2606) rather than 127.0.0.1:389. The assertion below needs
+                // the endpoint to be unreachable, and 389 is precisely the port a contributor
+                // occupies by starting this project's own OpenLDAP container — which would turn
+                // this into a test that fails on the machines most likely to run it.
+                ["Ldap:Providers:branch:Server"] = "unreachable.invalid.nelsar-axia.test",
+                ["Ldap:Providers:branch:Port"] = "65000",
                 ["Ldap:Providers:branch:BaseDn"] = "dc=branch,dc=example,dc=com"
             })
             .Build();
@@ -295,9 +299,9 @@ public class DefaultLdapProviderFactoryTests
         var defaultProvider = new Mock<ILdapProvider>();
         var factory = BuildFactory(repo, defaultProvider, configuration: configuration);
 
-        // Nothing is listening on 127.0.0.1:389 in the test run, so this resolves to the
-        // unreachable outcome rather than to the default — which is the point either way: a
-        // named domain never silently becomes the default one.
+        // The host does not resolve, so this reaches the unreachable outcome rather than the
+        // default — which is the point either way: a named domain never silently becomes the
+        // default one.
         Assert.Throws<DirectoryUnavailableException>(() => factory.Resolve("branch"));
     }
 }
