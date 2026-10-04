@@ -9,13 +9,15 @@ services:
       - LDAP_DOMAIN=nelsar.com
       - LDAP_ADMIN_USERNAME=admin
       - LDAP_ADMIN_PASSWORD=password@
-      # Настройка TLS (по умолчанию включена)
+      # TLS for the container's own listener on 636. The API does not use it — it speaks plain
+      # LDAP on 389; see SECURITY.md under known limitations.
       - LDAP_TLS=true
     volumes:
       - ldap_data:/var/lib/ldap
       - ldap_config:/etc/ldap/slapd.d
-      # Применяется только при первом старте (на пустом ldap_data volume):
-      # OU people/groups, ~2000 тестовых пользователей, 2 группы (Administrators/UserCreators).
+      # Applied on first start only, against an empty ldap_data volume: OU people/groups, ~2000
+      # test users, and two groups (Administrators/UserCreators). The fixtures themselves are not
+      # in the repository — see README.md under "Not in scope yet".
       - ./bootstrap:/container/service/slapd/assets/config/bootstrap/ldif/custom
     ports:
       - "389:389"

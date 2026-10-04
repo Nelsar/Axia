@@ -4,7 +4,7 @@
   "private": true,
   "license": "Apache-2.0",
   "type": "module",
-  "description": "DirCore — фронтенд для Nelsar.Axia.Api (React + TypeScript, Vite)",
+  "description": "Web console for Nelsar.Axia — administering Active Directory and LDAP directories (React, TypeScript, Vite)",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

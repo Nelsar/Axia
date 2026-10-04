@@ -64,7 +64,7 @@ public sealed class DistinguishedName : IEquatable<DistinguishedName>
     }
 
     /// <summary>
-    /// The value of the leftmost component — "Финансы" for "OU=Финансы,DC=example,DC=com".
+    /// The value of the leftmost component — "Finance" for "OU=Finance,DC=example,DC=com".
     /// That is the entry's own name within its parent, and the part a rename replaces.
     /// </summary>
     public string Rdn
@@ -131,8 +131,8 @@ public sealed class DistinguishedName : IEquatable<DistinguishedName>
 
     /// <summary>
     /// Escapes an attribute value for use in an RDN, per RFC 4514. Without this, a unit named
-    /// "Отдел кадров, филиал" would be written as two DN components and land somewhere nobody
-    /// asked for.
+    /// "Human Resources, Northern Branch" would be written as two DN components and land
+    /// somewhere nobody asked for.
     /// </summary>
     public static string EscapeRdnValue(string value)
     {

@@ -8,13 +8,13 @@
     "types": [],
 
     "strict": true,
-    /* Индексация массива даёт T | undefined: `items[0].name` больше не проходит без проверки.
-       Для консоли, которая рисует ответы каталога, это ровно тот случай, ради которого флаг
-       и существует. */
+    /* Indexing an array yields T | undefined, so `items[0].name` no longer compiles unchecked.
+       For a console whose whole job is rendering directory responses — lists that are routinely
+       empty — this is the case the flag exists for. */
     "noUncheckedIndexedAccess": true,
-    /* `style?: CSSProperties` и `style: CSSProperties | undefined` — разные вещи: без этого
-       флага можно передать undefined в необязательное свойство и не заметить. Поэтому все
-       необязательные props ниже объявлены явно как `?: T | undefined`. */
+    /* `style?: CSSProperties` and `style: CSSProperties | undefined` are different types: without
+       this flag you can pass undefined to an optional property and not be told. Which is why the
+       optional props in this project are declared explicitly as `?: T | undefined`. */
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,

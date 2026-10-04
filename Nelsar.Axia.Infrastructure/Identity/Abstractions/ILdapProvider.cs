@@ -26,7 +26,7 @@ internal interface ILdapProvider
     string[] GetUserGroups(string username);
 
     // Organizational units. Addressed by DN rather than by name: an OU name is unique only
-    // among its siblings, so "Финансы" identifies an entry no better than a bare file name
+    // among its siblings, so "Finance" identifies an entry no better than a bare file name
     // identifies a file. Callers holding an API-level id resolve it against the enumeration.
 
     DirectoryOrganizationalUnitListing GetAllOrganizationalUnits();
