@@ -4,16 +4,21 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy csproj files first so `dotnet restore` is cached unless dependencies change.
+# Contracts is referenced by Api, Application and Infrastructure alike. Leaving it out is what
+# used to break this build: `dotnet restore` reported success — a missing project reference is
+# only MSB9008, a warning — and `dotnet publish` then failed with a screen of CS0234.
 COPY Nelsar.Axia.Api/Nelsar.Axia.Api.csproj Nelsar.Axia.Api/
 COPY Nelsar.Axia.Application/Nelsar.Axia.Application.csproj Nelsar.Axia.Application/
 COPY Nelsar.Axia.Infrastructure/Nelsar.Axia.Infrastructure.csproj Nelsar.Axia.Infrastructure/
 COPY Nelsar.Axia.Domain/Nelsar.Axia.Domain.csproj Nelsar.Axia.Domain/
+COPY Nelsar.Axia.Contracts/Nelsar.Axia.Contracts.csproj Nelsar.Axia.Contracts/
 RUN dotnet restore Nelsar.Axia.Api/Nelsar.Axia.Api.csproj
 
 COPY Nelsar.Axia.Api/ Nelsar.Axia.Api/
 COPY Nelsar.Axia.Application/ Nelsar.Axia.Application/
 COPY Nelsar.Axia.Infrastructure/ Nelsar.Axia.Infrastructure/
 COPY Nelsar.Axia.Domain/ Nelsar.Axia.Domain/
+COPY Nelsar.Axia.Contracts/ Nelsar.Axia.Contracts/
 
 RUN dotnet publish Nelsar.Axia.Api/Nelsar.Axia.Api.csproj -c Release -o /app --no-restore
 
