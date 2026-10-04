@@ -1,118 +1,102 @@
-# DirCore — фронтенд для Nelsar.Axia.Api
+# Nelsar.Axia console
 
-Реализация консоли управления AD/LDAP на основе дизайн-макета
-[«Active Directory управления интерфейс»](https://claude.ai/design/p/1a224801-1e7a-4dfb-9817-64c1b84d164c)
-(`AD Console.dc.html`). React + TypeScript, сборка через Vite.
+The web console for [Nelsar.Axia](../README.md) — React, TypeScript, built with Vite. It talks to
+`Nelsar.Axia.Api` over HTTP and holds no state of its own beyond the session.
 
-Все экраны — на React (см. «Структура»): логика в кастомных хуках, разметка в
-презентационных компонентах, связывание в контейнерах. Типизация строгая: `strict`,
-`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noUnusedLocals/Parameters`
-(см. `tsconfig.json`), без единого `any`. Формы ответов API описаны в `src/api/dto.ts`
-по контрактам `Nelsar.Axia.Contracts` — это перевод C#-типов, а не догадки по виду JSON.
+Types are strict by configuration — `strict`, `noUncheckedIndexedAccess`,
+`exactOptionalPropertyTypes`, `noUnusedLocals/Parameters` (see `tsconfig.json`) — and there is no
+`any` in the source. Response and request shapes live in `src/api/dto.ts`, hand-translated from the
+C# types in `Nelsar.Axia.Contracts` rather than guessed from observed JSON.
 
-## Что это и чего здесь нет
-
-Исходный дизайн-документ — это набросок трёх вариантов раскладки (1a — классический
-сайдбар/дашборд, 1b — дерево леса + мониторинг репликации DC, 1c — тёмная тема,
-экран «Пользователи») с полностью статичными, придуманными данными (102 480
-пользователей, здоровье контроллеров домена, топология репликации и т.д.) — это
-дизайн-исследование, а не рабочее приложение.
-
-Настоящий backend (`Nelsar.Axia.Api`) не хранит и не умеет отдавать данные о
-репликации/здоровье DC, поэтому эти виджеты **не реализованы** — рисовать их
-с фиктивными числами означало бы врать администратору о состоянии его AD.
-Вместо этого отсюда взят язык дизайна (IBM Plex Sans/Mono, палитра, сайдбар,
-светлая + тёмная тема) и применён к экранам, которые реально отражают то, что
-умеет API:
-
-- **Дашборд** — реальные счётчики (пользователи, провайдеры, ролевые сопоставления)
-  и последние события аудита; честно помечает недоступные для роли/API виджеты.
-- **Пользователи** — поиск/список, создание/изменение/удаление, массовые операции
-  (sync и async с опросом статуса), генератор логинов по маске/regex с транслитерацией
-  и проверкой конфликтов в LDAP.
-- **Орг. единицы (OU)** — полноценный CRUD поверх `/api/organizationalunits`: поиск
-  по имени/DN/описанию, создание, переименование и перенос, удаление. `id` — хэш от DN
-  записи, поэтому после переименования или переноса он меняется; экран всегда работает
-  с идентификаторами из свежего списка. Удаление непустого подразделения каталог
-  отклоняет (409) — экран показывает этот ответ, а не удаляет содержимое рекурсивно.
-  Если перебор каталога оборвался, список помечается как неполный.
-- **Группы** — полноценный CRUD поверх `/api/groups`: поиск по имени/DN/описанию,
-  создание, переименование и перенос, редактирование состава, удаление. `id`, как и у OU,
-  хэш от DN записи, поэтому после переименования или переноса он меняется. Участники —
-  это DN записей каталога (атрибут `member`), и при сохранении список заменяет состав
-  целиком; пустой состав экран не даёт отправить, потому что схема `groupOfNames`
-  требует минимум одного участника. Если каталог обслуживает Windows-провайдер
-  `ActiveDirectory`, API отвечает 501 (группами он не управляет) — экран показывает этот
-  ответ, а не пустой список.
-- **LDAP-провайдеры, Ролевые сопоставления, Rate limiting** — полноценный CRUD
-  поверх `/api/v1/providers`, `/api/v1/role-mappings`, `/api/v1/rate-limit-settings`.
-- **Журнал аудита** — постраничный просмотр `/api/v1/audit-events` (только Admin).
-
-## Запуск
+## Running it
 
 ```bash
-cd frontend
-npm install          # один раз
-npm run dev          # Vite на http://localhost:5500
+npm ci
+npm run dev          # Vite on http://localhost:5500
 ```
 
-Другие скрипты: `npm run typecheck` (tsc --noEmit), `npm run build` (typecheck + сборка
-в `dist/`), `npm run preview` (отдать собранный `dist/`).
+Other scripts: `npm run typecheck` (`tsc --noEmit`), `npm run build` (typecheck, then a production
+build into `dist/`), `npm run preview` (serve what `build` produced).
 
-Откройте `http://localhost:5500`. При первом входе разверните «Адрес API» на
-экране логина и укажите базовый URL `Nelsar.Axia.Api` (по умолчанию
-`http://localhost:5063` — порт из `Properties/launchSettings.json`).
+On the sign-in screen, expand **API address** and give it the base URL of `Nelsar.Axia.Api`. The
+default is `http://localhost:5063`, the `http` profile's port in
+`Nelsar.Axia.Api/Properties/launchSettings.json`.
 
-## Backend: что было добавлено для фронтенда
+The API admits a browser on any loopback port by default, so 5500 needs no configuration on that
+side; a console served from anywhere else has to be named in `Cors:AllowedOrigins`. See
+[Security defaults](../README.md#security-defaults).
 
-В `Nelsar.Axia.Api/Program.cs` добавлен CORS (`AllowAnyOrigin/Header/Method`,
-без `AllowCredentials` — авторизация через `Authorization: Bearer`, не через
-куки) — без него браузер не пустит фронтенд с отдельного порта к API. Больше
-backend не менялся.
+## Screens
 
-## Структура
+- **Dashboard** — real counts (users, providers, role mappings) and the most recent audit events.
+  Widgets the signed-in role or the API cannot supply are labelled as unavailable rather than
+  filled with plausible numbers.
+- **Users** — search and list, create, edit, delete, bulk operations (synchronous, and
+  asynchronous with status polling), and the login generator: pattern or regular expression, with
+  transliteration and a conflict check against the directory.
+- **Organizational units** — search by name, DN or description; create, rename, move, delete. The
+  `id` is a hash of the entry's DN, so it changes when an entry is renamed or moved, and the
+  screen always works from identifiers in a freshly fetched list. Deleting a non-empty unit is
+  refused by the directory with a 409, which the screen shows rather than deleting the contents
+  recursively. A truncated enumeration is marked as incomplete instead of being presented as the
+  whole list.
+- **Groups** — the same CRUD over `/api/groups`, plus membership. Members are entry DNs (the
+  `member` attribute) and saving replaces the membership wholesale; an empty membership cannot be
+  submitted, because the `groupOfNames` schema requires at least one. Against a Windows
+  `ActiveDirectory` provider the API answers 501 — it does not manage groups there — and the
+  screen shows that answer rather than an empty list.
+- **LDAP providers, role mappings, rate limiting** — CRUD over `/api/v1/providers`,
+  `/api/v1/role-mappings` and `/api/v1/rate-limit-settings`.
+- **Audit log** — paged `/api/v1/audit-events`, for administrators.
+
+## Structure
+
+Logic lives in hooks, markup in presentational components, and the wiring between them in
+containers. A component that renders takes its data through props and fetches nothing.
 
 ```
 frontend/
-  index.html            — точка входа Vite (<script src="/src/main.tsx">)
-  tsconfig.json         — strict + noUncheckedIndexedAccess + exactOptionalPropertyTypes
-  vite.config.ts
-  css/styles.css        — дизайн-система (CSS-переменные, светлая/тёмная тема)
+  index.html            Vite entry point (<script src="/src/main.tsx">)
+  css/styles.css        the design system: CSS custom properties, light and dark theme
   src/
-    main.tsx            — оболочка (сайдбар/шапка), маршруты, ролевые гварды, монтирование
+    main.tsx            shell (sidebar, header), routes, role-based menu filtering, mount
     api/
-      dto.ts              — формы ответов и тел запросов (перевод Nelsar.Axia.Contracts)
-      client.ts           — fetch + ApiError; единственное место с приведением типа ответа
-      index.ts            — методы под каждый контроллер, типизированные DTO
-    lib/                  — auth, config, router, ui (toast/confirm), errors, actions
-    hooks/                — вся логика: запросы, состояние, валидация, опрос задач
-      usePagedList.ts       — <T>: поиск с debounce + пагинация (пользователи, группы, OU,
-                              компьютеры, аудит)
-      useCollection.ts      — <T>: список целиком (провайдеры, сопоставления, rate limits)
-      useEntityForm.ts      — <TValues>: значения полей, валидация, отправка, ошибка API
-      use*.ts               — доменные хуки поверх этих трёх
-    components/           — презентационные компоненты, данные только через props
-      Tabs.tsx              — составной компонент вкладок (Tabs.List/Tab/Panel, 2 варианта)
-      Modal.tsx             — составная модалка (Modal.Section / Modal.Actions)
-      DataTable.tsx         — <T>: таблица, описанная массивом колонок
-      directory/, collection/ — общий вид экранов каталога и справочников
-      <экран>/              — колонки и формы конкретного экрана
-    containers/           — связывание хуков с компонентами, без разметки
+      dto.ts              response and request shapes, translated from Nelsar.Axia.Contracts
+      client.ts           fetch plus ApiError; the only place a response is cast to its type
+      index.ts            one typed method per controller
+    lib/                  auth, config, router, ui (toast/confirm), errors, actions, i18n
+    hooks/                all the logic: requests, state, validation, task polling
+      usePagedList.ts       <T>: debounced search with paging (users, groups, OUs, computers, audit)
+      useCollection.ts      <T>: a whole collection at once (providers, mappings, rate limits)
+      useEntityForm.ts      <TValues>: field values, validation, submission, API error
+      use*.ts               domain hooks built on those three
+    components/           presentational; data arrives through props
+      Tabs.tsx              compound tabs (Tabs.List / Tab / Panel, two variants)
+      Modal.tsx             compound modal (Modal.Section / Modal.Actions)
+      DataTable.tsx         <T>: a table described by an array of column definitions
+      directory/, collection/   the shared shape of directory and reference-data screens
+      <screen>/             the columns and forms of one screen
+    containers/           hooks joined to components, no markup of their own
 ```
 
-## Известные ограничения
+Text comes from `src/lib/i18n/`: `messages.en.ts` defines the keys and every other language is
+typed against it, so a missing translation fails `tsc`. Right-to-left languages are handled with
+CSS logical properties — write `margin-inline-start`, not `margin-left`.
 
-- Роли (`Admin`/`UserCreator`/`UserEditor`/`UserDeleter`/`User`) читаются из
-  ответа логина и просто скрывают недоступные пункты меню/кнопки — реальная
-  проверка прав всё равно на backend (`[Authorize(Roles=...)]`), фронтенд не
-  является источником правды по авторизации.
-- Группы не реализованы на backend — см. выше, страница честно об этом говорит.
-- OU: экран не показывает дерево, только плоский список с DN и родительским DN.
-  Родительский DN в форме — свободный текст со списком подсказок, потому что
-  создавать подразделение можно и в контейнерах, которых нет в этом списке
-  (`CN=Users`, сам базовый DN).
-- Формы ответов API проверяет только компилятор: `request<T>` в `src/api/client.ts`
-  утверждает тип, а не доказывает его. Если backend разойдётся с `dto.ts`, ошибка
-  проявится в рантайме — рантайм-валидация, если понадобится, добавляется ровно там.
-- Нет автообновления токена (`refresh token` на backend не реализован) — по
-  истечении JWT (`Jwt:ExpiresInMinutes`) нужно войти заново.
+## Known limitations
+
+- **The role only hides things.** `UserRole` (`Admin`, `UserCreator`, `UserEditor`, `UserDeleter`,
+  `User`) comes from the sign-in response and filters the menu and the buttons. It is not a
+  security control: the API resolves permissions per request from directory group membership and
+  the role mappings, and refuses on its own. Hiding a button changes what is convenient, not what
+  is permitted.
+- **Organizational units are a flat list**, not a tree — name, DN and parent DN. The parent DN
+  field is free text with suggestions, because a unit can legitimately be created in a container
+  that is not in the list (`CN=Users`, or the base DN itself).
+- **Response shapes are checked by the compiler only.** `request<T>` in `src/api/client.ts`
+  asserts the type rather than proving it. If the API diverges from `dto.ts`, the mismatch
+  surfaces at runtime; runtime validation can be added at exactly that one place if it becomes
+  worth it.
+- **A session cannot be refreshed or ended.** There is no refresh token and no sign-out on the API,
+  so when the JWT expires (`Jwt:ExpiresInMinutes`, 60 by default) signing in again is the only
+  option. See [SECURITY.md](../SECURITY.md#known-limitations).
