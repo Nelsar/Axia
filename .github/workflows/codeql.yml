@@ -1,0 +1,58 @@
+# The one workflow in this repository that cannot be run locally, so treat its first run as part
+# of setting the project up rather than as a verified gate.
+#
+# It needs code scanning available: free on a public repository, and on a private one only with
+# GitHub Advanced Security. On a private repository without it, every run fails on the upload
+# step — delete this file rather than letting that failure become background noise.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # A dependency-free scan still finds new things, because the query packs change under it.
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze ${{ matrix.language }}
+    runs-on: ubuntu-latest
+    permissions:
+      # The one write this repository's workflows ask for, and it writes findings rather than code.
+      security-events: write
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: csharp
+            build-mode: autobuild
+          - language: javascript-typescript
+            build-mode: none
+    steps:
+      - uses: actions/checkout@v4
+
+      # autobuild shells out to `dotnet build`, which needs the SDK this solution targets; the
+      # runner image's preinstalled version is not something to rely on.
+      - uses: actions/setup-dotnet@v4
+        if: matrix.language == 'csharp'
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          # security-and-quality over the default security-extended: this is a tool for handing
+          # out directory accounts, and the extra queries cost CI minutes rather than accuracy.
+          queries: security-and-quality
+
+      - uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}

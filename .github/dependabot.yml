@@ -1,0 +1,28 @@
+# Dependabot opens the pull requests; CI's `dependencies` job is what fails when a known
+# vulnerability is already in the tree. The two answer different questions — "is there a newer
+# version" and "is what we ship affected" — and neither replaces the other.
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # One pull request for the test stack: xunit, Moq and the runners move together and a
+      # version skew between them fails in ways that are tedious to read one package at a time.
+      test-stack:
+        patterns: ["xunit*", "Moq*", "Microsoft.NET.Test.Sdk", "coverlet*"]
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # Actions are pinned to major tags here, so these updates are the ones that matter: a tag moves
+  # under you silently, and a major bump does not.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

@@ -1,0 +1,106 @@
+# Every step here is one a contributor can run locally; see CONTRIBUTING.md for the commands.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Read-only by default. Nothing in this workflow writes to the repository, and a workflow that
+# cannot write is a workflow a malicious pull request cannot turn into one that does.
+permissions:
+  contents: read
+
+# A new push to the same branch makes the previous run's answer stale.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  api:
+    name: API — build and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - run: dotnet restore Nelsar.Axia.sln
+
+      # -warnaserror, and the build is warning-free today. The alternative is a warning count
+      # that only ever grows, with the real one arriving among the others: the three CA1416 this
+      # repo carried for a while were saying that a Windows-only provider was being constructed
+      # on Linux, which is exactly the kind of thing that gets read as noise.
+      - run: dotnet build Nelsar.Axia.sln --no-restore -warnaserror
+
+      # No directory, no database, no network: the suite stands up the API in memory. Anything
+      # that starts needing a live LDAP server belongs behind a trait, not in this job.
+      - run: dotnet test Nelsar.Axia.sln --no-build --verbosity normal
+
+  console:
+    name: Console — typecheck and build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+
+      # `npm run build` is `tsc --noEmit && vite build`. The typecheck is the half that matters
+      # most here: the message dictionaries are typed so that a missing translation in any
+      # language fails to compile, and that check exists nowhere else.
+      - run: npm run build
+
+  dependencies:
+    name: Dependencies — known vulnerabilities
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # `dotnet list package --vulnerable` exits 0 whatever it finds, so the output is what is
+      # checked. Two patterns rather than one because a false negative here is silent: if the
+      # phrasing changes in a future SDK, the advisory URLs still give it away.
+      - name: NuGet
+        run: |
+          dotnet restore Nelsar.Axia.sln
+          dotnet list package --vulnerable --include-transitive | tee nuget-audit.txt
+          if grep -qE "has the following vulnerable|github.com/advisories" nuget-audit.txt; then
+            echo "::error::Vulnerable NuGet packages — see the table above."
+            exit 1
+          fi
+
+      # Moderate and below are reported without failing: the console's dependency tree is small
+      # and dev-only tooling dominates it, so a moderate advisory in a build-time package should
+      # not block an unrelated pull request. It still shows in the log.
+      - name: npm
+        working-directory: frontend
+        run: |
+          npm ci
+          npm audit || true
+          npm audit --audit-level=high

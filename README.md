@@ -6,7 +6,7 @@ groups, organizational units and computer accounts — across several directorie
 Built on .NET 10 with a React/TypeScript console. Licensed under
 [Apache 2.0](LICENSE).
 
-> **Status: MVP.** The API and console do what is described below, and 515 tests cover it. What is
+> **Status: MVP.** The API and console do what is described below, and 545 tests cover it. What is
 > not yet here is listed under [Not in scope yet](#not-in-scope-yet) — read it before deciding
 > whether this fits.
 
@@ -186,7 +186,7 @@ the tests if a message is left untranslated.
 dotnet test
 ```
 
-524 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
+545 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
 authorisation on every guarded use case, what may reach a log sink, multi-directory isolation, and
 translation completeness in every supported language.
 
@@ -194,16 +194,33 @@ translation completeness in every supported language.
 
 Said plainly, so nobody discovers it after deploying:
 
+- **The connection to the directory is plain LDAP** — no LDAPS, no StartTLS. Every sign-in binds
+  as the user, so the user's password crosses the network to the directory in the clear, and so
+  does the bind credential on every connection. The API and the directory have to sit on a network
+  where that is acceptable. This is the project's largest security gap; see
+  [SECURITY.md](SECURITY.md#known-limitations) for the rest.
+- **A session cannot be ended.** Tokens are bearer JWTs valid until they expire, 60 minutes by
+  default, with no sign-out and no deny list.
 - **No Docker quick start.** The compose files in the repository are not currently in a working
   state, and the OpenLDAP bootstrap fixtures are missing. Point the API at a directory you already
   have.
-- **No CI.** Tests run locally; there is no workflow in the repository yet.
 - **Route prefixes are inconsistent** — some controllers are under `/api/v1/…`, others under
   `/api/…`. This will be unified, and it will be a breaking change when it is.
 - **Password policy, account lockout and group membership editing from the user screen** are not
   implemented.
 - The `ActiveDirectory` provider is Windows-only and manages fewer object types than
   `StandardLdap`, which also works against Active Directory. Prefer `StandardLdap`.
+
+## Contributing
+
+Small contributions are the useful ones here — a safer default, a failure that reports itself
+badly, a translation that reads wrong to someone who speaks the language. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for how to run what CI runs, and for the conventions that are
+enforced by tests rather than by review.
+
+Found something exploitable? Please report it privately rather than in an issue —
+[SECURITY.md](SECURITY.md#reporting-a-vulnerability) says how, and sets out what the project does
+and does not currently defend against.
 
 ## Licence
 
