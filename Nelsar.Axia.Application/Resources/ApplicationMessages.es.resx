@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /></xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" /></xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="UserAlreadyExistsInDirectory" xml:space="preserve">
+    <value>Ya existe en LDAP un usuario con este correo electrónico.</value>
+  </data>
+  <data name="UserAlreadyExists" xml:space="preserve">
+    <value>El usuario ya existe.</value>
+  </data>
+  <data name="UserNotFoundForUpdate" xml:space="preserve">
+    <value>No se encontró el usuario que se quería modificar.</value>
+  </data>
+  <data name="BulkCreateFieldsRequired" xml:space="preserve">
+    <value>Para crear se requieren el correo electrónico, el nombre y la contraseña.</value>
+  </data>
+  <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
+    <value>No se pudo recorrer el directorio por completo, así que no se puede determinar si este usuario existe.</value>
+  </data>
+  <data name="DirectoryUnreachable" xml:space="preserve">
+    <value>No se pudo contactar con el directorio.</value>
+  </data>
+  <data name="DirectoryProviderUnknown" xml:space="preserve">
+    <value>El proveedor de directorio «{0}» no está configurado o no está activo.</value>
+  </data>
+  <data name="DirectoryProviderUnreachable" xml:space="preserve">
+    <value>No se pudo contactar con ningún extremo del proveedor de directorio «{0}».</value>
+  </data>
+  <data name="DirectoryProviderMisconfigured" xml:space="preserve">
+    <value>El proveedor de directorio «{0}» está mal configurado y no se puede usar. Póngase en contacto con un administrador.</value>
+  </data>
+  <data name="DirectorySearchFailed" xml:space="preserve">
+    <value>No se pudo buscar «{0}» en el directorio.</value>
+  </data>
+  <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
+    <value>El directorio no pudo verificar las credenciales de «{0}».</value>
+  </data>
+  <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
+    <value>El directorio no pudo informar de la pertenencia a grupos de «{0}».</value>
+  </data>
+  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
+    <value>El directorio no devolvió ninguna entrada para «{0}», por lo que se desconoce su pertenencia a grupos.</value>
+  </data>
+  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
+    <value>AD no devolvió ningún principal para «{0}», por lo que se desconoce su pertenencia a grupos.</value>
+  </data>
+  <data name="DirectoryRejectedCreate" xml:space="preserve">
+    <value>El directorio rechazó la creación de «{0}».</value>
+  </data>
+  <data name="DirectoryRejectedUpdate" xml:space="preserve">
+    <value>El directorio rechazó la modificación de «{0}».</value>
+  </data>
+  <data name="DirectoryRejectedDelete" xml:space="preserve">
+    <value>El directorio rechazó la eliminación de «{0}».</value>
+  </data>
+  <data name="UserNotFoundInLdap" xml:space="preserve">
+    <value>No se encontró al usuario «{0}» en LDAP.</value>
+  </data>
+  <data name="UserNotFoundInAd" xml:space="preserve">
+    <value>No se encontró al usuario «{0}» en AD.</value>
+  </data>
+  <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
+    <value>Las operaciones de escritura LDAP no se admiten en los puertos de Catálogo Global 3268/3269. Use el puerto LDAP/LDAPS de escritura 389/636 y el DN de una OU de destino para crear, modificar y eliminar.</value>
+  </data>
+  <data name="OrganizationalUnitNameRequired" xml:space="preserve">
+    <value>Se requiere un nombre de unidad organizativa.</value>
+  </data>
+  <data name="OrganizationalUnitNotFound" xml:space="preserve">
+    <value>No se encontró la unidad organizativa «{0}» en el directorio.</value>
+  </data>
+  <data name="OrganizationalUnitLookupIncomplete" xml:space="preserve">
+    <value>No se pudo recorrer el directorio por completo, así que la unidad organizativa «{0}» no se encontró ni se pudo descartar. Inténtelo de nuevo.</value>
+  </data>
+  <data name="OrganizationalUnitAlreadyExists" xml:space="preserve">
+    <value>Ya existe una entrada en «{0}».</value>
+  </data>
+  <data name="OrganizationalUnitNotEmpty" xml:space="preserve">
+    <value>La unidad organizativa «{0}» todavía contiene entradas y no se puede eliminar. Mueva o elimine antes su contenido.</value>
+  </data>
+  <data name="OrganizationalUnitsUnsupportedByAdProvider" xml:space="preserve">
+    <value>La gestión de unidades organizativas no está implementada para el proveedor de Windows ActiveDirectory. Establezca Ldap:ProviderType en StandardLdap: también gestiona unidades organizativas en Active Directory.</value>
+  </data>
+  <data name="GroupNameRequired" xml:space="preserve">
+    <value>Se requiere un nombre de grupo.</value>
+  </data>
+  <data name="GroupMembersRequired" xml:space="preserve">
+    <value>Un grupo debe tener al menos un miembro: el esquema del directorio hace obligatorio «member» para un groupOfNames, así que un grupo sin nadie dentro no se puede almacenar. Añada el distinguished name de un miembro, o elimine el grupo en lugar de vaciarlo.</value>
+  </data>
+  <data name="GroupNotFound" xml:space="preserve">
+    <value>No se encontró el grupo «{0}» en el directorio.</value>
+  </data>
+  <data name="GroupLookupIncomplete" xml:space="preserve">
+    <value>No se pudo recorrer el directorio por completo, así que el grupo «{0}» no se encontró ni se pudo descartar. Inténtelo de nuevo.</value>
+  </data>
+  <data name="GroupAlreadyExists" xml:space="preserve">
+    <value>Ya existe una entrada en «{0}».</value>
+  </data>
+  <data name="GroupNotEmptyContainer" xml:space="preserve">
+    <value>El grupo «{0}» tiene entradas por debajo en el árbol del directorio y no se puede eliminar. Muévalas o elimínelas antes.</value>
+  </data>
+  <data name="GroupsUnsupportedByAdProvider" xml:space="preserve">
+    <value>La gestión de grupos no está implementada para el proveedor de Windows ActiveDirectory. Establezca Ldap:ProviderType en StandardLdap: también gestiona grupos en Active Directory.</value>
+  </data>
+  <data name="UserAttributesUnsupportedByAdProvider" xml:space="preserve">
+    <value>La lectura de atributos brutos del directorio no está implementada para el proveedor de Windows ActiveDirectory. Establezca Ldap:ProviderType en StandardLdap: también los lee de Active Directory.</value>
+  </data>
+  <data name="ComputerNameRequired" xml:space="preserve">
+    <value>Se requiere un nombre de equipo.</value>
+  </data>
+  <data name="ComputerNotFound" xml:space="preserve">
+    <value>No se encontró el equipo «{0}» en el directorio.</value>
+  </data>
+  <data name="ComputerLookupIncomplete" xml:space="preserve">
+    <value>No se pudo recorrer el directorio por completo, así que no se puede determinar si el equipo «{0}» existe.</value>
+  </data>
+  <data name="ComputerAlreadyExists" xml:space="preserve">
+    <value>El equipo «{0}» ya existe en el directorio.</value>
+  </data>
+  <data name="ComputerNotEmptyContainer" xml:space="preserve">
+    <value>El equipo «{0}» todavía contiene entradas y no se puede eliminar. Mueva o elimine antes su contenido.</value>
+  </data>
+  <data name="ComputersUnsupportedByAdProvider" xml:space="preserve">
+    <value>La gestión de equipos no está implementada para el proveedor de Windows ActiveDirectory. Establezca Ldap:ProviderType en StandardLdap: también gestiona cuentas de equipo en Active Directory.</value>
+  </data>
+  <data name="BulkRequestEmpty" xml:space="preserve">
+    <value>Una solicitud masiva debe contener al menos un elemento.</value>
+  </data>
+  <data name="AuthenticationRequired" xml:space="preserve">
+    <value>Esta operación requiere autenticación.</value>
+  </data>
+  <data name="PermissionDenied" xml:space="preserve">
+    <value>No tiene permiso para realizar esta operación.</value>
+  </data>
+  <data name="PatternRequired" xml:space="preserve">
+    <value>Se necesita un patrón para la generación.</value>
+  </data>
+  <data name="PageSizeOutOfRange" xml:space="preserve">
+    <value>El tamaño de página debe estar entre {0} y {1}.</value>
+  </data>
+  <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
+    <value>El número de elementos a generar debe estar entre {0} y {1}.</value>
+  </data>
+</root>

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /></xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" /></xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="UserAlreadyExistsInDirectory" xml:space="preserve">
+    <value>משתמש עם כתובת דואר אלקטרוני זו כבר קיים ב-LDAP.</value>
+  </data>
+  <data name="UserAlreadyExists" xml:space="preserve">
+    <value>המשתמש כבר קיים.</value>
+  </data>
+  <data name="UserNotFoundForUpdate" xml:space="preserve">
+    <value>המשתמש לעדכון לא נמצא.</value>
+  </data>
+  <data name="BulkCreateFieldsRequired" xml:space="preserve">
+    <value>פעולות יצירה דורשות דואר אלקטרוני, שם וסיסמה.</value>
+  </data>
+  <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
+    <value>לא ניתן היה לסרוק את הספרייה במלואה, ולכן לא ניתן לקבוע אם משתמש זה קיים.</value>
+  </data>
+  <data name="DirectoryUnreachable" xml:space="preserve">
+    <value>לא ניתן היה להגיע לספרייה.</value>
+  </data>
+  <data name="DirectoryProviderUnknown" xml:space="preserve">
+    <value>ספק הספרייה «{0}» אינו מוגדר או אינו פעיל.</value>
+  </data>
+  <data name="DirectoryProviderUnreachable" xml:space="preserve">
+    <value>לא ניתן היה להגיע לאף נקודת קצה של ספק הספרייה «{0}».</value>
+  </data>
+  <data name="DirectoryProviderMisconfigured" xml:space="preserve">
+    <value>ספק הספרייה «{0}» מוגדר בצורה שגויה ולא ניתן להשתמש בו. פנה למנהל המערכת.</value>
+  </data>
+  <data name="DirectorySearchFailed" xml:space="preserve">
+    <value>לא ניתן היה לחפש «{0}» בספרייה.</value>
+  </data>
+  <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
+    <value>הספרייה לא הצליחה לאמת את פרטי ההזדהות של «{0}».</value>
+  </data>
+  <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
+    <value>הספרייה לא הצליחה לדווח על חברות בקבוצות עבור «{0}».</value>
+  </data>
+  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
+    <value>הספרייה לא החזירה רשומה עבור «{0}», ולכן החברות בקבוצות אינה ידועה.</value>
+  </data>
+  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
+    <value>AD לא החזיר אובייקט עבור «{0}», ולכן החברות בקבוצות אינה ידועה.</value>
+  </data>
+  <data name="DirectoryRejectedCreate" xml:space="preserve">
+    <value>הספרייה דחתה את יצירת «{0}».</value>
+  </data>
+  <data name="DirectoryRejectedUpdate" xml:space="preserve">
+    <value>הספרייה דחתה את עדכון «{0}».</value>
+  </data>
+  <data name="DirectoryRejectedDelete" xml:space="preserve">
+    <value>הספרייה דחתה את מחיקת «{0}».</value>
+  </data>
+  <data name="UserNotFoundInLdap" xml:space="preserve">
+    <value>המשתמש «{0}» לא נמצא ב-LDAP.</value>
+  </data>
+  <data name="UserNotFoundInAd" xml:space="preserve">
+    <value>המשתמש «{0}» לא נמצא ב-AD.</value>
+  </data>
+  <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
+    <value>פעולות כתיבה ב-LDAP אינן נתמכות בפורטי הקטלוג הגלובלי 3268/3269. השתמש בפורט LDAP/LDAPS הניתן לכתיבה 389/636 וב-DN של יחידה ארגונית יעד ליצירה, עדכון ומחיקה.</value>
+  </data>
+  <data name="OrganizationalUnitNameRequired" xml:space="preserve">
+    <value>נדרש שם ליחידה הארגונית.</value>
+  </data>
+  <data name="OrganizationalUnitNotFound" xml:space="preserve">
+    <value>היחידה הארגונית «{0}» לא נמצאה בספרייה.</value>
+  </data>
+  <data name="OrganizationalUnitLookupIncomplete" xml:space="preserve">
+    <value>לא ניתן היה לסרוק את הספרייה במלואה, ולכן היחידה הארגונית «{0}» לא נמצאה אך גם לא נשללה. נסה שוב.</value>
+  </data>
+  <data name="OrganizationalUnitAlreadyExists" xml:space="preserve">
+    <value>כבר קיימת רשומה ב-«{0}».</value>
+  </data>
+  <data name="OrganizationalUnitNotEmpty" xml:space="preserve">
+    <value>היחידה הארגונית «{0}» עדיין מכילה רשומות ולא ניתן למחוק אותה. העבר או מחק את תוכנה תחילה.</value>
+  </data>
+  <data name="OrganizationalUnitsUnsupportedByAdProvider" xml:space="preserve">
+    <value>ניהול יחידות ארגוניות אינו ממומש עבור ספק Windows ActiveDirectory. הגדר את Ldap:ProviderType ל-StandardLdap — הוא מנהל יחידות ארגוניות גם ב-Active Directory.</value>
+  </data>
+  <data name="GroupNameRequired" xml:space="preserve">
+    <value>נדרש שם לקבוצה.</value>
+  </data>
+  <data name="GroupMembersRequired" xml:space="preserve">
+    <value>בקבוצה חייב להיות חבר אחד לפחות: סכמת הספרייה הופכת את «member» לחובה עבור groupOfNames, ולכן לא ניתן לשמור קבוצה ריקה. הוסף DN של חבר, או מחק את הקבוצה במקום לרוקן אותה.</value>
+  </data>
+  <data name="GroupNotFound" xml:space="preserve">
+    <value>הקבוצה «{0}» לא נמצאה בספרייה.</value>
+  </data>
+  <data name="GroupLookupIncomplete" xml:space="preserve">
+    <value>לא ניתן היה לסרוק את הספרייה במלואה, ולכן הקבוצה «{0}» לא נמצאה אך גם לא נשללה. נסה שוב.</value>
+  </data>
+  <data name="GroupAlreadyExists" xml:space="preserve">
+    <value>כבר קיימת רשומה ב-«{0}».</value>
+  </data>
+  <data name="GroupNotEmptyContainer" xml:space="preserve">
+    <value>בעץ הספרייה יש רשומות מתחת לקבוצה «{0}» ולא ניתן למחוק אותה. העבר או מחק אותן תחילה.</value>
+  </data>
+  <data name="GroupsUnsupportedByAdProvider" xml:space="preserve">
+    <value>ניהול קבוצות אינו ממומש עבור ספק Windows ActiveDirectory. הגדר את Ldap:ProviderType ל-StandardLdap — הוא מנהל קבוצות גם ב-Active Directory.</value>
+  </data>
+  <data name="UserAttributesUnsupportedByAdProvider" xml:space="preserve">
+    <value>קריאת תכונות גולמיות מהספרייה אינה ממומשת עבור ספק Windows ActiveDirectory. הגדר את Ldap:ProviderType ל-StandardLdap — הוא קורא אותן גם מ-Active Directory.</value>
+  </data>
+  <data name="ComputerNameRequired" xml:space="preserve">
+    <value>נדרש שם למחשב.</value>
+  </data>
+  <data name="ComputerNotFound" xml:space="preserve">
+    <value>המחשב «{0}» לא נמצא בספרייה.</value>
+  </data>
+  <data name="ComputerLookupIncomplete" xml:space="preserve">
+    <value>לא ניתן היה לסרוק את הספרייה במלואה, ולכן לא ניתן לקבוע אם המחשב «{0}» קיים.</value>
+  </data>
+  <data name="ComputerAlreadyExists" xml:space="preserve">
+    <value>המחשב «{0}» כבר קיים בספרייה.</value>
+  </data>
+  <data name="ComputerNotEmptyContainer" xml:space="preserve">
+    <value>המחשב «{0}» עדיין מכיל רשומות ולא ניתן למחוק אותו. העבר או מחק את תוכנו תחילה.</value>
+  </data>
+  <data name="ComputersUnsupportedByAdProvider" xml:space="preserve">
+    <value>ניהול מחשבים אינו ממומש עבור ספק Windows ActiveDirectory. הגדר את Ldap:ProviderType ל-StandardLdap — הוא מנהל חשבונות מחשב גם ב-Active Directory.</value>
+  </data>
+  <data name="BulkRequestEmpty" xml:space="preserve">
+    <value>בקשה מרובה חייבת להכיל פריט אחד לפחות.</value>
+  </data>
+  <data name="AuthenticationRequired" xml:space="preserve">
+    <value>פעולה זו דורשת אימות.</value>
+  </data>
+  <data name="PermissionDenied" xml:space="preserve">
+    <value>אינך מורשה לבצע פעולה זו.</value>
+  </data>
+  <data name="PatternRequired" xml:space="preserve">
+    <value>היצירה דורשת תבנית.</value>
+  </data>
+  <data name="PageSizeOutOfRange" xml:space="preserve">
+    <value>גודל העמוד חייב להיות בין {0} ל-{1}.</value>
+  </data>
+  <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
+    <value>מספר הפריטים ליצירה חייב להיות בין {0} ל-{1}.</value>
+  </data>
+</root>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /></xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" /></xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="EmailInvalid" xml:space="preserve">
+    <value>« {0} » n’est pas une adresse e-mail valide.</value>
+  </data>
+  <data name="DistinguishedNameBlank" xml:space="preserve">
+    <value>Un distinguished name ne peut pas être vide.</value>
+  </data>
+  <data name="LdapPortOutOfRange" xml:space="preserve">
+    <value>{0} n’est pas un port TCP utilisable ; {1}-{2} est attendu.</value>
+  </data>
+  <data name="ValueRequired" xml:space="preserve">
+    <value>Une valeur est requise pour {0}.</value>
+  </data>
+  <data name="ValueTooLong" xml:space="preserve">
+    <value>{0} ne doit pas dépasser {1} caractères.</value>
+  </data>
+  <data name="SearchFilterPlaceholderMissing" xml:space="preserve">
+    <value>Le filtre de recherche des utilisateurs doit contenir un emplacement pour l’identifiant.</value>
+  </data>
+  <data name="SearchFilterMalformed" xml:space="preserve">
+    <value>Le filtre de recherche des utilisateurs n’est pas un filtre LDAP bien formé.</value>
+  </data>
+  <data name="SearchPageSizeOutOfRange" xml:space="preserve">
+    <value>{0} n’est pas une taille de page de recherche utilisable ; {1}-{2} est attendu.</value>
+  </data>
+  <data name="PriorityNegative" xml:space="preserve">
+    <value>Une priorité ne peut pas être négative ; {0} a été fourni.</value>
+  </data>
+  <data name="RateLimitPermitLimitInvalid" xml:space="preserve">
+    <value>Une limite doit autoriser au moins une requête ; {0} a été fourni.</value>
+  </data>
+  <data name="RateLimitWindowInvalid" xml:space="preserve">
+    <value>Une fenêtre de limite doit valoir au moins une seconde ; {0} a été fourni.</value>
+  </data>
+  <data name="RateLimitQueueLimitNegative" xml:space="preserve">
+    <value>Une file de limite ne peut pas être négative ; {0} a été fourni.</value>
+  </data>
+  <data name="PermissionUnknown" xml:space="preserve">
+    <value>« {0} » n’est pas une permission définie par cette application.</value>
+  </data>
+</root>

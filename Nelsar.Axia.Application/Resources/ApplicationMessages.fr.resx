@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /></xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" /></xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="UserAlreadyExistsInDirectory" xml:space="preserve">
+    <value>Un utilisateur avec cette adresse e-mail existe déjà dans LDAP.</value>
+  </data>
+  <data name="UserAlreadyExists" xml:space="preserve">
+    <value>L’utilisateur existe déjà.</value>
+  </data>
+  <data name="UserNotFoundForUpdate" xml:space="preserve">
+    <value>L’utilisateur à modifier est introuvable.</value>
+  </data>
+  <data name="BulkCreateFieldsRequired" xml:space="preserve">
+    <value>La création exige une adresse e-mail, un nom et un mot de passe.</value>
+  </data>
+  <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
+    <value>L’annuaire n’a pas pu être parcouru en entier, il est donc impossible d’établir si cet utilisateur existe.</value>
+  </data>
+  <data name="DirectoryUnreachable" xml:space="preserve">
+    <value>L’annuaire n’a pas pu être joint.</value>
+  </data>
+  <data name="DirectoryProviderUnknown" xml:space="preserve">
+    <value>Le fournisseur d’annuaire « {0} » n’est pas configuré ou n’est pas actif.</value>
+  </data>
+  <data name="DirectoryProviderUnreachable" xml:space="preserve">
+    <value>Aucun point de terminaison n’a pu être joint pour le fournisseur d’annuaire « {0} ».</value>
+  </data>
+  <data name="DirectoryProviderMisconfigured" xml:space="preserve">
+    <value>Le fournisseur d’annuaire « {0} » est mal configuré et inutilisable. Contactez un administrateur.</value>
+  </data>
+  <data name="DirectorySearchFailed" xml:space="preserve">
+    <value>La recherche de « {0} » dans l’annuaire a échoué.</value>
+  </data>
+  <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
+    <value>L’annuaire n’a pas pu vérifier les identifiants de « {0} ».</value>
+  </data>
+  <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
+    <value>L’annuaire n’a pas pu indiquer l’appartenance aux groupes de « {0} ».</value>
+  </data>
+  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
+    <value>L’annuaire n’a renvoyé aucune entrée pour « {0} » ; l’appartenance aux groupes est donc inconnue.</value>
+  </data>
+  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
+    <value>AD n’a renvoyé aucun principal pour « {0} » ; l’appartenance aux groupes est donc inconnue.</value>
+  </data>
+  <data name="DirectoryRejectedCreate" xml:space="preserve">
+    <value>L’annuaire a refusé la création de « {0} ».</value>
+  </data>
+  <data name="DirectoryRejectedUpdate" xml:space="preserve">
+    <value>L’annuaire a refusé la modification de « {0} ».</value>
+  </data>
+  <data name="DirectoryRejectedDelete" xml:space="preserve">
+    <value>L’annuaire a refusé la suppression de « {0} ».</value>
+  </data>
+  <data name="UserNotFoundInLdap" xml:space="preserve">
+    <value>L’utilisateur « {0} » est introuvable dans LDAP.</value>
+  </data>
+  <data name="UserNotFoundInAd" xml:space="preserve">
+    <value>L’utilisateur « {0} » est introuvable dans AD.</value>
+  </data>
+  <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
+    <value>Les écritures LDAP ne sont pas prises en charge sur les ports Catalogue global 3268/3269. Utilisez le port LDAP/LDAPS accessible en écriture 389/636 et le DN d’une OU cible pour créer, modifier et supprimer.</value>
+  </data>
+  <data name="OrganizationalUnitNameRequired" xml:space="preserve">
+    <value>Un nom d’unité d’organisation est requis.</value>
+  </data>
+  <data name="OrganizationalUnitNotFound" xml:space="preserve">
+    <value>L’unité d’organisation « {0} » est introuvable dans l’annuaire.</value>
+  </data>
+  <data name="OrganizationalUnitLookupIncomplete" xml:space="preserve">
+    <value>L’annuaire n’a pas pu être parcouru en entier ; l’unité d’organisation « {0} » n’a donc pu être ni trouvée ni écartée. Réessayez.</value>
+  </data>
+  <data name="OrganizationalUnitAlreadyExists" xml:space="preserve">
+    <value>Une entrée existe déjà à « {0} ».</value>
+  </data>
+  <data name="OrganizationalUnitNotEmpty" xml:space="preserve">
+    <value>L’unité d’organisation « {0} » contient encore des entrées et ne peut pas être supprimée. Déplacez ou supprimez son contenu au préalable.</value>
+  </data>
+  <data name="OrganizationalUnitsUnsupportedByAdProvider" xml:space="preserve">
+    <value>La gestion des unités d’organisation n’est pas implémentée pour le fournisseur Windows ActiveDirectory. Réglez Ldap:ProviderType sur StandardLdap — il gère aussi les unités d’organisation dans Active Directory.</value>
+  </data>
+  <data name="GroupNameRequired" xml:space="preserve">
+    <value>Un nom de groupe est requis.</value>
+  </data>
+  <data name="GroupMembersRequired" xml:space="preserve">
+    <value>Un groupe doit compter au moins un membre : le schéma de l’annuaire rend « member » obligatoire pour un groupOfNames, un groupe vide ne peut donc pas être enregistré. Ajoutez le distinguished name d’un membre, ou supprimez le groupe au lieu de le vider.</value>
+  </data>
+  <data name="GroupNotFound" xml:space="preserve">
+    <value>Le groupe « {0} » est introuvable dans l’annuaire.</value>
+  </data>
+  <data name="GroupLookupIncomplete" xml:space="preserve">
+    <value>L’annuaire n’a pas pu être parcouru en entier ; le groupe « {0} » n’a donc pu être ni trouvé ni écarté. Réessayez.</value>
+  </data>
+  <data name="GroupAlreadyExists" xml:space="preserve">
+    <value>Une entrée existe déjà à « {0} ».</value>
+  </data>
+  <data name="GroupNotEmptyContainer" xml:space="preserve">
+    <value>Des entrées se trouvent sous le groupe « {0} » dans l’arbre de l’annuaire ; il ne peut pas être supprimé. Déplacez-les ou supprimez-les au préalable.</value>
+  </data>
+  <data name="GroupsUnsupportedByAdProvider" xml:space="preserve">
+    <value>La gestion des groupes n’est pas implémentée pour le fournisseur Windows ActiveDirectory. Réglez Ldap:ProviderType sur StandardLdap — il gère aussi les groupes dans Active Directory.</value>
+  </data>
+  <data name="UserAttributesUnsupportedByAdProvider" xml:space="preserve">
+    <value>La lecture des attributs bruts de l’annuaire n’est pas implémentée pour le fournisseur Windows ActiveDirectory. Réglez Ldap:ProviderType sur StandardLdap — il les lit aussi depuis Active Directory.</value>
+  </data>
+  <data name="ComputerNameRequired" xml:space="preserve">
+    <value>Un nom d’ordinateur est requis.</value>
+  </data>
+  <data name="ComputerNotFound" xml:space="preserve">
+    <value>L’ordinateur « {0} » est introuvable dans l’annuaire.</value>
+  </data>
+  <data name="ComputerLookupIncomplete" xml:space="preserve">
+    <value>L’annuaire n’a pas pu être parcouru en entier, il est donc impossible d’établir si l’ordinateur « {0} » existe.</value>
+  </data>
+  <data name="ComputerAlreadyExists" xml:space="preserve">
+    <value>L’ordinateur « {0} » existe déjà dans l’annuaire.</value>
+  </data>
+  <data name="ComputerNotEmptyContainer" xml:space="preserve">
+    <value>L’ordinateur « {0} » contient encore des entrées et ne peut pas être supprimé. Déplacez ou supprimez son contenu au préalable.</value>
+  </data>
+  <data name="ComputersUnsupportedByAdProvider" xml:space="preserve">
+    <value>La gestion des ordinateurs n’est pas implémentée pour le fournisseur Windows ActiveDirectory. Réglez Ldap:ProviderType sur StandardLdap — il gère aussi les comptes d’ordinateur dans Active Directory.</value>
+  </data>
+  <data name="BulkRequestEmpty" xml:space="preserve">
+    <value>Une requête en masse doit contenir au moins un élément.</value>
+  </data>
+  <data name="AuthenticationRequired" xml:space="preserve">
+    <value>Cette opération exige une authentification.</value>
+  </data>
+  <data name="PermissionDenied" xml:space="preserve">
+    <value>Vous n’êtes pas autorisé à effectuer cette opération.</value>
+  </data>
+  <data name="PatternRequired" xml:space="preserve">
+    <value>Un motif est requis pour la génération.</value>
+  </data>
+  <data name="PageSizeOutOfRange" xml:space="preserve">
+    <value>La taille de page doit être comprise entre {0} et {1}.</value>
+  </data>
+  <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
+    <value>Le nombre d’éléments à générer doit être compris entre {0} et {1}.</value>
+  </data>
+</root>

@@ -1,0 +1,20 @@
+Nelsar.Axia
+Copyright 2026 Nelsar
+
+This product includes software developed at Nelsar.
+
+Licensed under the Apache License, Version 2.0. See the LICENSE file for the
+full terms.
+
+---
+
+Third-party components, with their own licenses:
+
+  MediatR                            Apache-2.0
+  FluentValidation                   Apache-2.0
+  Serilog and its sinks              Apache-2.0 / MIT
+  Novell.Directory.Ldap.NETStandard  MIT
+  Microsoft .NET libraries           MIT
+  React, Vite, TypeScript            MIT
+
+Each remains under the terms of its own license; nothing here modifies them.

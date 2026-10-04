@@ -1,0 +1,6 @@
+@Nelsar.Axia.Api_HostAddress = http://localhost:5063
+
+GET {{Nelsar.Axia.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

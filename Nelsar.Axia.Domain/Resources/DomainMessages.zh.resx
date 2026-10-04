@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /></xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" /></xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="EmailInvalid" xml:space="preserve">
+    <value>“{0}”不是有效的电子邮件地址。</value>
+  </data>
+  <data name="DistinguishedNameBlank" xml:space="preserve">
+    <value>Distinguished name 不能为空。</value>
+  </data>
+  <data name="LdapPortOutOfRange" xml:space="preserve">
+    <value>{0} 不是可用的 TCP 端口；应为 {1}-{2}。</value>
+  </data>
+  <data name="ValueRequired" xml:space="preserve">
+    <value>{0} 需要一个值。</value>
+  </data>
+  <data name="ValueTooLong" xml:space="preserve">
+    <value>{0} 最多只能有 {1} 个字符。</value>
+  </data>
+  <data name="SearchFilterPlaceholderMissing" xml:space="preserve">
+    <value>用户搜索过滤器必须包含登录名值的占位符。</value>
+  </data>
+  <data name="SearchFilterMalformed" xml:space="preserve">
+    <value>用户搜索过滤器不是格式正确的 LDAP 过滤器。</value>
+  </data>
+  <data name="SearchPageSizeOutOfRange" xml:space="preserve">
+    <value>{0} 不是可用的搜索分页大小；应为 {1}-{2}。</value>
+  </data>
+  <data name="PriorityNegative" xml:space="preserve">
+    <value>优先级不能为负数；给出的是 {0}。</value>
+  </data>
+  <data name="RateLimitPermitLimitInvalid" xml:space="preserve">
+    <value>速率限制必须至少允许一个请求；给出的是 {0}。</value>
+  </data>
+  <data name="RateLimitWindowInvalid" xml:space="preserve">
+    <value>速率限制窗口必须至少为一秒；给出的是 {0}。</value>
+  </data>
+  <data name="RateLimitQueueLimitNegative" xml:space="preserve">
+    <value>速率限制队列不能为负数；给出的是 {0}。</value>
+  </data>
+  <data name="PermissionUnknown" xml:space="preserve">
+    <value>“{0}”不是本应用定义的权限。</value>
+  </data>
+</root>

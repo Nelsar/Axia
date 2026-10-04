@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /></xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" /></xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="UserAlreadyExistsInDirectory" xml:space="preserve">
+    <value>LDAP 中已存在使用该电子邮件的用户。</value>
+  </data>
+  <data name="UserAlreadyExists" xml:space="preserve">
+    <value>该用户已存在。</value>
+  </data>
+  <data name="UserNotFoundForUpdate" xml:space="preserve">
+    <value>未找到要修改的用户。</value>
+  </data>
+  <data name="BulkCreateFieldsRequired" xml:space="preserve">
+    <value>创建操作需要电子邮件、姓名和密码。</value>
+  </data>
+  <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
+    <value>未能完整遍历目录，因此无法确定该用户是否存在。</value>
+  </data>
+  <data name="DirectoryUnreachable" xml:space="preserve">
+    <value>无法连接到目录。</value>
+  </data>
+  <data name="DirectoryProviderUnknown" xml:space="preserve">
+    <value>目录提供程序“{0}”未配置或未启用。</value>
+  </data>
+  <data name="DirectoryProviderUnreachable" xml:space="preserve">
+    <value>无法连接到目录提供程序“{0}”的任何端点。</value>
+  </data>
+  <data name="DirectoryProviderMisconfigured" xml:space="preserve">
+    <value>目录提供程序“{0}”配置有误，无法使用。请联系管理员。</value>
+  </data>
+  <data name="DirectorySearchFailed" xml:space="preserve">
+    <value>无法在目录中搜索“{0}”。</value>
+  </data>
+  <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
+    <value>目录无法验证“{0}”的凭据。</value>
+  </data>
+  <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
+    <value>目录无法报告“{0}”的组成员关系。</value>
+  </data>
+  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
+    <value>目录未返回“{0}”的条目，因此其组成员关系未知。</value>
+  </data>
+  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
+    <value>AD 未返回“{0}”的主体对象，因此其组成员关系未知。</value>
+  </data>
+  <data name="DirectoryRejectedCreate" xml:space="preserve">
+    <value>目录拒绝创建“{0}”。</value>
+  </data>
+  <data name="DirectoryRejectedUpdate" xml:space="preserve">
+    <value>目录拒绝更新“{0}”。</value>
+  </data>
+  <data name="DirectoryRejectedDelete" xml:space="preserve">
+    <value>目录拒绝删除“{0}”。</value>
+  </data>
+  <data name="UserNotFoundInLdap" xml:space="preserve">
+    <value>在 LDAP 中未找到用户“{0}”。</value>
+  </data>
+  <data name="UserNotFoundInAd" xml:space="preserve">
+    <value>在 AD 中未找到用户“{0}”。</value>
+  </data>
+  <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
+    <value>全局编录端口 3268/3269 不支持 LDAP 写操作。创建、更新和删除请使用可写的 LDAP/LDAPS 端口 389/636 以及目标 OU 的 DN。</value>
+  </data>
+  <data name="OrganizationalUnitNameRequired" xml:space="preserve">
+    <value>需要组织单位名称。</value>
+  </data>
+  <data name="OrganizationalUnitNotFound" xml:space="preserve">
+    <value>在目录中未找到组织单位“{0}”。</value>
+  </data>
+  <data name="OrganizationalUnitLookupIncomplete" xml:space="preserve">
+    <value>未能完整遍历目录，因此既无法找到也无法排除组织单位“{0}”。请重试。</value>
+  </data>
+  <data name="OrganizationalUnitAlreadyExists" xml:space="preserve">
+    <value>“{0}”处已存在条目。</value>
+  </data>
+  <data name="OrganizationalUnitNotEmpty" xml:space="preserve">
+    <value>组织单位“{0}”中仍有条目，无法删除。请先移走或删除其内容。</value>
+  </data>
+  <data name="OrganizationalUnitsUnsupportedByAdProvider" xml:space="preserve">
+    <value>Windows ActiveDirectory 提供程序未实现组织单位管理。请将 Ldap:ProviderType 设为 StandardLdap——它同样能在 Active Directory 中管理组织单位。</value>
+  </data>
+  <data name="GroupNameRequired" xml:space="preserve">
+    <value>需要组名称。</value>
+  </data>
+  <data name="GroupMembersRequired" xml:space="preserve">
+    <value>组必须至少有一个成员：目录架构要求 groupOfNames 必须带有 member 属性，因此无法保存没有任何成员的组。请添加成员的 distinguished name，或者删除该组而不是清空它。</value>
+  </data>
+  <data name="GroupNotFound" xml:space="preserve">
+    <value>在目录中未找到组“{0}”。</value>
+  </data>
+  <data name="GroupLookupIncomplete" xml:space="preserve">
+    <value>未能完整遍历目录，因此既无法找到也无法排除组“{0}”。请重试。</value>
+  </data>
+  <data name="GroupAlreadyExists" xml:space="preserve">
+    <value>“{0}”处已存在条目。</value>
+  </data>
+  <data name="GroupNotEmptyContainer" xml:space="preserve">
+    <value>目录树中组“{0}”之下还有条目，无法删除。请先移走或删除它们。</value>
+  </data>
+  <data name="GroupsUnsupportedByAdProvider" xml:space="preserve">
+    <value>Windows ActiveDirectory 提供程序未实现组管理。请将 Ldap:ProviderType 设为 StandardLdap——它同样能在 Active Directory 中管理组。</value>
+  </data>
+  <data name="UserAttributesUnsupportedByAdProvider" xml:space="preserve">
+    <value>Windows ActiveDirectory 提供程序未实现读取目录原始属性。请将 Ldap:ProviderType 设为 StandardLdap——它同样能从 Active Directory 读取这些属性。</value>
+  </data>
+  <data name="ComputerNameRequired" xml:space="preserve">
+    <value>需要计算机名称。</value>
+  </data>
+  <data name="ComputerNotFound" xml:space="preserve">
+    <value>在目录中未找到计算机“{0}”。</value>
+  </data>
+  <data name="ComputerLookupIncomplete" xml:space="preserve">
+    <value>未能完整遍历目录，因此无法确定计算机“{0}”是否存在。</value>
+  </data>
+  <data name="ComputerAlreadyExists" xml:space="preserve">
+    <value>目录中已存在计算机“{0}”。</value>
+  </data>
+  <data name="ComputerNotEmptyContainer" xml:space="preserve">
+    <value>计算机“{0}”中仍有条目，无法删除。请先移走或删除其内容。</value>
+  </data>
+  <data name="ComputersUnsupportedByAdProvider" xml:space="preserve">
+    <value>Windows ActiveDirectory 提供程序未实现计算机管理。请将 Ldap:ProviderType 设为 StandardLdap——它同样能在 Active Directory 中管理计算机账户。</value>
+  </data>
+  <data name="BulkRequestEmpty" xml:space="preserve">
+    <value>批量请求必须至少包含一个条目。</value>
+  </data>
+  <data name="AuthenticationRequired" xml:space="preserve">
+    <value>此操作需要身份验证。</value>
+  </data>
+  <data name="PermissionDenied" xml:space="preserve">
+    <value>您无权执行此操作。</value>
+  </data>
+  <data name="PatternRequired" xml:space="preserve">
+    <value>生成需要一个模式。</value>
+  </data>
+  <data name="PageSizeOutOfRange" xml:space="preserve">
+    <value>分页大小必须介于 {0} 和 {1} 之间。</value>
+  </data>
+  <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
+    <value>要生成的条目数必须介于 {0} 和 {1} 之间。</value>
+  </data>
+</root>

@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.idea/
+**/.venv/
+**/.venv-1/
+**/*.db
+.git/
+.gitignore
+.env
+*.md
+OpenLdap/

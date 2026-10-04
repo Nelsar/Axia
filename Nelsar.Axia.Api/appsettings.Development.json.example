@@ -1,0 +1,34 @@
+{
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft.AspNetCore": "Warning",
+        "Microsoft.EntityFrameworkCore.Database.Command": "Warning"
+      }
+    }
+  },
+
+  // A person is reading this one, so the console goes back to rendered lines and nothing is
+  // written to disk. Everything else about the log — the correlation id, the masking, the
+  // redaction — behaves exactly as it does in production.
+  "Observability": {
+    "Console": {
+      "Enabled": true,
+      "Json": false
+    },
+    "File": {
+      "Enabled": false
+    }
+  },
+
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=nelsar-axia-dev.db"
+  },
+  "Encryption": {
+    "Key": "CHANGE_ME_BASE64_16_24_OR_32_BYTE_AES_KEY"
+  },
+  "LdapBootstrap": {
+    "EncryptedBindPasswordExample": "enc:L/hR363V26AYspZ7:BuNOXkuuNdUScLH5fA==:+M1ZX2EcHtNbhn7qw8pdtQ=="
+  }
+}

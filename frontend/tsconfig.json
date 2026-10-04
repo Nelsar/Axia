@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "types": [],
+
+    "strict": true,
+    /* Индексация массива даёт T | undefined: `items[0].name` больше не проходит без проверки.
+       Для консоли, которая рисует ответы каталога, это ровно тот случай, ради которого флаг
+       и существует. */
+    "noUncheckedIndexedAccess": true,
+    /* `style?: CSSProperties` и `style: CSSProperties | undefined` — разные вещи: без этого
+       флага можно передать undefined в необязательное свойство и не заметить. Поэтому все
+       необязательные props ниже объявлены явно как `?: T | undefined`. */
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "allowJs": false,
+    "noEmit": true
+  },
+  "include": ["src", "vite.config.ts"]
+}

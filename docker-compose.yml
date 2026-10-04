@@ -1,0 +1,50 @@
+services:
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: nelsar-axia-api
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ConnectionStrings__DefaultConnection=Data Source=/data/nelsar-axia.db
+  #     # StandardLdap works against AD, OpenLDAP, and eDirectory alike — see
+  #     # StandardLdapProvider's class doc comment. Do not switch this to ActiveDirectory
+  #     # here: that provider needs System.DirectoryServices, which is Windows-only and
+  #     # throws PlatformNotSupportedException in this Linux container.
+  #     - Ldap__ProviderType=${LDAP_PROVIDER_TYPE:-StandardLdap}
+  #     - Ldap__Server=${LDAP_SERVER:-openldap}
+  #     - Ldap__Port=${LDAP_PORT:-389}
+  #     - Ldap__BaseDn=${LDAP_BASE_DN:-dc=nelsar,dc=kz}
+  #     - Ldap__AdminUsername=${LDAP_ADMIN_USERNAME:-cn=admin,dc=nelsar,dc=kz}
+  #     - Ldap__AdminPassword=${LDAP_ADMIN_PASSWORD:-password@}
+  #     # Overrides appsettings.json's checked-in AD-only default (sAMAccountName-only) with
+  #     # the portable filter that matches AD, OpenLDAP, and eDirectory in one query.
+  #     - Ldap__UserSearchFilter=(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))
+  #     # Log destinations. Console and file are on by default; these two are the switches.
+  #     # Defaults come from .env — see .env.example.
+  #     - Observability__Logstash__Enabled=${OBSERVABILITY_LOGSTASH_ENABLED:-false}
+  #     - Observability__Logstash__Uri=${OBSERVABILITY_LOGSTASH_URI:-}
+  #     - Observability__Loki__Enabled=${OBSERVABILITY_LOKI_ENABLED:-false}
+  #     - Observability__Loki__Uri=${OBSERVABILITY_LOKI_URI:-}
+  #     - Observability__Loki__Password=${OBSERVABILITY_LOKI_PASSWORD:-}
+  #     # The file sink writes inside the container, so it dies with it unless the path is on a
+  #     # volume. api_logs below is also what a Filebeat sidecar would mount to feed Logstash
+  #     # without the application shipping anything itself.
+  #     - Observability__File__Path=/logs/axia-.json
+  #   volumes:
+  #     - api_data:/data
+  #     - api_logs:/logs
+  #   ports:
+  #     - "5000:8080"
+  #   depends_on:
+  #     - openldap
+  #   networks:
+  #     - nelsar-net
+  #   restart: unless-stopped
+
+networks:
+  nelsar-net:
+
+volumes:
+  api_data:
+  api_logs:

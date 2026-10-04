@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /></xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" /></xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="UserAlreadyExistsInDirectory" xml:space="preserve">
+    <value>يوجد في LDAP مستخدم بهذا البريد الإلكتروني بالفعل.</value>
+  </data>
+  <data name="UserAlreadyExists" xml:space="preserve">
+    <value>المستخدم موجود بالفعل.</value>
+  </data>
+  <data name="UserNotFoundForUpdate" xml:space="preserve">
+    <value>لم يُعثر على المستخدم المراد تعديله.</value>
+  </data>
+  <data name="BulkCreateFieldsRequired" xml:space="preserve">
+    <value>عمليات الإنشاء تتطلّب البريد الإلكتروني والاسم وكلمة المرور.</value>
+  </data>
+  <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
+    <value>تعذّر استعراض الدليل بالكامل، لذا لا يمكن تحديد ما إذا كان هذا المستخدم موجودًا.</value>
+  </data>
+  <data name="DirectoryUnreachable" xml:space="preserve">
+    <value>تعذّر الوصول إلى الدليل.</value>
+  </data>
+  <data name="DirectoryProviderUnknown" xml:space="preserve">
+    <value>موفّر الدليل «{0}» غير مُهيَّأ أو غير نشِط.</value>
+  </data>
+  <data name="DirectoryProviderUnreachable" xml:space="preserve">
+    <value>تعذّر الوصول إلى أي نقطة نهاية لموفّر الدليل «{0}».</value>
+  </data>
+  <data name="DirectoryProviderMisconfigured" xml:space="preserve">
+    <value>موفّر الدليل «{0}» مُهيَّأ بشكل خاطئ ولا يمكن استخدامه. اتصل بمسؤول النظام.</value>
+  </data>
+  <data name="DirectorySearchFailed" xml:space="preserve">
+    <value>تعذّر البحث عن «{0}» في الدليل.</value>
+  </data>
+  <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
+    <value>تعذّر على الدليل التحقّق من بيانات اعتماد «{0}».</value>
+  </data>
+  <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
+    <value>تعذّر على الدليل الإبلاغ عن عضوية المجموعات لـ «{0}».</value>
+  </data>
+  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
+    <value>لم يُرجع الدليل أي سجل لـ «{0}»، لذا فعضوية المجموعات غير معروفة.</value>
+  </data>
+  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
+    <value>لم يُرجع AD أي كائن لـ «{0}»، لذا فعضوية المجموعات غير معروفة.</value>
+  </data>
+  <data name="DirectoryRejectedCreate" xml:space="preserve">
+    <value>رفض الدليل إنشاء «{0}».</value>
+  </data>
+  <data name="DirectoryRejectedUpdate" xml:space="preserve">
+    <value>رفض الدليل تعديل «{0}».</value>
+  </data>
+  <data name="DirectoryRejectedDelete" xml:space="preserve">
+    <value>رفض الدليل حذف «{0}».</value>
+  </data>
+  <data name="UserNotFoundInLdap" xml:space="preserve">
+    <value>لم يُعثر على المستخدم «{0}» في LDAP.</value>
+  </data>
+  <data name="UserNotFoundInAd" xml:space="preserve">
+    <value>لم يُعثر على المستخدم «{0}» في AD.</value>
+  </data>
+  <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
+    <value>عمليات الكتابة في LDAP غير مدعومة على منفذي الفهرس العام 3268/3269. استخدم منفذ LDAP/LDAPS القابل للكتابة 389/636 والاسم المميّز لوحدة تنظيمية هدف للإنشاء والتعديل والحذف.</value>
+  </data>
+  <data name="OrganizationalUnitNameRequired" xml:space="preserve">
+    <value>يلزم اسم للوحدة التنظيمية.</value>
+  </data>
+  <data name="OrganizationalUnitNotFound" xml:space="preserve">
+    <value>لم يُعثر على الوحدة التنظيمية «{0}» في الدليل.</value>
+  </data>
+  <data name="OrganizationalUnitLookupIncomplete" xml:space="preserve">
+    <value>تعذّر استعراض الدليل بالكامل، لذا لم يمكن العثور على الوحدة التنظيمية «{0}» ولا استبعادها. حاول مرة أخرى.</value>
+  </data>
+  <data name="OrganizationalUnitAlreadyExists" xml:space="preserve">
+    <value>يوجد سجل بالفعل عند «{0}».</value>
+  </data>
+  <data name="OrganizationalUnitNotEmpty" xml:space="preserve">
+    <value>لا تزال الوحدة التنظيمية «{0}» تحتوي على سجلات ولا يمكن حذفها. انقل محتواها أو احذفه أولًا.</value>
+  </data>
+  <data name="OrganizationalUnitsUnsupportedByAdProvider" xml:space="preserve">
+    <value>إدارة الوحدات التنظيمية غير مُنفَّذة لموفّر Windows ActiveDirectory. اضبط Ldap:ProviderType على StandardLdap — فهو يدير الوحدات التنظيمية في Active Directory أيضًا.</value>
+  </data>
+  <data name="GroupNameRequired" xml:space="preserve">
+    <value>يلزم اسم للمجموعة.</value>
+  </data>
+  <data name="GroupMembersRequired" xml:space="preserve">
+    <value>يجب أن تضم المجموعة عضوًا واحدًا على الأقل: مخطط الدليل يجعل «member» إلزاميًا لـ groupOfNames، لذا لا يمكن تخزين مجموعة خالية. أضف الاسم المميّز لعضو، أو احذف المجموعة بدلًا من إفراغها.</value>
+  </data>
+  <data name="GroupNotFound" xml:space="preserve">
+    <value>لم يُعثر على المجموعة «{0}» في الدليل.</value>
+  </data>
+  <data name="GroupLookupIncomplete" xml:space="preserve">
+    <value>تعذّر استعراض الدليل بالكامل، لذا لم يمكن العثور على المجموعة «{0}» ولا استبعادها. حاول مرة أخرى.</value>
+  </data>
+  <data name="GroupAlreadyExists" xml:space="preserve">
+    <value>يوجد سجل بالفعل عند «{0}».</value>
+  </data>
+  <data name="GroupNotEmptyContainer" xml:space="preserve">
+    <value>توجد سجلات أسفل المجموعة «{0}» في شجرة الدليل ولا يمكن حذفها. انقلها أو احذفها أولًا.</value>
+  </data>
+  <data name="GroupsUnsupportedByAdProvider" xml:space="preserve">
+    <value>إدارة المجموعات غير مُنفَّذة لموفّر Windows ActiveDirectory. اضبط Ldap:ProviderType على StandardLdap — فهو يدير المجموعات في Active Directory أيضًا.</value>
+  </data>
+  <data name="UserAttributesUnsupportedByAdProvider" xml:space="preserve">
+    <value>قراءة سمات الدليل الخام غير مُنفَّذة لموفّر Windows ActiveDirectory. اضبط Ldap:ProviderType على StandardLdap — فهو يقرأها من Active Directory أيضًا.</value>
+  </data>
+  <data name="ComputerNameRequired" xml:space="preserve">
+    <value>يلزم اسم للجهاز.</value>
+  </data>
+  <data name="ComputerNotFound" xml:space="preserve">
+    <value>لم يُعثر على الجهاز «{0}» في الدليل.</value>
+  </data>
+  <data name="ComputerLookupIncomplete" xml:space="preserve">
+    <value>تعذّر استعراض الدليل بالكامل، لذا لا يمكن تحديد ما إذا كان الجهاز «{0}» موجودًا.</value>
+  </data>
+  <data name="ComputerAlreadyExists" xml:space="preserve">
+    <value>الجهاز «{0}» موجود بالفعل في الدليل.</value>
+  </data>
+  <data name="ComputerNotEmptyContainer" xml:space="preserve">
+    <value>لا يزال الجهاز «{0}» يحتوي على سجلات ولا يمكن حذفه. انقل محتواه أو احذفه أولًا.</value>
+  </data>
+  <data name="ComputersUnsupportedByAdProvider" xml:space="preserve">
+    <value>إدارة الأجهزة غير مُنفَّذة لموفّر Windows ActiveDirectory. اضبط Ldap:ProviderType على StandardLdap — فهو يدير حسابات الأجهزة في Active Directory أيضًا.</value>
+  </data>
+  <data name="BulkRequestEmpty" xml:space="preserve">
+    <value>يجب أن يحتوي الطلب المجمّع على عنصر واحد على الأقل.</value>
+  </data>
+  <data name="AuthenticationRequired" xml:space="preserve">
+    <value>هذه العملية تتطلّب المصادقة.</value>
+  </data>
+  <data name="PermissionDenied" xml:space="preserve">
+    <value>لا تملك صلاحية تنفيذ هذه العملية.</value>
+  </data>
+  <data name="PatternRequired" xml:space="preserve">
+    <value>التوليد يتطلّب نمطًا.</value>
+  </data>
+  <data name="PageSizeOutOfRange" xml:space="preserve">
+    <value>يجب أن يكون حجم الصفحة بين {0} و{1}.</value>
+  </data>
+  <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
+    <value>يجب أن يكون عدد العناصر المراد توليدها بين {0} و{1}.</value>
+  </data>
+</root>

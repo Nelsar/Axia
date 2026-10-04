@@ -1,0 +1,100 @@
+{
+    // Levels only. Which sinks the log reaches lives under "Observability" below — see the note
+    // there. Anything Serilog documents for this section (Filter, Destructure, a WriteTo array)
+    // is still read, so the standard configuration route stays open for cases the switches
+    // below do not cover.
+    "Serilog": {
+        "MinimumLevel": {
+            "Default": "Information",
+            "Override": {
+                "Microsoft.AspNetCore": "Warning",
+                // Every SQL statement EF Core runs is logged at Information, parameters included
+                // once anyone turns on EnableSensitiveDataLogging. Directory bind DNs and the
+                // encrypted secrets column both travel through those statements.
+                "Microsoft.EntityFrameworkCore.Database.Command": "Warning",
+                "System.Net.Http.HttpClient": "Warning"
+            }
+        }
+    },
+
+    // Where the log goes. Console and file are on; the two shippers are switches, so moving to
+    // ELK or Grafana is a flag and an address rather than a code change:
+    //
+    //   Observability__Logstash__Enabled=true   Observability__Logstash__Uri=http://logstash:8080
+    //   Observability__Loki__Enabled=true       Observability__Loki__Uri=http://loki:3100
+    //
+    // More than one may be on at a time — the file sink is worth keeping under a shipper, since
+    // it is what survives the shipper being down.
+    "Observability": {
+        "ApplicationName": "Nelsar.Axia.Api",
+
+        // Json=false swaps the compact JSON for a readable line. Leave it true anywhere a
+        // collector reads stdout (Docker's json-file driver, Filebeat, Promtail).
+        "Console": {
+            "Enabled": true,
+            "Json": true
+        },
+
+        // Compact JSON, one file per day. This is the ELK path that needs nothing of the
+        // application: Filebeat tails the directory and Logstash never hears from the process.
+        // Mount this path in a container or the log dies with it.
+        "File": {
+            "Enabled": true,
+            "Path": "logs/axia-.json",
+            "RetainedFileCountLimit": 14
+        },
+
+        // Logstash's HTTP input:
+        //   input { http { port => 8080 codec => json } }
+        // The sink batches and buffers in memory, dropping the oldest events rather than
+        // blocking, so an unreachable Logstash cannot slow the API down.
+        "Logstash": {
+            "Enabled": false,
+            "Uri": "http://logstash:8080",
+            "QueueLimitBytes": 33554432,
+            "PeriodSeconds": 2
+        },
+
+        // Grafana Loki's base URI — the sink appends /loki/api/v1/push itself.
+        // Labels are indexed, so they stay few and low-cardinality: nothing per-request belongs
+        // in here. Username/Password are for a Loki behind a gateway; supply them through the
+        // environment (Observability__Loki__Password), never in this file.
+        "Loki": {
+            "Enabled": false,
+            "Uri": "http://loki:3100",
+            "Labels": {
+                "app": "nelsar-axia",
+                "component": "api"
+            }
+        },
+
+        "Correlation": {
+            "HeaderName": "X-Correlation-ID"
+        }
+    },
+
+    // Whether an unauthenticated caller may create a directory account through
+    // POST /api/auth/register. Off, and worth leaving off: that endpoint writes to the directory
+    // with nothing but a rate limiter in front of it. Administrators create accounts through
+    // POST /api/v1/users, behind the users.create permission, which is the same operation.
+    "Auth": {
+        "AllowSelfRegistration": false
+    },
+
+    "Ldap": {
+        "Server": "openldap",
+        "Port": 389,
+        "BaseDn": "dc=nelsar,dc=kz",
+        "AdminUsername": "cn=admin,dc=nelsar,dc=kz",
+        "AdminPassword": "CHANGE_ME",
+        "UserSearchFilter": "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))",
+        "ProviderType": "StandardLdap"
+    },
+    "Jwt": {
+        "Key": "CHANGE_ME_AT_LEAST_32_CHARACTERS_LONG",
+        "Issuer": "Nelsar.Axia.Api",
+        "Audience": "Nelsar.Axia.Api",
+        "ExpiresInMinutes": 60
+    },
+    "AllowedHosts": "*"
+}

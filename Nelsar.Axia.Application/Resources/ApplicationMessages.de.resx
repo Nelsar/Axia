@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /></xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" /></xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="UserAlreadyExistsInDirectory" xml:space="preserve">
+    <value>Ein Benutzer mit dieser E-Mail-Adresse existiert bereits in LDAP.</value>
+  </data>
+  <data name="UserAlreadyExists" xml:space="preserve">
+    <value>Der Benutzer existiert bereits.</value>
+  </data>
+  <data name="UserNotFoundForUpdate" xml:space="preserve">
+    <value>Der zu ändernde Benutzer wurde nicht gefunden.</value>
+  </data>
+  <data name="BulkCreateFieldsRequired" xml:space="preserve">
+    <value>Für das Anlegen sind E-Mail, Name und Passwort erforderlich.</value>
+  </data>
+  <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
+    <value>Das Verzeichnis konnte nicht vollständig durchlaufen werden, daher lässt sich nicht feststellen, ob dieser Benutzer existiert.</value>
+  </data>
+  <data name="DirectoryUnreachable" xml:space="preserve">
+    <value>Das Verzeichnis war nicht erreichbar.</value>
+  </data>
+  <data name="DirectoryProviderUnknown" xml:space="preserve">
+    <value>Der Verzeichnisprovider „{0}“ ist nicht konfiguriert oder nicht aktiv.</value>
+  </data>
+  <data name="DirectoryProviderUnreachable" xml:space="preserve">
+    <value>Für den Verzeichnisprovider „{0}“ war kein Endpunkt erreichbar.</value>
+  </data>
+  <data name="DirectoryProviderMisconfigured" xml:space="preserve">
+    <value>Der Verzeichnisprovider „{0}“ ist fehlerhaft konfiguriert und nicht verwendbar. Wenden Sie sich an einen Administrator.</value>
+  </data>
+  <data name="DirectorySearchFailed" xml:space="preserve">
+    <value>Im Verzeichnis konnte nicht nach „{0}“ gesucht werden.</value>
+  </data>
+  <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
+    <value>Das Verzeichnis konnte die Zugangsdaten für „{0}“ nicht prüfen.</value>
+  </data>
+  <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
+    <value>Das Verzeichnis konnte die Gruppenmitgliedschaft für „{0}“ nicht melden.</value>
+  </data>
+  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
+    <value>Das Verzeichnis lieferte keinen Eintrag für „{0}“, die Gruppenmitgliedschaft ist daher unbekannt.</value>
+  </data>
+  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
+    <value>AD lieferte kein Principal-Objekt für „{0}“, die Gruppenmitgliedschaft ist daher unbekannt.</value>
+  </data>
+  <data name="DirectoryRejectedCreate" xml:space="preserve">
+    <value>Das Verzeichnis hat das Anlegen von „{0}“ abgelehnt.</value>
+  </data>
+  <data name="DirectoryRejectedUpdate" xml:space="preserve">
+    <value>Das Verzeichnis hat die Änderung von „{0}“ abgelehnt.</value>
+  </data>
+  <data name="DirectoryRejectedDelete" xml:space="preserve">
+    <value>Das Verzeichnis hat das Löschen von „{0}“ abgelehnt.</value>
+  </data>
+  <data name="UserNotFoundInLdap" xml:space="preserve">
+    <value>Benutzer „{0}“ wurde in LDAP nicht gefunden.</value>
+  </data>
+  <data name="UserNotFoundInAd" xml:space="preserve">
+    <value>Benutzer „{0}“ wurde in AD nicht gefunden.</value>
+  </data>
+  <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
+    <value>LDAP-Schreibvorgänge werden auf den Global-Catalog-Ports 3268/3269 nicht unterstützt. Verwenden Sie den schreibbaren LDAP/LDAPS-Port 389/636 und den DN einer Ziel-OU für Anlegen, Ändern und Löschen.</value>
+  </data>
+  <data name="OrganizationalUnitNameRequired" xml:space="preserve">
+    <value>Ein Name für die Organisationseinheit ist erforderlich.</value>
+  </data>
+  <data name="OrganizationalUnitNotFound" xml:space="preserve">
+    <value>Die Organisationseinheit „{0}“ wurde im Verzeichnis nicht gefunden.</value>
+  </data>
+  <data name="OrganizationalUnitLookupIncomplete" xml:space="preserve">
+    <value>Das Verzeichnis konnte nicht vollständig durchlaufen werden, daher ließ sich die Organisationseinheit „{0}“ weder finden noch ausschließen. Versuchen Sie es erneut.</value>
+  </data>
+  <data name="OrganizationalUnitAlreadyExists" xml:space="preserve">
+    <value>Bei „{0}“ existiert bereits ein Eintrag.</value>
+  </data>
+  <data name="OrganizationalUnitNotEmpty" xml:space="preserve">
+    <value>Die Organisationseinheit „{0}“ enthält noch Einträge und kann nicht gelöscht werden. Verschieben oder löschen Sie zuerst ihren Inhalt.</value>
+  </data>
+  <data name="OrganizationalUnitsUnsupportedByAdProvider" xml:space="preserve">
+    <value>Die Verwaltung von Organisationseinheiten ist für den Windows-Provider ActiveDirectory nicht implementiert. Setzen Sie Ldap:ProviderType auf StandardLdap — dieser verwaltet Organisationseinheiten auch in Active Directory.</value>
+  </data>
+  <data name="GroupNameRequired" xml:space="preserve">
+    <value>Ein Gruppenname ist erforderlich.</value>
+  </data>
+  <data name="GroupMembersRequired" xml:space="preserve">
+    <value>Eine Gruppe muss mindestens ein Mitglied haben: das Verzeichnisschema macht „member“ für einen groupOfNames verpflichtend, eine Gruppe ohne Mitglieder lässt sich also nicht speichern. Fügen Sie den Distinguished Name eines Mitglieds hinzu, oder löschen Sie die Gruppe, statt sie zu leeren.</value>
+  </data>
+  <data name="GroupNotFound" xml:space="preserve">
+    <value>Die Gruppe „{0}“ wurde im Verzeichnis nicht gefunden.</value>
+  </data>
+  <data name="GroupLookupIncomplete" xml:space="preserve">
+    <value>Das Verzeichnis konnte nicht vollständig durchlaufen werden, daher ließ sich die Gruppe „{0}“ weder finden noch ausschließen. Versuchen Sie es erneut.</value>
+  </data>
+  <data name="GroupAlreadyExists" xml:space="preserve">
+    <value>Bei „{0}“ existiert bereits ein Eintrag.</value>
+  </data>
+  <data name="GroupNotEmptyContainer" xml:space="preserve">
+    <value>Unterhalb der Gruppe „{0}“ liegen Einträge im Verzeichnisbaum; sie kann nicht gelöscht werden. Verschieben oder löschen Sie diese zuerst.</value>
+  </data>
+  <data name="GroupsUnsupportedByAdProvider" xml:space="preserve">
+    <value>Die Gruppenverwaltung ist für den Windows-Provider ActiveDirectory nicht implementiert. Setzen Sie Ldap:ProviderType auf StandardLdap — dieser verwaltet Gruppen auch in Active Directory.</value>
+  </data>
+  <data name="UserAttributesUnsupportedByAdProvider" xml:space="preserve">
+    <value>Das Lesen roher Verzeichnisattribute ist für den Windows-Provider ActiveDirectory nicht implementiert. Setzen Sie Ldap:ProviderType auf StandardLdap — dieser liest sie auch aus Active Directory.</value>
+  </data>
+  <data name="ComputerNameRequired" xml:space="preserve">
+    <value>Ein Computername ist erforderlich.</value>
+  </data>
+  <data name="ComputerNotFound" xml:space="preserve">
+    <value>Der Computer „{0}“ wurde im Verzeichnis nicht gefunden.</value>
+  </data>
+  <data name="ComputerLookupIncomplete" xml:space="preserve">
+    <value>Das Verzeichnis konnte nicht vollständig durchlaufen werden, daher lässt sich nicht feststellen, ob der Computer „{0}“ existiert.</value>
+  </data>
+  <data name="ComputerAlreadyExists" xml:space="preserve">
+    <value>Der Computer „{0}“ existiert bereits im Verzeichnis.</value>
+  </data>
+  <data name="ComputerNotEmptyContainer" xml:space="preserve">
+    <value>Der Computer „{0}“ enthält noch Einträge und kann nicht gelöscht werden. Verschieben oder löschen Sie zuerst seinen Inhalt.</value>
+  </data>
+  <data name="ComputersUnsupportedByAdProvider" xml:space="preserve">
+    <value>Die Computerverwaltung ist für den Windows-Provider ActiveDirectory nicht implementiert. Setzen Sie Ldap:ProviderType auf StandardLdap — dieser verwaltet Computerkonten auch in Active Directory.</value>
+  </data>
+  <data name="BulkRequestEmpty" xml:space="preserve">
+    <value>Eine Massenanfrage muss mindestens einen Eintrag enthalten.</value>
+  </data>
+  <data name="AuthenticationRequired" xml:space="preserve">
+    <value>Für diesen Vorgang ist eine Anmeldung erforderlich.</value>
+  </data>
+  <data name="PermissionDenied" xml:space="preserve">
+    <value>Sie sind nicht berechtigt, diesen Vorgang auszuführen.</value>
+  </data>
+  <data name="PatternRequired" xml:space="preserve">
+    <value>Für die Erzeugung wird ein Muster benötigt.</value>
+  </data>
+  <data name="PageSizeOutOfRange" xml:space="preserve">
+    <value>Die Seitengröße muss zwischen {0} und {1} liegen.</value>
+  </data>
+  <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
+    <value>Die Anzahl der zu erzeugenden Elemente muss zwischen {0} und {1} liegen.</value>
+  </data>
+</root>

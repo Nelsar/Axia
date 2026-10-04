@@ -1,0 +1,603 @@
+openapi: 3.1.0
+info:
+  title: Nelsar.Axia LDAP Management API
+  description: REST API для управления LDAP объектами, аутентификации и ролей.
+  version: 1.0.0
+servers:
+  - url: /api
+paths:
+  /auth/login:
+    post:
+      summary: Аутентификация пользователя через LDAP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticateRequest'
+      responses:
+        '200':
+          description: Успешный вход
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticateResponse'
+        '401':
+          description: Неверные учетные данные
+  /auth/register:
+    post:
+      summary: Регистрация нового пользователя через LDAP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '201':
+          description: Пользователь создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '409':
+          description: Пользователь уже существует
+  /users:
+    get:
+      summary: Получить список пользователей
+      parameters:
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 200
+        - name: pageToken
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedUserResponse'
+    post:
+      summary: Создать пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '201':
+          description: Пользователь создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '409':
+          description: "Конфликт: пользователь уже существует"
+  /users/{id}:
+    get:
+      summary: Получить пользователя по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Пользователь найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '404':
+          description: Пользователь не найден
+    put:
+      summary: Обновить пользователя
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: Пользователь обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '404':
+          description: Пользователь не найден
+        '409':
+          description: Конфликт данных
+    delete:
+      summary: Удалить пользователя
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Пользователь удален
+        '404':
+          description: Пользователь не найден
+  /groups:
+    get:
+      summary: Получить список групп
+      parameters:
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 200
+        - name: pageToken
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список групп
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedGroupResponse'
+    post:
+      summary: Создать группу
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupRequest'
+      responses:
+        '201':
+          description: Группа создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupDto'
+  /groups/{id}:
+    get:
+      summary: Получить группу по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Группа найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupDto'
+        '404':
+          description: Группа не найдена
+    put:
+      summary: Обновить группу
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGroupRequest'
+      responses:
+        '200':
+          description: Группа обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupDto'
+        '404':
+          description: Группа не найдена
+    delete:
+      summary: Удалить группу
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Группа удалена
+        '404':
+          description: Группа не найдена
+  # Путь совпадает с OrganizationalUnitsController ([Route("api/[controller]")]).
+  # Раньше здесь стоял /ous — такого маршрута в API никогда не было.
+  /organizationalunits:
+    get:
+      summary: Получить список организационных подразделений
+      parameters:
+        - name: filter
+          in: query
+          description: >-
+            Подстрока; сравнивается с именем, DN и описанием. Несколько слов — все должны
+            совпасть.
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 200
+        - name: pageToken
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список организационных подразделений
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedOrganizationalUnitResponse'
+    post:
+      summary: Создать организационное подразделение
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganizationalUnitRequest'
+      responses:
+        '201':
+          description: OU создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationalUnitDto'
+        '400':
+          description: Не указано имя подразделения
+        '409':
+          description: По этому DN уже есть запись
+  /organizationalunits/{id}:
+    get:
+      summary: Получить OU по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OU найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationalUnitDto'
+        '404':
+          description: OU не найдено
+    put:
+      summary: Обновить OU
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationalUnitRequest'
+      responses:
+        '200':
+          description: OU обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationalUnitDto'
+        '404':
+          description: OU не найдено
+    delete:
+      summary: Удалить OU
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: OU удалено
+        '404':
+          description: OU не найдено
+        '409':
+          description: >-
+            Подразделение не пусто. Каталог отказывает в удалении контейнера с содержимым;
+            рекурсивного удаления в API нет намеренно.
+        '502':
+          description: >-
+            Каталог недоступен или перебор оборвался, поэтому отсутствие подразделения
+            не доказано.
+components:
+  schemas:
+    AuthenticateRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - email
+        - password
+    AuthenticateResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserDto'
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+      required:
+        - id
+        - email
+        - name
+        - role
+    UserCreateRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - name
+        - password
+    UserUpdateRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        password:
+          type: string
+      required:
+        - name
+    BulkUserRequest:
+      type: object
+      properties:
+        operation:
+          type: string
+          enum: [create, update]
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        password:
+          type: string
+        newEmail:
+          type: string
+          format: email
+      required:
+        - operation
+        - email
+        - name
+    BulkUserResult:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        status:
+          type: string
+        message:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserDto'
+    BulkOperationResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+        state:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkUserResult'
+        completedCount:
+          type: integer
+        failedCount:
+          type: integer
+        errorMessage:
+          type: string
+          nullable: true
+    GroupDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        distinguishedName:
+          type: string
+        description:
+          type: string
+        members:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - name
+        - distinguishedName
+        - description
+    CreateGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        memberDistinguishedNames:
+          type: array
+          items:
+            type: string
+      required:
+        - name
+    UpdateGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        memberDistinguishedNames:
+          type: array
+          items:
+            type: string
+      required:
+        - name
+    OrganizationalUnitDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        distinguishedName:
+          type: string
+        parentDistinguishedName:
+          type: string
+        description:
+          type: string
+      required:
+        - id
+        - name
+        - distinguishedName
+    CreateOrganizationalUnitRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The ou value, which also becomes the entry's RDN.
+        parentDistinguishedName:
+          type: string
+          description: >-
+            Container to create the unit in. Omitted or empty means the configured base DN.
+        description:
+          type: string
+      required:
+        - name
+    UpdateOrganizationalUnitRequest:
+      type: object
+      description: >-
+        A partial update: every property is optional and null leaves that part unchanged.
+        A different name renames the entry and a different parentDistinguishedName moves it —
+        either changes its distinguished name, and therefore the id it is addressed by.
+        For description alone, null keeps the current text while an empty string clears it.
+      properties:
+        name:
+          type: string
+          nullable: true
+        parentDistinguishedName:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+    PagedUserResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDto'
+        pageSize:
+          type: integer
+        pageToken:
+          type: string
+          nullable: true
+        hasMore:
+          type: boolean
+    PagedGroupResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupDto'
+        pageSize:
+          type: integer
+        pageToken:
+          type: string
+          nullable: true
+        hasMore:
+          type: boolean
+    PagedOrganizationalUnitResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationalUnitDto'
+        pageSize:
+          type: integer
+        pageToken:
+          type: string
+          nullable: true
+        hasMore:
+          type: boolean

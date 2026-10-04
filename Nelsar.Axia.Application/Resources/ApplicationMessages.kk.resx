@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /></xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" /></xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="UserAlreadyExistsInDirectory" xml:space="preserve">
+    <value>Мұндай email мекенжайы бар пайдаланушы LDAP-та бұрыннан бар.</value>
+  </data>
+  <data name="UserAlreadyExists" xml:space="preserve">
+    <value>Пайдаланушы бұрыннан бар.</value>
+  </data>
+  <data name="UserNotFoundForUpdate" xml:space="preserve">
+    <value>Өзгертуге арналған пайдаланушы табылмады.</value>
+  </data>
+  <data name="BulkCreateFieldsRequired" xml:space="preserve">
+    <value>Жасау операциясы үшін email, аты және құпия сөз қажет.</value>
+  </data>
+  <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
+    <value>Каталогты толық аралап шығу мүмкін болмады, сондықтан бұл пайдаланушының бар-жоғын анықтау мүмкін емес.</value>
+  </data>
+  <data name="DirectoryUnreachable" xml:space="preserve">
+    <value>Каталогқа қосылу мүмкін болмады.</value>
+  </data>
+  <data name="DirectoryProviderUnknown" xml:space="preserve">
+    <value>«{0}» каталог провайдері бапталмаған немесе белсенді емес.</value>
+  </data>
+  <data name="DirectoryProviderUnreachable" xml:space="preserve">
+    <value>«{0}» каталог провайдерінің бірде-бір түйініне қосылу мүмкін болмады.</value>
+  </data>
+  <data name="DirectoryProviderMisconfigured" xml:space="preserve">
+    <value>«{0}» каталог провайдері қате бапталған және қолданылмайды. Әкімшіге хабарласыңыз.</value>
+  </data>
+  <data name="DirectorySearchFailed" xml:space="preserve">
+    <value>Каталогта «{0}» іздеу мүмкін болмады.</value>
+  </data>
+  <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
+    <value>Каталог «{0}» тіркелгі деректерін тексере алмады.</value>
+  </data>
+  <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
+    <value>Каталог «{0}» пайдаланушысының топтардағы мүшелігін хабарлай алмады.</value>
+  </data>
+  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
+    <value>Каталог «{0}» үшін жазба қайтармады, сондықтан топтардағы мүшелігі белгісіз.</value>
+  </data>
+  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
+    <value>AD «{0}» үшін объект қайтармады, сондықтан топтардағы мүшелігі белгісіз.</value>
+  </data>
+  <data name="DirectoryRejectedCreate" xml:space="preserve">
+    <value>Каталог «{0}» жасауды қабылдамады.</value>
+  </data>
+  <data name="DirectoryRejectedUpdate" xml:space="preserve">
+    <value>Каталог «{0}» жаңартуды қабылдамады.</value>
+  </data>
+  <data name="DirectoryRejectedDelete" xml:space="preserve">
+    <value>Каталог «{0}» жоюды қабылдамады.</value>
+  </data>
+  <data name="UserNotFoundInLdap" xml:space="preserve">
+    <value>«{0}» пайдаланушысы LDAP-та табылмады.</value>
+  </data>
+  <data name="UserNotFoundInAd" xml:space="preserve">
+    <value>«{0}» пайдаланушысы AD-та табылмады.</value>
+  </data>
+  <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
+    <value>LDAP жазу операциялары Global Catalog 3268/3269 порттарында қолдау таппайды. Жасау, жаңарту және жою үшін жазуға ашық LDAP/LDAPS 389/636 портын және мақсатты OU DN-ін пайдаланыңыз.</value>
+  </data>
+  <data name="OrganizationalUnitNameRequired" xml:space="preserve">
+    <value>Ұйымдық бөлімшенің атауы қажет.</value>
+  </data>
+  <data name="OrganizationalUnitNotFound" xml:space="preserve">
+    <value>«{0}» ұйымдық бөлімшесі каталогтан табылмады.</value>
+  </data>
+  <data name="OrganizationalUnitLookupIncomplete" xml:space="preserve">
+    <value>Каталогты толық аралап шығу мүмкін болмады, сондықтан «{0}» ұйымдық бөлімшесі табылған да, жоққа шығарылған да жоқ. Қайталап көріңіз.</value>
+  </data>
+  <data name="OrganizationalUnitAlreadyExists" xml:space="preserve">
+    <value>«{0}» орнында жазба бұрыннан бар.</value>
+  </data>
+  <data name="OrganizationalUnitNotEmpty" xml:space="preserve">
+    <value>«{0}» ұйымдық бөлімшесінде әлі жазбалар бар, оны жою мүмкін емес. Алдымен мазмұнын көшіріңіз немесе жойыңыз.</value>
+  </data>
+  <data name="OrganizationalUnitsUnsupportedByAdProvider" xml:space="preserve">
+    <value>Ұйымдық бөлімшелерді басқару Windows ActiveDirectory провайдері үшін іске асырылмаған. Ldap:ProviderType мәнін StandardLdap етіп қойыңыз — ол ұйымдық бөлімшелерді Active Directory ішінде де басқарады.</value>
+  </data>
+  <data name="GroupNameRequired" xml:space="preserve">
+    <value>Топ атауы қажет.</value>
+  </data>
+  <data name="GroupMembersRequired" xml:space="preserve">
+    <value>Топта кемінде бір мүше болуы тиіс: каталог схемасы groupOfNames үшін «member» атрибутын міндетті етеді, сондықтан ешкімі жоқ топты сақтау мүмкін емес. Мүшенің distinguished name-ін қосыңыз немесе топты босатудың орнына жойыңыз.</value>
+  </data>
+  <data name="GroupNotFound" xml:space="preserve">
+    <value>«{0}» тобы каталогтан табылмады.</value>
+  </data>
+  <data name="GroupLookupIncomplete" xml:space="preserve">
+    <value>Каталогты толық аралап шығу мүмкін болмады, сондықтан «{0}» тобы табылған да, жоққа шығарылған да жоқ. Қайталап көріңіз.</value>
+  </data>
+  <data name="GroupAlreadyExists" xml:space="preserve">
+    <value>«{0}» орнында жазба бұрыннан бар.</value>
+  </data>
+  <data name="GroupNotEmptyContainer" xml:space="preserve">
+    <value>«{0}» тобының астында каталог ағашында жазбалар бар, оны жою мүмкін емес. Алдымен оларды көшіріңіз немесе жойыңыз.</value>
+  </data>
+  <data name="GroupsUnsupportedByAdProvider" xml:space="preserve">
+    <value>Топтарды басқару Windows ActiveDirectory провайдері үшін іске асырылмаған. Ldap:ProviderType мәнін StandardLdap етіп қойыңыз — ол топтарды Active Directory ішінде де басқарады.</value>
+  </data>
+  <data name="UserAttributesUnsupportedByAdProvider" xml:space="preserve">
+    <value>Каталогтың шикі атрибуттарын оқу Windows ActiveDirectory провайдері үшін іске асырылмаған. Ldap:ProviderType мәнін StandardLdap етіп қойыңыз — ол оларды Active Directory-ден де оқиды.</value>
+  </data>
+  <data name="ComputerNameRequired" xml:space="preserve">
+    <value>Компьютер атауы қажет.</value>
+  </data>
+  <data name="ComputerNotFound" xml:space="preserve">
+    <value>«{0}» компьютері каталогтан табылмады.</value>
+  </data>
+  <data name="ComputerLookupIncomplete" xml:space="preserve">
+    <value>Каталогты толық аралап шығу мүмкін болмады, сондықтан «{0}» компьютерінің бар-жоғын анықтау мүмкін емес.</value>
+  </data>
+  <data name="ComputerAlreadyExists" xml:space="preserve">
+    <value>«{0}» компьютері каталогта бұрыннан бар.</value>
+  </data>
+  <data name="ComputerNotEmptyContainer" xml:space="preserve">
+    <value>«{0}» компьютерінде әлі жазбалар бар, оны жою мүмкін емес. Алдымен мазмұнын көшіріңіз немесе жойыңыз.</value>
+  </data>
+  <data name="ComputersUnsupportedByAdProvider" xml:space="preserve">
+    <value>Компьютерлерді басқару Windows ActiveDirectory провайдері үшін іске асырылмаған. Ldap:ProviderType мәнін StandardLdap етіп қойыңыз — ол компьютер тіркелгілерін Active Directory ішінде де басқарады.</value>
+  </data>
+  <data name="BulkRequestEmpty" xml:space="preserve">
+    <value>Жаппай сұрауда кемінде бір элемент болуы тиіс.</value>
+  </data>
+  <data name="AuthenticationRequired" xml:space="preserve">
+    <value>Бұл операция үшін аутентификация қажет.</value>
+  </data>
+  <data name="PermissionDenied" xml:space="preserve">
+    <value>Сізде бұл операцияны орындауға рұқсат жоқ.</value>
+  </data>
+  <data name="PatternRequired" xml:space="preserve">
+    <value>Жасау үшін үлгі қажет.</value>
+  </data>
+  <data name="PageSizeOutOfRange" xml:space="preserve">
+    <value>Бет өлшемі {0} мен {1} аралығында болуы тиіс.</value>
+  </data>
+  <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
+    <value>Жасалатын элементтер саны {0} мен {1} аралығында болуы тиіс.</value>
+  </data>
+</root>
