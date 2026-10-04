@@ -1,3 +1,5 @@
+using System.Net;
+
 namespace Nelsar.Axia.Api.Configuration;
 
 /// <summary>
@@ -50,6 +52,77 @@ public sealed class ReverseProxyOptions
     /// network.
     /// </summary>
     public string[] KnownNetworks { get; set; } = [];
+
+    /// <summary>Whether any proxy was named at all.</summary>
+    public bool IsConfigured => KnownProxies.Length > 0 || KnownNetworks.Length > 0;
+
+    /// <summary>
+    /// <see cref="KnownProxies"/> as addresses.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">An entry is not an IP address.</exception>
+    public IReadOnlyList<IPAddress> ParseKnownProxies()
+    {
+        var parsed = new List<IPAddress>(KnownProxies.Length);
+
+        foreach (var proxy in KnownProxies)
+        {
+            if (!IPAddress.TryParse(proxy, out var address))
+                throw Invalid(
+                    nameof(KnownProxies),
+                    proxy,
+                    "expected an IP address, as in 10.0.0.7 — a host name will not do, because the "
+                    + "check happens per request against the address the connection actually came from");
+
+            parsed.Add(address);
+        }
+
+        return parsed;
+    }
+
+    /// <summary>
+    /// <see cref="KnownNetworks"/> as networks.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">An entry is not a CIDR network.</exception>
+    public IReadOnlyList<IPNetwork> ParseKnownNetworks()
+    {
+        var parsed = new List<IPNetwork>(KnownNetworks.Length);
+
+        foreach (var network in KnownNetworks)
+        {
+            if (!IPNetwork.TryParse(network, out var parsedNetwork))
+                throw Invalid(
+                    nameof(KnownNetworks),
+                    network,
+                    "expected CIDR notation, as in 10.0.0.0/8");
+
+            // TryParse masks off bits set below the prefix, so 10.0.0.7/8 is accepted and quietly
+            // becomes the whole of 10.0.0.0/8. Refused, because the two readings differ by sixteen
+            // million trusted addresses and the text does not say which was meant.
+            var slash = network.IndexOf('/');
+            if (slash > 0
+                && IPAddress.TryParse(network.AsSpan(0, slash), out var written)
+                && !written.Equals(parsedNetwork.BaseAddress))
+            {
+                throw Invalid(
+                    nameof(KnownNetworks),
+                    network,
+                    $"it has bits set below the /{parsedNetwork.PrefixLength} prefix, so it reads "
+                    + $"either as the single address {written}, which belongs under "
+                    + $"{nameof(KnownProxies)}, or as the whole of {parsedNetwork} — write whichever "
+                    + "was meant");
+            }
+
+            parsed.Add(parsedNetwork);
+        }
+
+        return parsed;
+    }
+
+    // Refusing to start is deliberate. The alternative — skipping the entry — leaves an instance
+    // running that looks configured and is not: forwarded headers quietly ignored, every client
+    // in the proxy's single rate-limit bucket. A typo in a security control should be loud.
+    private static InvalidOperationException Invalid(string key, string value, string expectation) =>
+        new($"{SectionName}:{key} contains '{value}', which could not be read: {expectation}.");
 }
 
 /// <summary>

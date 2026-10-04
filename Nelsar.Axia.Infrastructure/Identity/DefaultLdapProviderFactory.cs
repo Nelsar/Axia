@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
@@ -228,6 +229,20 @@ internal class DefaultLdapProviderFactory : ILdapProviderFactory
         };
 
         var isActiveDirectory = dbProvider.ProviderType.Equals("ActiveDirectory", StringComparison.OrdinalIgnoreCase);
+
+        // Same platform limit as the configured default directory, except that this one arrives
+        // from a database row rather than from appsettings, so it cannot be caught at startup.
+        // Misconfigured rather than Unreachable: the host may well be up, and no amount of
+        // retrying will make System.DirectoryServices exist here.
+        if (isActiveDirectory && !OperatingSystem.IsWindows())
+        {
+            _logger.LogError(
+                "DB provider {ProviderId} ({Name}) asks for ProviderType=ActiveDirectory, which needs "
+                + "Windows; this host is {OperatingSystem}. StandardLdap reaches Active Directory too.",
+                providerId, dbProvider.Name, RuntimeInformation.OSDescription);
+            return Resolution.Misconfigured;
+        }
+
         var resolved = TryResolveFromHosts(hosts, dbProvider.Port.Value, settings, isActiveDirectory);
 
         if (resolved != null)
@@ -308,6 +323,14 @@ internal class DefaultLdapProviderFactory : ILdapProviderFactory
 
             if (isActiveDirectory)
             {
+                // Written as a guard rather than left to the caller's check so that the platform
+                // analyser can see it. Both callers have already refused this combination, so
+                // reaching here off Windows would be a bug in this file, not a bad configuration.
+                if (!OperatingSystem.IsWindows())
+                    throw new PlatformNotSupportedException(
+                        "ActiveDirectoryProvider was reached on a non-Windows host; callers are "
+                        + "expected to resolve this to Misconfigured first.");
+
                 var adLogger = _sp.GetService<ILogger<ActiveDirectoryProvider>>();
                 return new ActiveDirectoryProvider(options, adLogger!);
             }

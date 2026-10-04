@@ -38,8 +38,13 @@ try
     var httpsOptions = builder.Configuration.GetSection(HttpsOptions.SectionName).Get<HttpsOptions>()
         ?? new HttpsOptions();
 
-    if (proxyOptions.KnownProxies.Length > 0 || proxyOptions.KnownNetworks.Length > 0)
+    if (proxyOptions.IsConfigured)
     {
+        // Read before the host is built, so a malformed entry stops startup here rather than
+        // surfacing as a quietly untrusted proxy once traffic is arriving.
+        var knownProxies = proxyOptions.ParseKnownProxies();
+        var knownNetworks = proxyOptions.ParseKnownNetworks();
+
         builder.Services.Configure<Microsoft.AspNetCore.Builder.ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -49,22 +54,13 @@ try
             // anything reaching us over loopback could rewrite the client address the rate limiter
             // partitions by.
             options.KnownProxies.Clear();
-            options.KnownNetworks.Clear();
+            options.KnownIPNetworks.Clear();
 
-            foreach (var proxy in proxyOptions.KnownProxies)
-                if (System.Net.IPAddress.TryParse(proxy, out var address))
-                    options.KnownProxies.Add(address);
+            foreach (var proxy in knownProxies)
+                options.KnownProxies.Add(proxy);
 
-            foreach (var network in proxyOptions.KnownNetworks)
-            {
-                var parts = network.Split('/', 2);
-                if (parts.Length == 2
-                    && System.Net.IPAddress.TryParse(parts[0], out var prefix)
-                    && int.TryParse(parts[1], out var length))
-                {
-                    options.KnownNetworks.Add(new IPNetwork(prefix, length));
-                }
-            }
+            foreach (var network in knownNetworks)
+                options.KnownIPNetworks.Add(network);
         });
     }
 

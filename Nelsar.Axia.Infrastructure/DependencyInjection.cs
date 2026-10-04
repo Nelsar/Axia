@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.Runtime.InteropServices;
 using System.Text;
 using Nelsar.Axia.Application;
 using Nelsar.Axia.Application.Configuration;
@@ -56,6 +57,20 @@ public static class DependencyInjection
         var ldapSettings = configuration.GetSection("Ldap").Get<LdapSettings>();
         if (ldapSettings?.ProviderType?.Equals("ActiveDirectory", StringComparison.OrdinalIgnoreCase) == true)
         {
+            // ActiveDirectoryProvider is built on System.DirectoryServices, which ships only on
+            // Windows. Registering it elsewhere starts the application and then fails every
+            // directory call with a PlatformNotSupportedException from inside the provider —
+            // nowhere near the setting that caused it. Refusing at startup puts the message where
+            // whoever edited the configuration is looking.
+            if (!OperatingSystem.IsWindows())
+            {
+                throw new InvalidOperationException(
+                    "Ldap:ProviderType is 'ActiveDirectory', which needs System.DirectoryServices and "
+                    + $"therefore Windows; this host is {RuntimeInformation.OSDescription}. Use "
+                    + "'StandardLdap' — it speaks to Active Directory as well as to OpenLDAP, over "
+                    + "plain LDAP, on any platform.");
+            }
+
             services.AddScoped<ILdapProvider, ActiveDirectoryProvider>();
         }
         else

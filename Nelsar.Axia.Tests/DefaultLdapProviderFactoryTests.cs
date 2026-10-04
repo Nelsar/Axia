@@ -209,6 +209,33 @@ public class DefaultLdapProviderFactoryTests
     }
 
     [Fact]
+    public void ADirectoryAskingForActiveDirectoryOffWindows_IsReportedAsMisconfigured()
+    {
+        // ActiveDirectoryProvider is built on System.DirectoryServices, which ships only on
+        // Windows. The configured default directory is checked at startup; this row cannot be,
+        // because it arrives from the database. Before the check it was constructed anyway and
+        // threw PlatformNotSupportedException from inside the provider — a 500 naming no
+        // directory, on a host where no retry could ever help.
+        //
+        // Misconfigured, not Unreachable: the domain controller may be perfectly healthy. The
+        // fix is ProviderType=StandardLdap, which reaches Active Directory as well.
+        if (OperatingSystem.IsWindows())
+            return; // On Windows the provider is supported and there is nothing to refuse.
+
+        var provider = TestProvider.Create(name: "corp", providerType: "ActiveDirectory");
+        var providerId = provider.Id;
+
+        var repo = new Mock<IProviderRepository>();
+        repo.Setup(x => x.GetByIdAsync(providerId)).ReturnsAsync(provider);
+
+        var factory = BuildFactory(repo, new Mock<ILdapProvider>());
+
+        var error = Assert.Throws<DirectoryUnavailableException>(() => factory.Resolve(providerId.ToString()));
+
+        Assert.Equal(ApplicationMessages.DirectoryProviderMisconfigured(providerId.ToString()), error.Message);
+    }
+
+    [Fact]
     public void AnAnonymousBind_IsNotMistakenForABrokenCredential()
     {
         // A blank stored credential is a real configuration for a read-only directory, not a
