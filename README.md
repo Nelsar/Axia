@@ -115,6 +115,9 @@ standard double-underscore form (`Auth__AllowSelfRegistration=true`).
 | Setting | Default | What it is |
 | --- | --- | --- |
 | `Auth:AllowSelfRegistration` | `false` | Whether `POST /api/auth/register` creates an account for an unauthenticated caller. See [Security defaults](#security-defaults). |
+| `Cors:AllowedOrigins` | — | Origins the browser console may call the API from, as a list. Empty means loopback only. |
+| `Https:RedirectToHttps` | `false` | Whether plain HTTP is redirected. Leave off when a reverse proxy terminates TLS. |
+| `ReverseProxy:KnownProxies` / `KnownNetworks` | — | Proxy addresses whose `X-Forwarded-For` and `X-Forwarded-Proto` are believed. Empty means none. |
 | `Ldap:*` | — | The default directory: host, port, base DN, bind account, search filter. |
 | `Jwt:Key` / `Jwt:ExpiresInMinutes` | — / `60` | Token signing key and lifetime. |
 | `Encryption:Key` | — | AES key for provider bind passwords at rest. |
@@ -131,9 +134,35 @@ Read this before exposing the API anywhere.
   your directory; the rate limiter makes that slow rather than impossible. Administrators create
   accounts through `POST /api/v1/users`, behind the `users.create` permission, which is the same
   operation. Turn it on only deliberately.
-- **CORS allows any origin** and **HTTPS redirection is off** in the shipped configuration. Both
-  suit local development and neither should go to production unchanged — put the API behind a
-  reverse proxy that terminates TLS, and narrow the CORS policy in `Program.cs`.
+- **CORS is closed to everything but loopback.** With `Cors:AllowedOrigins` unset, a browser may
+  call the API only from `localhost` or `127.0.0.1` — enough for development, and it does not
+  silently become an open API when the port is exposed. Deploying the console on its own host
+  means listing that host:
+
+  ```json
+  "Cors": { "AllowedOrigins": [ "https://axia.example.com" ] }
+  ```
+
+  Naming any origin replaces the loopback default rather than adding to it, so a deployment
+  that wants both lists both. Note what the policy is for: it decides which *websites* may read
+  responses in a browser. It is not a network control, and nothing about it restrains a
+  non-browser client — that is the authentication's job.
+- **HTTPS redirection is off, HSTS is on outside Development.** The shipped default suits the
+  common deployment, where a reverse proxy terminates TLS and talks plain HTTP to the API; with
+  redirection on, that proxy's request would be bounced back to itself. Set
+  `Https:RedirectToHttps` when the API itself holds the certificate.
+- **A reverse proxy is not trusted until named.** `X-Forwarded-For` is a request header like any
+  other: anyone who can reach the port can send one. Honouring it unconditionally would let a
+  caller write their own address, and the rate limiter partitions by exactly that address.
+  So forwarded headers are read only from the proxies you list:
+
+  ```json
+  "ReverseProxy": { "KnownProxies": [ "10.0.0.7" ] }
+  ```
+
+  Until then, every request appears to come from the proxy — one rate-limit bucket for all
+  clients, and the proxy's address in the audit trail. Both are worth fixing in a real
+  deployment, by naming the proxy here.
 - **Secrets never reach the log.** Bind passwords are encrypted at rest; log properties whose
   names read like a secret are redacted on the way to every sink; logins and distinguished names
   are masked in the diagnostic log, while the audit trail records the actor in full on purpose.
@@ -157,7 +186,7 @@ the tests if a message is left untranslated.
 dotnet test
 ```
 
-515 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
+524 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
 authorisation on every guarded use case, what may reach a log sink, multi-directory isolation, and
 translation completeness in every supported language.
 

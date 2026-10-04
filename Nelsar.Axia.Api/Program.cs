@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Localization;
 using Nelsar.Axia.Api.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Nelsar.Axia.Api.Configuration;
 using Nelsar.Axia.Api.Controllers;
 using Nelsar.Axia.Api.Middleware;
@@ -31,6 +32,41 @@ try
 
     // Self-registration is off unless a deployment turns it on; see AuthOptions.
     builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection(AuthOptions.SectionName));
+
+    var proxyOptions = builder.Configuration.GetSection(ReverseProxyOptions.SectionName).Get<ReverseProxyOptions>()
+        ?? new ReverseProxyOptions();
+    var httpsOptions = builder.Configuration.GetSection(HttpsOptions.SectionName).Get<HttpsOptions>()
+        ?? new HttpsOptions();
+
+    if (proxyOptions.KnownProxies.Length > 0 || proxyOptions.KnownNetworks.Length > 0)
+    {
+        builder.Services.Configure<Microsoft.AspNetCore.Builder.ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+
+            // The defaults trust any loopback proxy. Cleared, because the whole point of naming
+            // proxies is that only those are believed — leaving the defaults in place would mean
+            // anything reaching us over loopback could rewrite the client address the rate limiter
+            // partitions by.
+            options.KnownProxies.Clear();
+            options.KnownNetworks.Clear();
+
+            foreach (var proxy in proxyOptions.KnownProxies)
+                if (System.Net.IPAddress.TryParse(proxy, out var address))
+                    options.KnownProxies.Add(address);
+
+            foreach (var network in proxyOptions.KnownNetworks)
+            {
+                var parts = network.Split('/', 2);
+                if (parts.Length == 2
+                    && System.Net.IPAddress.TryParse(parts[0], out var prefix)
+                    && int.TryParse(parts[1], out var length))
+                {
+                    options.KnownNetworks.Add(new IPNetwork(prefix, length));
+                }
+            }
+        });
+    }
 
     // Add Infrastructure Services (Authentication, DI, etc.)
     builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -81,6 +117,12 @@ try
         options.AddPolicy("auth-login", httpContext => PerClientAddress(httpContext, "auth-login"));
     });
 
+    // Whether an Origin header names this machine. Used only when no origins are configured, to
+    // keep local development working without opening the API to the web.
+    static bool IsLoopback(string origin) =>
+        Uri.TryCreate(origin, UriKind.Absolute, out var uri)
+        && (uri.IsLoopback || string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase));
+
     // Partitions by client address and reads its limits from IRateLimitSettingsProvider, so an
     // admin retunes either policy through /api/v1/rate-limit-settings without a redeploy.
     static RateLimitPartition<string> PerClientAddress(HttpContext httpContext, string policyName)
@@ -102,16 +144,25 @@ try
         });
     }
 
-    // CORS for the separately-hosted frontend (frontend/ — static files, its own origin/port).
-    // Auth is Bearer-token-based (Authorization header, no cookies), so AllowCredentials is not
-    // needed and AllowAnyOrigin is safe here.
+    // CORS for the separately-hosted console (frontend/ — its own origin and port). See
+    // CorsOptions for why this is a list rather than AllowAnyOrigin.
     const string FrontendCorsPolicy = "Frontend";
+    var corsOptions = builder.Configuration.GetSection(CorsOptions.SectionName).Get<CorsOptions>()
+        ?? new CorsOptions();
+
     builder.Services.AddCors(options =>
     {
         options.AddPolicy(FrontendCorsPolicy, policy =>
         {
-            policy.AllowAnyOrigin()
-                .AllowAnyHeader()
+            if (corsOptions.AllowedOrigins.Length > 0)
+                policy.WithOrigins(corsOptions.AllowedOrigins);
+            else
+                // Nothing configured: the console talking to a locally-run API, on whichever port
+                // Vite picked. A predicate rather than a fixed list because the port moves and an
+                // operator should not have to edit configuration to run the thing locally.
+                policy.SetIsOriginAllowed(IsLoopback);
+
+            policy.AllowAnyHeader()
                 .AllowAnyMethod()
                 // Response headers are hidden from browser script unless named here. Without it
                 // the frontend cannot read the correlation id off a failed call, and the id stops
@@ -169,6 +220,12 @@ try
 
     // Configure the HTTP request pipeline
 
+    // Before anything that reads the client address or the scheme — which is the rate limiter,
+    // the request log and the redirect below. Registered only when a proxy has been named; see
+    // ReverseProxyOptions for why an unnamed proxy is not trusted.
+    if (proxyOptions.KnownProxies.Length > 0 || proxyOptions.KnownNetworks.Length > 0)
+        app.UseForwardedHeaders();
+
     // Correlation id and request logging, both outside the exception handler. The id is ambient
     // for the rest of the pipeline, and GlobalExceptionHandler logs from inside that scope, so
     // the log line explaining a 500 carries the same id the caller was handed back.
@@ -193,7 +250,15 @@ try
         app.UseSwaggerUI();
     }
 
-    //app.UseHttpsRedirection();
+    if (!app.Environment.IsDevelopment())
+    {
+        // Harmless where TLS is terminated upstream — a browser ignores Strict-Transport-Security
+        // arriving over plain HTTP — and the right header to be sending everywhere else.
+        app.UseHsts();
+    }
+
+    if (httpsOptions.RedirectToHttps)
+        app.UseHttpsRedirection();
 
     app.UseCors(FrontendCorsPolicy);
     app.UseRateLimiter();

@@ -81,6 +81,39 @@
         "AllowSelfRegistration": false
     },
 
+    // Which websites may call this API from a browser. Empty means loopback only, which is
+    // what development needs and what keeps an exposed port from becoming an open API. Name
+    // the console's own origin when it is hosted anywhere else; naming any origin replaces the
+    // loopback default rather than adding to it.
+    //
+    //   "AllowedOrigins": [ "https://axia.example.com" ]
+    //
+    // This decides which pages may read a response in a browser. It is not a network control
+    // and does not restrain a non-browser client.
+    "Cors": {
+        "AllowedOrigins": []
+    },
+
+    // Off, because the usual deployment has a reverse proxy terminating TLS and speaking plain
+    // HTTP to this process — redirecting there bounces the proxy's own request back at it. Turn
+    // it on when the API itself holds the certificate. HSTS is sent outside Development either
+    // way.
+    "Https": {
+        "RedirectToHttps": false
+    },
+
+    // X-Forwarded-For is a header anyone who can reach the port may send, and the rate limiter
+    // partitions by client address — so forwarded headers are believed only from the proxies
+    // named here. Until one is named, every request appears to come from the proxy: a single
+    // rate-limit bucket, and the proxy's address in the audit trail.
+    //
+    //   "KnownProxies": [ "10.0.0.7" ]        individual addresses
+    //   "KnownNetworks": [ "10.0.0.0/8" ]     CIDR ranges
+    "ReverseProxy": {
+        "KnownProxies": [],
+        "KnownNetworks": []
+    },
+
     "Ldap": {
         "Server": "openldap",
         "Port": 389,

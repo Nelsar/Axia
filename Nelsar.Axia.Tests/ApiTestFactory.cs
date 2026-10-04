@@ -63,11 +63,14 @@ public class ApiTestFactory : WebApplicationFactory<Program>
                 ["Observability:Console:Enabled"] = "false",
                 ["Observability:File:Enabled"] = "false"
             });
-
-            // Last wins, so a test's own values override the defaults above.
-            if (_configuration.Count > 0)
-                configBuilder.AddInMemoryCollection(_configuration);
         });
+
+        // UseSetting rather than another AddInMemoryCollection, because some settings are read
+        // eagerly: Program.cs calls GetSection(...).Get<T>() while the app is being built, which
+        // happens before ConfigureAppConfiguration's callbacks run. Host settings are in the
+        // configuration from the start, so they reach both kinds of reader.
+        foreach (var (key, value) in _configuration)
+            builder.UseSetting(key, value);
 
         builder.ConfigureServices(services =>
         {
