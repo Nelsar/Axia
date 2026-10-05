@@ -67,6 +67,9 @@
   <data name="DirectoryUnreachable" xml:space="preserve">
     <value>تعذّر الوصول إلى الدليل.</value>
   </data>
+  <data name="DirectoryServerNotConfigured" xml:space="preserve">
+    <value>لم يُضبط خادم لهذا الدليل. اختر دليلاً آخر أو اطلب من المسؤول تعيين خادمه.</value>
+  </data>
   <data name="DirectoryProviderUnknown" xml:space="preserve">
     <value>موفّر الدليل «{0}» غير مُهيَّأ أو غير نشِط.</value>
   </data>

@@ -69,6 +69,9 @@
   <data name="DirectoryUnreachable" xml:space="preserve">
     <value>The directory could not be reached.</value>
   </data>
+  <data name="DirectoryServerNotConfigured" xml:space="preserve">
+    <value>This directory has no server configured. Choose another directory, or ask an administrator to set its server.</value>
+  </data>
   <data name="DirectoryProviderUnknown" xml:space="preserve">
     <value>Directory provider '{0}' is not configured or is not active.</value>
     <comment>{0} = provider id supplied in X-LDAP-Provider-Id.</comment>

@@ -732,6 +732,21 @@ public class UsersControllerIntegrationTests
         Assert.DoesNotContain("boom", body);
     }
 
+    [Fact]
+    public async Task SigningIn_ToADirectoryWithNoServer_IsAGatewayFailure_NotAnUnexpectedError()
+    {
+        // Ldap:Server is unset here, as it is in a deployment that keeps every directory in the
+        // database. The empty host used to reach the socket layer and come back as a 500.
+        using var factory = new ApiTestFactory(_ => { });
+        var client = factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login",
+            new AuthenticateRequest { Email = "someone", Password = "secret" });
+
+        Assert.Equal(System.Net.HttpStatusCode.BadGateway, response.StatusCode);
+        Assert.Contains("no server configured", await response.Content.ReadAsStringAsync());
+    }
+
     [Theory]
     [InlineData("en", "must contain at least one item")]
     [InlineData("ru", "хотя бы один элемент")]

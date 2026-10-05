@@ -28,6 +28,19 @@ public class StandardLdapProviderTests
             options, new LdapConnectionFactory(options), NullLogger<StandardLdapProvider>.Instance);
     }
 
+    [Fact]
+    public void ADirectoryWithNoServer_IsReportedAsUnavailable_NotAsAnArgumentError()
+    {
+        var options = Options.Create(new LdapSettings { Server = "", Port = 389, BaseDn = "DC=example,DC=com" });
+        var provider = new StandardLdapProvider(
+            options, new LdapConnectionFactory(options), NullLogger<StandardLdapProvider>.Instance);
+
+        Assert.Throws<Nelsar.Axia.Contracts.Exceptions.DirectoryUnavailableException>(
+            () => provider.Authenticate("someone", "secret"));
+        Assert.Throws<Nelsar.Axia.Contracts.Exceptions.DirectoryUnavailableException>(
+            () => provider.GetAllUsers());
+    }
+
     [Theory]
     // The directory answered the bind and said no. These stay 401.
     [InlineData(49, true)]  // InvalidCredentials

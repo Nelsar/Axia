@@ -67,6 +67,9 @@
   <data name="DirectoryUnreachable" xml:space="preserve">
     <value>No se pudo contactar con el directorio.</value>
   </data>
+  <data name="DirectoryServerNotConfigured" xml:space="preserve">
+    <value>Este directorio no tiene un servidor configurado. Elija otro directorio o pida a un administrador que configure su servidor.</value>
+  </data>
   <data name="DirectoryProviderUnknown" xml:space="preserve">
     <value>El proveedor de directorio «{0}» no está configurado o no está activo.</value>
   </data>
