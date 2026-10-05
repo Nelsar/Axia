@@ -22,6 +22,75 @@ public sealed class CorsOptions
     /// A deployment that wants to be callable from the open web can say so here.
     /// </summary>
     public string[] AllowedOrigins { get; set; } = [];
+
+    /// <summary>
+    /// Whether any website may call the API from a browser. Off by default, and deliberately a
+    /// switch of its own rather than a <c>*</c> in <see cref="AllowedOrigins"/>.
+    ///
+    /// A <c>*</c> in the list used to be accepted without comment and meant exactly this. It is
+    /// a bigger decision than it looks: with the API reachable only on an internal network, any
+    /// page an employee opens can use their browser to send sign-in attempts to it and read the
+    /// answers — a token included, when a guess is right. Bearer tokens keep it from acting as the
+    /// employee; they do not keep it from guessing.
+    /// </summary>
+    public bool AllowAnyOrigin { get; set; }
+
+    /// <summary>
+    /// <see cref="AllowedOrigins"/> as the exact strings a browser sends in its Origin header.
+    ///
+    /// Every entry is checked, and one that cannot match anything stops startup. A trailing slash,
+    /// a path, a <c>*.</c> wildcard or an empty value all used to be accepted and then silently
+    /// match no origin at all — the console reported the API unreachable, and nothing pointed at
+    /// the setting. An empty entry also switched off the loopback default, since the list was no
+    /// longer empty. Same reasoning as <see cref="ReverseProxyOptions"/>: a typo in an access
+    /// control should be loud.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">An entry is not a bare origin.</exception>
+    public IReadOnlyList<string> ParseAllowedOrigins()
+    {
+        if (AllowAnyOrigin && AllowedOrigins.Length > 0)
+            throw new InvalidOperationException(
+                $"{SectionName}:{nameof(AllowAnyOrigin)} is on and {SectionName}:{nameof(AllowedOrigins)} "
+                + "names origins as well. The switch already admits every origin, so the list would "
+                + "mean nothing — set one or the other.");
+
+        var parsed = new List<string>(AllowedOrigins.Length);
+
+        foreach (var entry in AllowedOrigins)
+        {
+            var origin = entry?.Trim() ?? string.Empty;
+
+            if (origin.Length == 0)
+                throw Invalid(entry, "the entry is empty. Remove it, or leave the whole list empty to "
+                    + "allow only this machine's loopback addresses");
+
+            if (origin == "*")
+                throw Invalid(entry, $"to admit every website, set {SectionName}:{nameof(AllowAnyOrigin)} "
+                    + "to true instead — and read what it allows first");
+
+            if (origin.Contains('*'))
+                throw Invalid(entry, "wildcards are not supported. List each origin the console is "
+                    + "served from, as in https://console.example.com");
+
+            if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri)
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+                throw Invalid(entry, "expected an http or https origin, as in https://console.example.com");
+
+            // An origin is scheme, host and port and nothing else. Anything after it — a slash,
+            // a path, a query — means no Origin header a browser sends will ever equal it.
+            var bare = uri.GetLeftPart(UriPartial.Authority);
+            if (!string.Equals(origin, bare, StringComparison.OrdinalIgnoreCase))
+                throw Invalid(entry, $"an origin has no path, query or trailing slash; write {bare}");
+
+            parsed.Add(bare);
+        }
+
+        return parsed;
+    }
+
+    private static InvalidOperationException Invalid(string? value, string expectation) =>
+        new($"{SectionName}:{nameof(AllowedOrigins)} contains '{value}', which can never match a "
+            + $"browser's origin: {expectation}.");
 }
 
 /// <summary>

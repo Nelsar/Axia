@@ -94,7 +94,9 @@ decision, and worth making deliberately — see [Security defaults](README.md#se
 
 - `Auth:AllowSelfRegistration=true` — an unauthenticated caller can then create directory
   accounts. That is the point of the setting; it ships off.
-- `Cors:AllowedOrigins` naming a wide origin, or a wildcard behind a proxy that adds one.
+- `Cors:AllowAnyOrigin=true`, or `Cors:AllowedOrigins` naming an origin wider than the console's.
+  Any listed website can use a visitor's browser to call the API and read the answers — on an
+  internal API, to try passwords from inside the network.
 - `Https:RedirectToHttps=false` where nothing else terminates TLS. The default suits a proxy that
   does; exposing the API directly on plain HTTP is a deployment error, not a code one.
 - `ReverseProxy:KnownProxies` naming an address that is not actually the proxy — forwarded headers

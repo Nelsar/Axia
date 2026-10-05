@@ -146,12 +146,18 @@ try
     var corsOptions = builder.Configuration.GetSection(CorsOptions.SectionName).Get<CorsOptions>()
         ?? new CorsOptions();
 
+    // Read before the host is built, for the same reason as the proxy list: an entry that can
+    // never match stops startup here instead of surfacing as a console that cannot reach the API.
+    var allowedOrigins = corsOptions.ParseAllowedOrigins();
+
     builder.Services.AddCors(options =>
     {
         options.AddPolicy(FrontendCorsPolicy, policy =>
         {
-            if (corsOptions.AllowedOrigins.Length > 0)
-                policy.WithOrigins(corsOptions.AllowedOrigins);
+            if (corsOptions.AllowAnyOrigin)
+                policy.AllowAnyOrigin();
+            else if (allowedOrigins.Count > 0)
+                policy.WithOrigins([.. allowedOrigins]);
             else
                 // Nothing configured: the console talking to a locally-run API, on whichever port
                 // Vite picked. A predicate rather than a fixed list because the port moves and an
@@ -163,7 +169,11 @@ try
                 // Response headers are hidden from browser script unless named here. Without it
                 // the frontend cannot read the correlation id off a failed call, and the id stops
                 // being something a user can quote when they report the failure.
-                .WithExposedHeaders("X-Correlation-ID");
+                .WithExposedHeaders("X-Correlation-ID")
+                // Every console call carries Authorization, so every one is preflighted. Without
+                // a max age the browser keeps a preflight for about five seconds and nearly every
+                // request went out twice.
+                .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
         });
     });
 
