@@ -3,7 +3,7 @@ import type { MessageKey } from "./messages.en";
 /** German. See messages.en.ts for how completeness is enforced. */
 export const de: Record<MessageKey, string> = {
   // --- Shared ---------------------------------------------------------------------------------
-  "app.title": "DirCore — AD-/LDAP-Konsole",
+  "app.title": "Nelsar.Axia — AD-/LDAP-Konsole",
   "common.save": "Speichern",
   "common.create": "Anlegen",
   "common.cancel": "Abbrechen",

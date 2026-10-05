@@ -15,7 +15,7 @@
  */
 export const en = {
   // --- Shared ---------------------------------------------------------------------------------
-  "app.title": "DirCore — AD / LDAP console",
+  "app.title": "Nelsar.Axia — AD / LDAP console",
   "common.save": "Save",
   "common.create": "Create",
   "common.cancel": "Cancel",

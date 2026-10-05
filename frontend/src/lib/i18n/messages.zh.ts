@@ -3,7 +3,7 @@ import type { MessageKey } from "./messages.en";
 /** Chinese (Simplified). See messages.en.ts for how completeness is enforced. */
 export const zh: Record<MessageKey, string> = {
   // --- Shared ---------------------------------------------------------------------------------
-  "app.title": "DirCore — AD / LDAP 控制台",
+  "app.title": "Nelsar.Axia — AD / LDAP 控制台",
   "common.save": "保存",
   "common.create": "创建",
   "common.cancel": "取消",

@@ -159,13 +159,9 @@ button { font-family: inherit; }
 }
 .sidebar__logo {
   width: 30px; height: 30px;
-  border-radius: 7px;
-  background: var(--accent);
-  color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 14px;
+  display: block;
+  flex-shrink: 0;
 }
-:root[data-theme="dark"] .sidebar__logo { color: #0e1116; }
 .sidebar__brand-name { font-weight: 700; font-size: 16px; }
 
 .sidebar__api {
