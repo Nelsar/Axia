@@ -9,7 +9,7 @@ using Nelsar.Axia.Contracts.Responses;
 namespace Nelsar.Axia.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/users")]
 [Authorize]
 [ProducesResponseType(StatusCodes.Status401Unauthorized)]
 [ProducesResponseType(StatusCodes.Status403Forbidden)]

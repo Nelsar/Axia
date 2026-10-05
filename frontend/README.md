@@ -40,7 +40,7 @@ side; a console served from anywhere else has to be named in `Cors:AllowedOrigin
   refused by the directory with a 409, which the screen shows rather than deleting the contents
   recursively. A truncated enumeration is marked as incomplete instead of being presented as the
   whole list.
-- **Groups** — the same CRUD over `/api/groups`, plus membership. Members are entry DNs (the
+- **Groups** — the same CRUD over `/api/v1/groups`, plus membership. Members are entry DNs (the
   `member` attribute) and saving replaces the membership wholesale; an empty membership cannot be
   submitted, because the `groupOfNames` schema requires at least one. Against a Windows
   `ActiveDirectory` provider the API answers 501 — it does not manage groups there — and the

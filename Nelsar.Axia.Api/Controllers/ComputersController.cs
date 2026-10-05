@@ -29,7 +29,7 @@ namespace Nelsar.Axia.Api.Controllers;
 /// system or an enabled state, which is reported as null rather than guessed at.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/computers")]
 [Authorize]
 [ProducesResponseType(StatusCodes.Status401Unauthorized)]
 [ProducesResponseType(StatusCodes.Status403Forbidden)]

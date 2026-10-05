@@ -12,7 +12,7 @@ public class GlobalExceptionHandlerTests
     {
         var context = new DefaultHttpContext();
         context.Request.Method = "POST";
-        context.Request.Path = "/api/users";
+        context.Request.Path = "/api/v1/users";
 
         using var body = new MemoryStream();
         context.Response.Body = body;

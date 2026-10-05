@@ -263,7 +263,7 @@ internal class DefaultLdapProviderFactory : ILdapProviderFactory
     ///
     /// It is also a third way a provider can fail, and until now the only one that escaped as an
     /// unhandled exception: a 500 with a stack trace, logged as "unhandled exception processing
-    /// POST /api/auth/login" and naming no provider at all. An operator then had to read the
+    /// POST /api/v1/auth/login" and naming no provider at all. An operator then had to read the
     /// stack to learn which of their directories was broken — for a failure that is neither rare
     /// nor mysterious. Rotating <c>Encryption:Key</c> without re-encrypting the stored passwords
     /// does it to every provider at once, and a hand-edited row does it to one.

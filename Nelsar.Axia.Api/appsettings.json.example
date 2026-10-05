@@ -74,7 +74,7 @@
     },
 
     // Whether an unauthenticated caller may create a directory account through
-    // POST /api/auth/register. Off, and worth leaving off: that endpoint writes to the directory
+    // POST /api/v1/auth/register. Off, and worth leaving off: that endpoint writes to the directory
     // with nothing but a rate limiter in front of it. Administrators create accounts through
     // POST /api/v1/users, behind the users.create permission, which is the same operation.
     "Auth": {

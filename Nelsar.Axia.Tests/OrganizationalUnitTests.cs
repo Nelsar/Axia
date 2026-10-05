@@ -256,7 +256,7 @@ public class OrganizationalUnitTests
         client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
 
-        var response = await client.GetAsync("/api/organizationalunits");
+        var response = await client.GetAsync("/api/v1/organizational-units");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var payload = await response.Content.ReadFromJsonAsync<PagedResponse<OrganizationalUnitDto>>();
@@ -283,7 +283,7 @@ public class OrganizationalUnitTests
         client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
 
-        var response = await client.GetAsync("/api/organizationalunits?filter=almaty");
+        var response = await client.GetAsync("/api/v1/organizational-units?filter=almaty");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var payload = await response.Content.ReadFromJsonAsync<PagedResponse<OrganizationalUnitDto>>();

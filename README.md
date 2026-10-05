@@ -114,7 +114,7 @@ standard double-underscore form (`Auth__AllowSelfRegistration=true`).
 
 | Setting | Default | What it is |
 | --- | --- | --- |
-| `Auth:AllowSelfRegistration` | `false` | Whether `POST /api/auth/register` creates an account for an unauthenticated caller. See [Security defaults](#security-defaults). |
+| `Auth:AllowSelfRegistration` | `false` | Whether `POST /api/v1/auth/register` creates an account for an unauthenticated caller. See [Security defaults](#security-defaults). |
 | `Cors:AllowedOrigins` | — | Origins the browser console may call the API from, as a list. Empty means loopback only. |
 | `Https:RedirectToHttps` | `false` | Whether plain HTTP is redirected. Leave off when a reverse proxy terminates TLS. |
 | `ReverseProxy:KnownProxies` / `KnownNetworks` | — | Proxy addresses whose `X-Forwarded-For` and `X-Forwarded-Proto` are believed. Empty means none. |
@@ -129,7 +129,7 @@ standard double-underscore form (`Auth__AllowSelfRegistration=true`).
 
 Read this before exposing the API anywhere.
 
-- **Self-registration is off.** `POST /api/auth/register` writes to the directory with no
+- **Self-registration is off.** `POST /api/v1/auth/register` writes to the directory with no
   authentication in front of it. Left open, anyone who can reach the port can create accounts in
   your directory; the rate limiter makes that slow rather than impossible. Administrators create
   accounts through `POST /api/v1/users`, behind the `users.create` permission, which is the same
@@ -204,8 +204,6 @@ Said plainly, so nobody discovers it after deploying:
 - **No Docker quick start.** The compose files in the repository are not currently in a working
   state, and the OpenLDAP bootstrap fixtures are missing. Point the API at a directory you already
   have.
-- **Route prefixes are inconsistent** — some controllers are under `/api/v1/…`, others under
-  `/api/…`. This will be unified, and it will be a breaking change when it is.
 - **Password policy, account lockout and group membership editing from the user screen** are not
   implemented.
 - The `ActiveDirectory` provider is Windows-only and manages fewer object types than

@@ -106,8 +106,8 @@ public class PermissionAuthorizationTests
         using var factory = FactoryForMemberOf("UserEditors");
         var client = SignedIn(factory, "editor@example.com");
 
-        var update = await client.PutAsJsonAsync($"/api/users/{AliceId}", new UserUpdateRequest { Name = "Alice" });
-        var delete = await client.DeleteAsync($"/api/users/{AliceId}");
+        var update = await client.PutAsJsonAsync($"/api/v1/users/{AliceId}", new UserUpdateRequest { Name = "Alice" });
+        var delete = await client.DeleteAsync($"/api/v1/users/{AliceId}");
 
         Assert.Equal(HttpStatusCode.OK, update.StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, delete.StatusCode);
@@ -119,8 +119,8 @@ public class PermissionAuthorizationTests
         using var factory = FactoryForMemberOf("UserEditors", "UserDeleters");
         var client = SignedIn(factory, "editor-and-deleter@example.com");
 
-        var update = await client.PutAsJsonAsync($"/api/users/{AliceId}", new UserUpdateRequest { Name = "Alice" });
-        var delete = await client.DeleteAsync($"/api/users/{AliceId}");
+        var update = await client.PutAsJsonAsync($"/api/v1/users/{AliceId}", new UserUpdateRequest { Name = "Alice" });
+        var delete = await client.DeleteAsync($"/api/v1/users/{AliceId}");
 
         // The headline change. Resolution used to pick a single winning role by priority, so one
         // of these two would have been refused however the administrator configured the groups.
@@ -134,8 +134,8 @@ public class PermissionAuthorizationTests
         using var factory = FactoryForMemberOf("SomeUnrelatedGroup");
         var client = SignedIn(factory, "nobody@example.com");
 
-        var read = await client.GetAsync($"/api/users/{AliceId}");
-        var delete = await client.DeleteAsync($"/api/users/{AliceId}");
+        var read = await client.GetAsync($"/api/v1/users/{AliceId}");
+        var delete = await client.DeleteAsync($"/api/v1/users/{AliceId}");
 
         Assert.NotEqual(HttpStatusCode.Forbidden, read.StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, delete.StatusCode);
@@ -147,7 +147,7 @@ public class PermissionAuthorizationTests
         using var factory = FactoryForMemberOf("UserEditors");
         var client = SignedIn(factory, "editor-only@example.com");
 
-        var response = await client.PostAsJsonAsync("/api/users", new UserCreateRequest
+        var response = await client.PostAsJsonAsync("/api/v1/users", new UserCreateRequest
         {
             Email = "newuser@example.com",
             Name = "New User",
@@ -173,7 +173,7 @@ public class PermissionAuthorizationTests
         });
 
         var client = SignedIn(factory, "anyone@example.com");
-        var response = await client.GetAsync($"/api/users/{AliceId}");
+        var response = await client.GetAsync($"/api/v1/users/{AliceId}");
 
         // 403 would tell the user they lack a right they may well hold, and would hide the
         // outage. Membership unknown means the question cannot be answered, not answered "no".
@@ -213,7 +213,7 @@ public class PermissionAuthorizationTests
             "Bearer",
             TestAuth.GenerateToken(UserRoles.User, email: "", preferredUsername: "Anuar Mukatov"));
 
-        var response = await client.PutAsJsonAsync($"/api/users/{AliceId}", new UserUpdateRequest { Name = "Anuar Mukatov" });
+        var response = await client.PutAsJsonAsync($"/api/v1/users/{AliceId}", new UserUpdateRequest { Name = "Anuar Mukatov" });
 
         // The regression this pins: with the email claim empty, subject resolution fell through
         // to NameIdentifier — which for a JWT is sub, a derived Guid. Every request from such an

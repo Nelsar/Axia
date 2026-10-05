@@ -21,7 +21,7 @@ namespace Nelsar.Axia.Api.Controllers;
 /// and the previous HTTP 501 came from the exception it raised.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/organizational-units")]
 [Authorize]
 [ProducesResponseType(StatusCodes.Status401Unauthorized)]
 [ProducesResponseType(StatusCodes.Status403Forbidden)]

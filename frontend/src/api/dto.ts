@@ -51,7 +51,7 @@ export interface UserDto {
   groups: string[];
 }
 
-/** UserListingResponse (GET /api/users). */
+/** UserListingResponse (GET /api/v1/users). */
 export interface UserListingResponse {
   items: UserDto[];
   isComplete: boolean;
@@ -119,7 +119,7 @@ export interface BulkOperationResponse {
   errorMessage?: string | null;
 }
 
-/** The response to POST /api/users/bulk — 202 Accepted with a single field. */
+/** The response to POST /api/v1/users/bulk — 202 Accepted with a single field. */
 export interface BulkEnqueueResponse {
   jobId: string;
 }

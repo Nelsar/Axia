@@ -26,7 +26,7 @@ namespace Nelsar.Axia.Api.Controllers;
 /// <see cref="OrganizationalUnitsController"/>.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/groups")]
 [Authorize]
 [ProducesResponseType(StatusCodes.Status401Unauthorized)]
 [ProducesResponseType(StatusCodes.Status403Forbidden)]

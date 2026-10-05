@@ -164,7 +164,7 @@ public class DefaultLdapProviderFactoryTests
     {
         // Rotating Encryption:Key without re-encrypting the stored passwords does this to every
         // provider at once; a hand-edited row does it to one. It used to escape as an unhandled
-        // FormatException — a 500 logged as "unhandled exception processing POST /api/auth/login",
+        // FormatException — a 500 logged as "unhandled exception processing POST /api/v1/auth/login",
         // naming no provider, leaving an operator to read a stack trace to find out which of
         // their directories was broken.
         var provider = TestProvider.Create(name: "branch", encryptedAdminPassword: "enc:not-really");

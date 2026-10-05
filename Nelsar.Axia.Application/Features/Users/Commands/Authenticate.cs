@@ -82,7 +82,7 @@ internal sealed class AuthenticateCommandHandler : IRequestHandler<AuthenticateC
         // Derived from the entry the directory returned, not from what was typed at the login
         // form. Those differ whenever an account has no mail and is reached by something other
         // than its cn — and when they did, the id issued here disagreed with the id the same
-        // account got from the listing, so the token named a user that GET /api/users/{id}
+        // account got from the listing, so the token named a user that GET /api/v1/users/{id}
         // could not resolve. DeterministicIdFactory's contract is that one LDAP identity maps
         // to one id whichever path resolved it; this is that contract holding for login too.
         var username = string.IsNullOrWhiteSpace(details.Username) ? request.Login : details.Username;

@@ -11,7 +11,7 @@ using Nelsar.Axia.Contracts.Responses;
 namespace Nelsar.Axia.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/auth")]
 [EnableRateLimiting("auth-login")]
 [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
 public class AuthController : ControllerBase

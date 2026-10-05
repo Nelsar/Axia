@@ -8,7 +8,7 @@ public sealed class AuthOptions
     public const string SectionName = "Auth";
 
     /// <summary>
-    /// Whether <c>POST /api/auth/register</c> will create a directory account for an
+    /// Whether <c>POST /api/v1/auth/register</c> will create a directory account for an
     /// unauthenticated caller.
     ///
     /// False by default, and the default is the point. This endpoint writes to the directory:
