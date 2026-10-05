@@ -23,7 +23,7 @@ public sealed class AuthorizeOperationFilter : IOperationFilter
 
         operation.Security ??= new List<OpenApiSecurityRequirement>();
 
-        // Two separate requirements mean either scheme can authorize the request.
+        // Bearer is the only scheme; sign in at POST /api/v1/auth/login to get a token.
         operation.Security.Add(new OpenApiSecurityRequirement
         {
             {
@@ -33,21 +33,6 @@ public sealed class AuthorizeOperationFilter : IOperationFilter
                     {
                         Type = ReferenceType.SecurityScheme,
                         Id = "Bearer"
-                    }
-                },
-                Array.Empty<string>()
-            }
-        });
-
-        operation.Security.Add(new OpenApiSecurityRequirement
-        {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Basic"
                     }
                 },
                 Array.Empty<string>()

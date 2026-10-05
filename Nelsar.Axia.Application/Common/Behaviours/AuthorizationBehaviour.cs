@@ -23,12 +23,12 @@ namespace Nelsar.Axia.Application.Common.Behaviours;
 internal sealed class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    private readonly ICurrentUser _currentUser;
+    private readonly ActingUser _currentUser;
     private readonly IPermissionResolver _permissionResolver;
     private readonly ILogger<AuthorizationBehaviour<TRequest, TResponse>> _logger;
 
     public AuthorizationBehaviour(
-        ICurrentUser currentUser,
+        ActingUser currentUser,
         IPermissionResolver permissionResolver,
         ILogger<AuthorizationBehaviour<TRequest, TResponse>> logger)
     {
@@ -45,9 +45,9 @@ internal sealed class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBeh
         if (request is not IRequirePermission guarded)
             return await next();
 
-        // Work the application runs for itself carries no principal. It was authorised when a
-        // person asked for it — the bulk job is checked at the point it is queued, not each time
-        // the worker picks it up — so re-checking here would only ever deny it.
+        // Work the application runs for itself carries no principal. Queued work is not that: it
+        // runs as the person who queued it (see BackgroundPrincipal) and is checked as them here,
+        // at the time it runs, like anything else.
         if (_currentUser.IsSystem)
             return await next();
 
@@ -63,12 +63,22 @@ internal sealed class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBeh
         // administrator mid-session. See IPermissionResolver.
         var held = await _permissionResolver.ResolveAsync(subject, _currentUser.ProviderId, cancellationToken);
 
-        if (!held.Contains(guarded.RequiredPermission))
+        // The request type's own permission first, then whatever its content adds — a bulk batch
+        // needs users.create for its create rows and users.update for its update rows. All of
+        // them, or none of the request runs.
+        IEnumerable<string> required = guarded is IRequireAdditionalPermissions additional
+            ? additional.AdditionalPermissions.Prepend(guarded.RequiredPermission)
+            : [guarded.RequiredPermission];
+
+        foreach (var permission in required.Distinct(StringComparer.OrdinalIgnoreCase))
         {
+            if (held.Contains(permission))
+                continue;
+
             // The permission is named here and not in the response — the log is where an operator
             // answering "why was I refused?" should have to look.
             _logger.LogWarning("{Request} refused: caller does not hold {Permission}.",
-                typeof(TRequest).Name, guarded.RequiredPermission);
+                typeof(TRequest).Name, permission);
 
             throw new PermissionDeniedException(ApplicationMessages.PermissionDenied());
         }

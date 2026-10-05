@@ -1,5 +1,6 @@
 using FluentValidation;
 using MediatR;
+using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Contracts.Common;
@@ -23,10 +24,16 @@ internal sealed record UpdateProviderCommand(
     string AdminUsername,
     string? AdminPassword,
     string UserSearchFilter,
-    int UserSearchPageSize) : IRequest<ProviderDto?>, IRequirePermission
+    int UserSearchPageSize) : IRequest<ProviderDto?>, IRequirePermission, IAuditedCommand
 {
     /// <inheritdoc />
     public string RequiredPermission => Permissions.ProvidersManage;
+
+    /// <inheritdoc />
+    public string AuditTarget => Id.ToString();
+
+    /// <inheritdoc />
+    public string? AuditDescription => $"host={Host}:{Port}" + (string.IsNullOrEmpty(AdminPassword) ? string.Empty : ", bind password changed");
 }
 
 internal sealed class UpdateProviderCommandValidator : AbstractValidator<UpdateProviderCommand>

@@ -58,6 +58,9 @@
   <data name="BulkCreateFieldsRequired" xml:space="preserve">
     <value>Для операции создания требуются адрес электронной почты, имя и пароль.</value>
   </data>
+  <data name="BulkOperationUnknown" xml:space="preserve">
+    <value>Неизвестная операция «{0}». Используйте «create» или «update».</value>
+  </data>
   <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
     <value>Каталог не удалось обойти полностью, поэтому невозможно установить, существует ли такой пользователь.</value>
   </data>

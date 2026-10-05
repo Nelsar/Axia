@@ -1,4 +1,5 @@
 using MediatR;
+using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Domain.Authorization;
@@ -7,10 +8,13 @@ namespace Nelsar.Axia.Application.Features.OrganizationalUnits.Commands;
 
 /// <summary>False when there is no such unit. A unit that still holds entries is a conflict
 /// raised by the adapter, never a silent recursive delete.</summary>
-internal sealed record DeleteOrganizationalUnitCommand(Guid Id) : IRequest<bool>, IRequirePermission
+internal sealed record DeleteOrganizationalUnitCommand(Guid Id) : IRequest<bool>, IRequirePermission, IAuditedCommand
 {
     /// <inheritdoc />
     public string RequiredPermission => Permissions.OrganizationalUnitsManage;
+
+    /// <inheritdoc />
+    public string AuditTarget => Id.ToString();
 }
 
 internal sealed class DeleteOrganizationalUnitCommandHandler

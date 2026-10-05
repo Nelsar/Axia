@@ -76,7 +76,9 @@ holding them all in memory.
 | Passwords never logged, on creation or reset | **done** |
 | Bind passwords encrypted at rest — `AesGcmEncryptionService`, `enc:<nonce>:<cipher>:<tag>` | **done** |
 | Log properties that read like a secret redacted on the way to every sink | **done** |
-| Audit trail: every sign-in and modification, successful or not, with actor, object and outcome | **done** |
+| Audit trail: every sign-in and modification, successful or not, with actor, object and outcome | **done** — enforced for every command by a test |
+| Least privilege by default: signing in grants read access only; bulk batches checked per row | **done** |
+| Refuse to start on a missing, weak or placeholder `Jwt:Key` / `Encryption:Key` | **done** |
 | Deterministic, stable object ids — `SHA256` of the DN, narrowed to a GUID | **done** |
 | Permission-based authorisation resolved per request from directory group membership | **done** |
 | Structured logging with switchable sinks (console, file, Logstash, Loki) and a correlation id | **done** |

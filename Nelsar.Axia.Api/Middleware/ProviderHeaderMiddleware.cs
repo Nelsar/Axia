@@ -20,18 +20,21 @@ namespace Nelsar.Axia.Api.Middleware;
 /// side, which is not a property to leave authorisation resting on.
 ///
 /// So a session names its directory, and it is the one it was opened against. The header is still
-/// how that directory is chosen, but only where there is no session to contradict:
+/// how that directory is chosen, but only where there is no session to contradict: signing in. An
+/// endpoint that allows anonymous callers has no session speaking for it, and the header is the
+/// only way to say which directory to authenticate against. This is also what lets a caller
+/// holding a token for one domain sign in to another.
 ///
-///   * signing in — an endpoint that allows anonymous callers has no session speaking for it, and
-///     the header is the only way to say which directory to authenticate against. This is also
-///     what lets a caller holding a token for one domain sign in to another;
-///   * Basic authentication — the credentials are checked against the named directory on that
-///     very request, so the identity and the operation cannot come apart the way they could with
-///     a bearer token that outlives the request that minted it.
+/// With a session, the header is optional and merely has to agree. Sending none is the normal
+/// case and resolves to the session's own directory rather than to the default, which is what a
+/// caller meant all along.
 ///
-/// With a bearer session, the header is optional and merely has to agree. Sending none is the
-/// normal case and now resolves to the session's own directory rather than to the default, which
-/// is what a caller meant all along.
+/// There used to be a second exception, for LDAP credentials sent in a Basic header, on the
+/// reasoning that they were checked against the named directory on that very request. They were
+/// not: authentication runs before this middleware, so the password was checked against the
+/// default directory and the request then served from the one in the header. That scheme is gone,
+/// and any authenticated principal now counts as a session, so a scheme added later cannot reopen
+/// the gap by being left off a list.
 /// </summary>
 public class ProviderHeaderMiddleware
 {
@@ -87,13 +90,7 @@ public class ProviderHeaderMiddleware
         if (IsOpenToAnyone(context.GetEndpoint()))
             return false;
 
-        if (context.User.Identity?.IsAuthenticated != true)
-            return false;
-
-        // Same test the SmartAuth policy scheme uses to route the request, so "this is a bearer
-        // session" means here exactly what it meant when the principal was built.
-        return context.Request.Headers.Authorization.ToString()
-            .StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase);
+        return context.User.Identity?.IsAuthenticated == true;
     }
 
     /// <summary>

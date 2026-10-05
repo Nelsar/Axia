@@ -6,8 +6,8 @@ using Nelsar.Axia.Domain.Events;
 namespace Nelsar.Axia.Tests;
 
 /// <summary>
-/// Pins the mapping from domain events onto audit rows — the behaviour that used to be
-/// inlined in UserService as TryAuditAsync calls.
+/// Pins the mapping from sign-in events onto audit rows. Changes are audited by AuditBehaviour
+/// instead; see AuditBehaviourTests.
 /// </summary>
 public class AuditTrailEventHandlerTests
 {
@@ -34,34 +34,6 @@ public class AuditTrailEventHandlerTests
 
         auditService.Verify(
             x => x.LogAuthenticationAsync("user@example.com", false, null, "Invalid credentials"),
-            Times.Once);
-    }
-
-    [Fact]
-    public async Task UserCreated_IsRecordedAsCreateUserModification()
-    {
-        var userId = Guid.NewGuid();
-        var auditService = new Mock<IAuditService>();
-        var handler = new AuditTrailEventHandler(auditService.Object);
-
-        await handler.HandleAsync(new UserCreated(userId, "admin@example.com"));
-
-        auditService.Verify(
-            x => x.LogModificationAsync(userId, null, "admin@example.com", "CreateUser", true, null),
-            Times.Once);
-    }
-
-    [Fact]
-    public async Task UserUpdated_IsRecordedAsUpdateUserModification()
-    {
-        var userId = Guid.NewGuid();
-        var auditService = new Mock<IAuditService>();
-        var handler = new AuditTrailEventHandler(auditService.Object);
-
-        await handler.HandleAsync(new UserUpdated(userId, "admin@example.com"));
-
-        auditService.Verify(
-            x => x.LogModificationAsync(userId, null, "admin@example.com", "UpdateUser", true, null),
             Times.Once);
     }
 }

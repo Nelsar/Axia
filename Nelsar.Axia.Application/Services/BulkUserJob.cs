@@ -26,6 +26,13 @@ public class BulkUserJob
     /// </summary>
     public Guid? ProviderId { get; set; }
 
+    /// <summary>
+    /// The subject of whoever queued the batch. The worker runs the job as them (see
+    /// BackgroundPrincipal), so its rows are authorised against their permissions and audited
+    /// under their name.
+    /// </summary>
+    public string? RequestedBy { get; set; }
+
     public List<BulkUserResult> Results { get; set; } = new();
     public BulkJobState State { get; set; } = BulkJobState.Pending;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

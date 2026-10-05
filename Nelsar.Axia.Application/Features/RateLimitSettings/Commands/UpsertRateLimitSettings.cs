@@ -1,5 +1,6 @@
 using FluentValidation;
 using MediatR;
+using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Contracts.Common;
 using Nelsar.Axia.Domain.Authorization;
@@ -16,10 +17,16 @@ internal sealed record UpsertRateLimitSettingsCommand(
     int PermitLimit,
     int WindowSeconds,
     int QueueLimit,
-    bool Enabled) : IRequest<RateLimitSettingsDto>, IRequirePermission
+    bool Enabled) : IRequest<RateLimitSettingsDto>, IRequirePermission, IAuditedCommand
 {
     /// <inheritdoc />
     public string RequiredPermission => Permissions.RateLimitsManage;
+
+    /// <inheritdoc />
+    public string AuditTarget => PolicyName;
+
+    /// <inheritdoc />
+    public string? AuditDescription => $"limit={PermitLimit}/{WindowSeconds}s, queue={QueueLimit}, enabled={Enabled}";
 }
 
 internal sealed class UpsertRateLimitSettingsCommandValidator : AbstractValidator<UpsertRateLimitSettingsCommand>

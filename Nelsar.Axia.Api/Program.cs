@@ -184,15 +184,6 @@ try
             Description = "JWT authorization using Bearer scheme. Example: Bearer {token}"
         });
 
-        options.AddSecurityDefinition("Basic", new OpenApiSecurityScheme
-        {
-            Name = "Authorization",
-            Type = SecuritySchemeType.Http,
-            Scheme = "basic",
-            In = ParameterLocation.Header,
-            Description = "LDAP authorization using Basic scheme. Example: Basic base64(username:password)"
-        });
-
         options.OperationFilter<AuthorizeOperationFilter>();
         options.OperationFilter<ProviderHeaderOperationFilter>();
 

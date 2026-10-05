@@ -58,6 +58,9 @@
   <data name="BulkCreateFieldsRequired" xml:space="preserve">
     <value>פעולות יצירה דורשות דואר אלקטרוני, שם וסיסמה.</value>
   </data>
+  <data name="BulkOperationUnknown" xml:space="preserve">
+    <value>פעולה לא מוכרת "{0}". השתמשו ב-"create" או ב-"update".</value>
+  </data>
   <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
     <value>לא ניתן היה לסרוק את הספרייה במלואה, ולכן לא ניתן לקבוע אם משתמש זה קיים.</value>
   </data>

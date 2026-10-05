@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Application.Common.Behaviours;
 using Nelsar.Axia.Application.EventHandlers;
 using Nelsar.Axia.Application.Features.Computers;
@@ -37,8 +38,9 @@ public static class DependencyInjection
     /// this layer with one call rather than by knowing what is inside it.
     ///
     /// Behaviour order is registration order, and it is deliberate. Logging is outermost so that
-    /// a request refused by anything downstream is still recorded with its duration. Authorisation
-    /// comes next, ahead of validation, so that a caller who may not perform an operation is not
+    /// a request refused by anything downstream is still recorded with its duration. Auditing is
+    /// next, outside authorisation, so that a refused attempt at a change reaches the audit trail
+    /// as well as a permitted one. Authorisation comes next, ahead of validation, so that a caller who may not perform an operation is not
     /// handed a description of the payload it takes. Validation sits directly in front of the
     /// handler so no handler ever runs on input it would have rejected.
     /// </summary>
@@ -57,6 +59,12 @@ public static class DependencyInjection
         // The default reports nobody rather than a system context, so a host that forgets to
         // supply one refuses every guarded use case instead of running them all unchecked.
         services.TryAddScoped<ICurrentUser, AnonymousCurrentUser>();
+
+        // Who the use case runs as when there is no request behind it — a queued job runs as
+        // the person who queued it — and the one answer to "who is acting" that authorisation
+        // and the audit trail both read.
+        services.AddScoped<BackgroundPrincipal>();
+        services.AddScoped<ActingUser>();
 
         // This layer's own collaborators. Ports they depend on (ILdapService, the repositories)
         // are still Infrastructure's to supply.
@@ -85,14 +93,14 @@ public static class DependencyInjection
 
         // Subscribers to domain events. Publishing them is Infrastructure's job; deciding what
         // this layer does when one is raised is not. One handler instance per scope, shared by
-        // all four subscriptions.
+        // both subscriptions. Sign-ins are the only thing recorded this way; every change is
+        // recorded by AuditBehaviour instead, with the person who made it as the actor.
         services.AddScoped<AuditTrailEventHandler>();
         services.AddScoped<IDomainEventHandler<UserAuthenticationSucceeded>>(sp => sp.GetRequiredService<AuditTrailEventHandler>());
         services.AddScoped<IDomainEventHandler<UserAuthenticationFailed>>(sp => sp.GetRequiredService<AuditTrailEventHandler>());
-        services.AddScoped<IDomainEventHandler<UserCreated>>(sp => sp.GetRequiredService<AuditTrailEventHandler>());
-        services.AddScoped<IDomainEventHandler<UserUpdated>>(sp => sp.GetRequiredService<AuditTrailEventHandler>());
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuditBehaviour<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehaviour<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
 

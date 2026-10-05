@@ -1,9 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Nelsar.Axia.Application.Configuration;
 using Nelsar.Axia.Domain.Authorization;
 using Nelsar.Axia.Domain.Entities;
+using Nelsar.Axia.Infrastructure.Identity;
 
 namespace Nelsar.Axia.Infrastructure.Persistence;
 
@@ -12,6 +14,12 @@ public static class DbInitializer
     public static async Task InitializeAsync(IServiceProvider services)
     {
         await using var scope = services.CreateAsyncScope();
+
+        // Before anything is written. The host checks these too when it starts, but that is after
+        // this method has run — and seeding is where the encryption key is first used.
+        _ = scope.ServiceProvider.GetRequiredService<IOptions<JwtSettings>>().Value;
+        _ = scope.ServiceProvider.GetRequiredService<IOptions<EncryptionSettings>>().Value;
+
         var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<AppDbContext>>();
 
@@ -78,10 +86,46 @@ public static class DbInitializer
 
 
     /// <summary>
-    /// Reproduces the access matrix that used to be compiled into [Authorize(Roles = ...)],
-    /// exactly — including the parts of it that are accidents rather than decisions. Nothing
-    /// about who can do what changes on the day this ships; from then on an administrator can
-    /// change it without a redeploy, which is the whole point.
+    /// Read-only access, which is all that signing in grants by itself.
+    ///
+    /// It used to be far more. The first seed reproduced what a bare [Authorize] had allowed, and
+    /// that included groups.manage, orgunits.manage, computers.manage and users.bulk for every
+    /// account in the directory. Group management alone was enough to become an administrator:
+    /// roles come from group membership, so anyone who could edit a group could put themselves in
+    /// the one mapped to Admin. users.bulk was worse still — its "update" rows set passwords, so
+    /// any employee could reset any account's password, an administrator's included.
+    /// </summary>
+    private static readonly string[] ReadOnly =
+    [
+        Permissions.UsersRead,
+        Permissions.GroupsRead,
+        Permissions.OrganizationalUnitsRead,
+        Permissions.ComputersRead,
+    ];
+
+    /// <summary>
+    /// Who may do what on a fresh database. Anything beyond reading is granted to a role whose
+    /// name says it, and changing the directory's structure — groups, units, computer accounts —
+    /// is an administrator's alone. Existing databases are brought to the same matrix by the
+    /// RevokeAccidentalDefaultGrants migration.
+    ///
+    /// users.bulk is held only by roles that also hold what a batch's rows do: a row that
+    /// creates needs users.create and a row that updates needs users.update, checked per batch
+    /// (see ProcessBulkUsersCommand).
+    /// </summary>
+    internal static IReadOnlyDictionary<string, string[]> DefaultGrants { get; } = new Dictionary<string, string[]>
+    {
+        [UserRoles.User] = ReadOnly,
+        [UserRoles.UserCreator] =
+            [.. ReadOnly, Permissions.UsersList, Permissions.UsersCreate, Permissions.UsersBulk, Permissions.UsersGenerate],
+        [UserRoles.UserEditor] = [.. ReadOnly, Permissions.UsersUpdate, Permissions.UsersBulk],
+        [UserRoles.UserDeleter] = [.. ReadOnly, Permissions.UsersDelete],
+        [UserRoles.Admin] = [.. Permissions.All],
+    };
+
+    /// <summary>
+    /// Writes <see cref="DefaultGrants"/> into an empty table. From then on the table is the
+    /// administrator's, and nothing here touches it again.
     /// </summary>
     private static async Task SeedRolePermissionsAsync(IAppDbContext db, ILogger logger)
     {
@@ -90,39 +134,7 @@ public static class DbInitializer
             return;
         }
 
-        // What [Authorize] alone allowed — i.e. any authenticated user, whatever their role.
-        // Group and OU management is in here because those controllers carried no role
-        // requirement either. Both are implemented now, so the grant is no longer inert: on a
-        // directory this API can write to, any authenticated user may create and delete groups
-        // and organizational units. That is what the code always said, faithfully reproduced —
-        // and an access decision worth an administrator's review rather than a quiet change here.
-        string[] everyAuthenticatedUser =
-        [
-            Permissions.UsersRead,
-            Permissions.UsersBulk,
-            Permissions.UsersGenerate,
-            Permissions.GroupsRead,
-            Permissions.GroupsManage,
-            Permissions.OrganizationalUnitsRead,
-            Permissions.OrganizationalUnitsManage,
-
-            // Computers were added on the same terms as groups and units above, deliberately.
-            // That means computers.manage lands here too: on a directory this API can write to,
-            // any authenticated user may delete a computer account and so force the machine to
-            // rejoin the domain. Consistent with the rest of this list, and for the same reason
-            // worth an administrator's review rather than a quiet decision here.
-            Permissions.ComputersRead,
-            Permissions.ComputersManage,
-        ];
-
-        var grants = new Dictionary<string, string[]>
-        {
-            [UserRoles.User] = everyAuthenticatedUser,
-            [UserRoles.UserCreator] = [.. everyAuthenticatedUser, Permissions.UsersList, Permissions.UsersCreate],
-            [UserRoles.UserEditor] = [.. everyAuthenticatedUser, Permissions.UsersUpdate],
-            [UserRoles.UserDeleter] = [.. everyAuthenticatedUser, Permissions.UsersDelete],
-            [UserRoles.Admin] = [.. Permissions.All],
-        };
+        var grants = DefaultGrants;
 
         foreach (var (role, permissions) in grants)
         {

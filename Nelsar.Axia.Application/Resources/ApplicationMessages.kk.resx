@@ -58,6 +58,9 @@
   <data name="BulkCreateFieldsRequired" xml:space="preserve">
     <value>Жасау операциясы үшін email, аты және құпия сөз қажет.</value>
   </data>
+  <data name="BulkOperationUnknown" xml:space="preserve">
+    <value>Белгісіз операция «{0}». «create» немесе «update» қолданыңыз.</value>
+  </data>
   <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
     <value>Каталогты толық аралап шығу мүмкін болмады, сондықтан бұл пайдаланушының бар-жоғын анықтау мүмкін емес.</value>
   </data>

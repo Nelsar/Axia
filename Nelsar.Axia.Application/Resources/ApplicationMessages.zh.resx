@@ -58,6 +58,9 @@
   <data name="BulkCreateFieldsRequired" xml:space="preserve">
     <value>创建操作需要电子邮件、姓名和密码。</value>
   </data>
+  <data name="BulkOperationUnknown" xml:space="preserve">
+    <value>未知操作“{0}”。请使用“create”或“update”。</value>
+  </data>
   <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
     <value>未能完整遍历目录，因此无法确定该用户是否存在。</value>
   </data>

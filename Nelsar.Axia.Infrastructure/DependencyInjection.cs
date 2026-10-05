@@ -25,9 +25,6 @@ namespace Nelsar.Axia.Infrastructure;
 
 public static class DependencyInjection
 {
-    private const string SmartAuthScheme = "SmartAuth";
-    private const string LdapBasicScheme = "LdapBasic";
-
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddPersistence(configuration);
@@ -78,6 +75,14 @@ public static class DependencyInjection
             services.AddScoped<LdapConnectionFactory>();
             services.AddScoped<ILdapProvider, StandardLdapProvider>();
         }
+
+        // Checked when the host starts, and again by DbInitializer before it seeds anything: a
+        // missing or malformed key used to mean bind passwords stored in plaintext, with only a
+        // warning in the log to say so. See SecretRequirements.
+        services.AddOptions<EncryptionSettings>()
+            .Bind(configuration.GetSection(EncryptionSettings.SectionName))
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<EncryptionSettings>, EncryptionSettingsValidation>();
 
         services.AddScoped<IEncryptionService, AesGcmEncryptionService>();
         services.AddScoped<ILdapService, LdapService>();
@@ -141,36 +146,23 @@ public static class DependencyInjection
 
     private static IServiceCollection AddAuthenticationScheme(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+        // A placeholder, missing or short signing key stops the host from starting. The example
+        // configuration's placeholder is public, and a token signed with it names whoever its
+        // author chooses. See SecretRequirements.
+        services.AddOptions<JwtSettings>()
+            .Bind(configuration.GetSection("Jwt"))
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<JwtSettings>, JwtSettingsValidation>();
         services.AddSingleton<ITokenService, JwtTokenService>();
 
-        services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = SmartAuthScheme;
-            options.DefaultChallengeScheme = SmartAuthScheme;
-        })
-        .AddPolicyScheme(SmartAuthScheme, SmartAuthScheme, options =>
-        {
-            options.ForwardDefaultSelector = context =>
-            {
-                var authorization = context.Request.Headers.Authorization.ToString();
-
-                if (!string.IsNullOrWhiteSpace(authorization) &&
-                    authorization.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
-                {
-                    return LdapBasicScheme;
-                }
-
-                return JwtBearerDefaults.AuthenticationScheme;
-            };
-        })
-        .AddJwtBearer(options => { })
-        .AddScheme<AuthenticationSchemeOptions, LdapBasicAuthenticationHandler>(
-            LdapBasicScheme,
-            _ =>
-            {
-            }
-        );
+        // Bearer tokens are the only way in. There used to be a second scheme, LDAP credentials
+        // in a Basic header on any request, and it was worse than redundant: it checked the
+        // password against the default directory while the request was then served from
+        // whichever directory X-LDAP-Provider-Id named, and it sat outside the sign-in rate limit,
+        // so any endpoint could be used to guess passwords at full speed. The console never used
+        // it.
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options => { });
 
         // Bind JwtBearerOptions lazily from IOptions<JwtSettings> (resolved when the
         // scheme is first used, after the host is fully built) instead of capturing a

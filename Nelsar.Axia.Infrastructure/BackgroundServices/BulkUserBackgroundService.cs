@@ -50,6 +50,11 @@ internal class BulkUserBackgroundService : BackgroundService
                 // a failed batch than a hundred accounts in the wrong directory.
                 scope.ServiceProvider.GetRequiredService<LdapProviderScope>().Use(job.ProviderId);
 
+                // And as whom. The batch runs as the person who queued it, so its rows are
+                // authorised against what they hold now and audited under their name — rather
+                // than running as nobody, unchecked and unattributed.
+                scope.ServiceProvider.GetRequiredService<BackgroundPrincipal>().RunAs(job.RequestedBy, job.ProviderId);
+
                 // The same way in the HTTP API uses. This service used to build the command and
                 // send it through ISender itself, which made it the one caller outside Application
                 // reaching past the module surface — and the one reason the command types had to
