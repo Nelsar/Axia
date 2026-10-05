@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Contracts.Common;
@@ -17,10 +18,16 @@ internal sealed record UpdateComputerCommand(
     string? ParentDistinguishedName,
     string? Description,
     string? DnsHostName,
-    bool? Enabled) : IRequest<ComputerDto?>, IRequirePermission
+    bool? Enabled) : IRequest<ComputerDto?>, IRequirePermission, IAuditedCommand
 {
     /// <inheritdoc />
     public string RequiredPermission => Permissions.ComputersManage;
+
+    /// <inheritdoc />
+    public string AuditTarget => Id.ToString();
+
+    /// <inheritdoc />
+    public string? AuditDescription => Enabled is { } enabled ? (enabled ? "enabled" : "disabled") : null;
 }
 
 internal sealed class UpdateComputerCommandHandler : IRequestHandler<UpdateComputerCommand, ComputerDto?>

@@ -4,15 +4,16 @@ using Nelsar.Axia.Domain.Events;
 namespace Nelsar.Axia.Application.EventHandlers;
 
 /// <summary>
-/// Writes the audit trail. This is the only place that knows user operations are audited —
-/// <c>UserService</c> raises the facts and has no idea anyone is listening, which is what
-/// lets a second consumer be added without editing the operation itself.
+/// Writes sign-ins to the audit trail. Authentication raises the facts and has no idea anyone is
+/// listening, which is what lets a second consumer be added without editing the operation itself.
+///
+/// It used to record account creation and updates too, from the UserCreated and UserUpdated
+/// events — with the changed account's address as the actor, since that is all the events carry.
+/// Changes are now recorded by AuditBehaviour, which knows who made them.
 /// </summary>
 internal sealed class AuditTrailEventHandler :
     IDomainEventHandler<UserAuthenticationSucceeded>,
-    IDomainEventHandler<UserAuthenticationFailed>,
-    IDomainEventHandler<UserCreated>,
-    IDomainEventHandler<UserUpdated>
+    IDomainEventHandler<UserAuthenticationFailed>
 {
     private readonly IAuditService _auditService;
 
@@ -26,10 +27,4 @@ internal sealed class AuditTrailEventHandler :
 
     public Task HandleAsync(UserAuthenticationFailed domainEvent, CancellationToken cancellationToken = default) =>
         _auditService.LogAuthenticationAsync(domainEvent.Actor, false, null, domainEvent.Reason);
-
-    public Task HandleAsync(UserCreated domainEvent, CancellationToken cancellationToken = default) =>
-        _auditService.LogModificationAsync(domainEvent.UserId, null, domainEvent.Actor, "CreateUser", true, null);
-
-    public Task HandleAsync(UserUpdated domainEvent, CancellationToken cancellationToken = default) =>
-        _auditService.LogModificationAsync(domainEvent.UserId, null, domainEvent.Actor, "UpdateUser", true, null);
 }

@@ -58,6 +58,9 @@
   <data name="BulkCreateFieldsRequired" xml:space="preserve">
     <value>Para crear se requieren el correo electrónico, el nombre y la contraseña.</value>
   </data>
+  <data name="BulkOperationUnknown" xml:space="preserve">
+    <value>Operación desconocida «{0}». Use «create» o «update».</value>
+  </data>
   <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
     <value>No se pudo recorrer el directorio por completo, así que no se puede determinar si este usuario existe.</value>
   </data>

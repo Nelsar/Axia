@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Application.Resources;
@@ -18,10 +19,16 @@ internal sealed record UpdateGroupCommand(
     string? Name,
     string? ParentDistinguishedName,
     string? Description,
-    IEnumerable<string>? MemberDistinguishedNames) : IRequest<GroupDto?>, IRequirePermission
+    IEnumerable<string>? MemberDistinguishedNames) : IRequest<GroupDto?>, IRequirePermission, IAuditedCommand
 {
     /// <inheritdoc />
     public string RequiredPermission => Permissions.GroupsManage;
+
+    /// <inheritdoc />
+    public string AuditTarget => Id.ToString();
+
+    /// <inheritdoc />
+    public string? AuditDescription => MemberDistinguishedNames is null ? null : $"members replaced with {string.Join(" | ", MemberDistinguishedNames)}";
 }
 
 internal sealed class UpdateGroupCommandHandler : IRequestHandler<UpdateGroupCommand, GroupDto?>

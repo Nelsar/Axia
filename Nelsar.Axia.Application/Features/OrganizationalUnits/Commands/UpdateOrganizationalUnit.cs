@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Contracts.Common;
@@ -15,10 +16,13 @@ internal sealed record UpdateOrganizationalUnitCommand(
     Guid Id,
     string? Name,
     string? ParentDistinguishedName,
-    string? Description) : IRequest<OrganizationalUnitDto?>, IRequirePermission
+    string? Description) : IRequest<OrganizationalUnitDto?>, IRequirePermission, IAuditedCommand
 {
     /// <inheritdoc />
     public string RequiredPermission => Permissions.OrganizationalUnitsManage;
+
+    /// <inheritdoc />
+    public string AuditTarget => Id.ToString();
 }
 
 internal sealed class UpdateOrganizationalUnitCommandHandler

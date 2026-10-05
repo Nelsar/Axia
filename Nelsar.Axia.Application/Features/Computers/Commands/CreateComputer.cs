@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Application.Resources;
@@ -16,10 +17,13 @@ internal sealed record CreateComputerCommand(
     string Name,
     string ParentDistinguishedName,
     string Description,
-    string DnsHostName) : IRequest<ComputerDto>, IRequirePermission
+    string DnsHostName) : IRequest<ComputerDto>, IRequirePermission, IAuditedCommand
 {
     /// <inheritdoc />
     public string RequiredPermission => Permissions.ComputersManage;
+
+    /// <inheritdoc />
+    public string AuditTarget => Name;
 }
 
 internal sealed class CreateComputerCommandValidator : AbstractValidator<CreateComputerCommand>

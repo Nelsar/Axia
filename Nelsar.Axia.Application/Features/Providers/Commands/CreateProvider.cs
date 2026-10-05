@@ -1,5 +1,6 @@
 using FluentValidation;
 using MediatR;
+using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Contracts.Common;
@@ -21,10 +22,16 @@ internal sealed record CreateProviderCommand(
     string AdminUsername,
     string? AdminPassword,
     string UserSearchFilter,
-    int UserSearchPageSize) : IRequest<ProviderDto>, IRequirePermission
+    int UserSearchPageSize) : IRequest<ProviderDto>, IRequirePermission, IAuditedCommand
 {
     /// <inheritdoc />
     public string RequiredPermission => Permissions.ProvidersManage;
+
+    /// <inheritdoc />
+    public string AuditTarget => Name;
+
+    /// <inheritdoc />
+    public string? AuditDescription => $"host={Host}:{Port}";
 }
 
 internal sealed class CreateProviderCommandValidator : AbstractValidator<CreateProviderCommand>

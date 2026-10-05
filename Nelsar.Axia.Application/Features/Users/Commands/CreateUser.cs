@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Nelsar.Axia.Application.Common;
+using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Configuration;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Application.Resources;
@@ -27,7 +28,11 @@ namespace Nelsar.Axia.Application.Features.Users.Commands;
 /// and an anonymous RegisterUserCommand — so each states its own rule. If it is not, the
 /// register endpoint should go, and this can then carry the permission like the rest.
 /// </summary>
-internal sealed record CreateUserCommand(string Email, string Name, string Password) : IRequest<UserDto>;
+internal sealed record CreateUserCommand(string Email, string Name, string Password) : IRequest<UserDto>, IAuditedCommand
+{
+    /// <inheritdoc />
+    public string AuditTarget => Email;
+}
 
 internal sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 {

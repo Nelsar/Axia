@@ -60,6 +60,9 @@
   <data name="BulkCreateFieldsRequired" xml:space="preserve">
     <value>Email, name and password are required for create operations.</value>
   </data>
+  <data name="BulkOperationUnknown" xml:space="preserve">
+    <value>Unknown operation '{0}'. Use 'create' or 'update'.</value>
+  </data>
   <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
     <value>The directory could not be enumerated completely, so it cannot be established whether this user exists.</value>
   </data>

@@ -78,11 +78,13 @@ internal sealed class AesGcmEncryptionService : IEncryptionService
         if (string.IsNullOrEmpty(plainText))
             return string.Empty;
 
+        // Refused rather than passed through. This used to log a warning and return the plaintext,
+        // which the caller then stored as if it were encrypted — so a missing or mistyped key
+        // quietly put every bind password in the database in the clear. Startup now refuses such
+        // a key (see SecretRequirements); this is the backstop for anything that gets here anyway.
         if (_key == null)
-        {
-            _logger.LogWarning("Encryption:Key is not configured; returning plaintext secret.");
-            return plainText;
-        }
+            throw new InvalidOperationException(
+                "Encryption:Key is not configured, so the secret cannot be stored encrypted.");
 
         var plain = Encoding.UTF8.GetBytes(plainText);
         var nonce = RandomNumberGenerator.GetBytes(12);

@@ -1,5 +1,6 @@
 using FluentValidation;
 using MediatR;
+using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Application.Common;
 using Nelsar.Axia.Application.Interfaces;
@@ -11,10 +12,16 @@ using Nelsar.Axia.Domain.ValueObjects;
 namespace Nelsar.Axia.Application.Features.Users.Commands;
 
 /// <summary>Null when there is no such account.</summary>
-internal sealed record UpdateUserCommand(Guid Id, string Name, string? Email, string? Password) : IRequest<UserDto?>, IRequirePermission
+internal sealed record UpdateUserCommand(Guid Id, string Name, string? Email, string? Password) : IRequest<UserDto?>, IRequirePermission, IAuditedCommand
 {
     /// <inheritdoc />
     public string RequiredPermission => Permissions.UsersUpdate;
+
+    /// <inheritdoc />
+    public string AuditTarget => Id.ToString();
+
+    /// <inheritdoc />
+    public string? AuditDescription => string.IsNullOrEmpty(Password) ? null : "password reset";
 }
 
 internal sealed class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>

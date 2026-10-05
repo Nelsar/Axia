@@ -26,6 +26,8 @@ public static class ApplicationMessages
 
     public static string BulkCreateFieldsRequired() => Get(nameof(BulkCreateFieldsRequired));
 
+    public static string BulkOperationUnknown(string operation) => Format(nameof(BulkOperationUnknown), operation);
+
     /// <summary>Moved here from ApiMessages together with the guard it belongs to: the check is
     /// now a validator on the command, so its text has to be reachable from this layer.</summary>
     public static string BulkRequestEmpty() => Get(nameof(BulkRequestEmpty));

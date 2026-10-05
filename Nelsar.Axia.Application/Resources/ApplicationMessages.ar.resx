@@ -58,6 +58,9 @@
   <data name="BulkCreateFieldsRequired" xml:space="preserve">
     <value>عمليات الإنشاء تتطلّب البريد الإلكتروني والاسم وكلمة المرور.</value>
   </data>
+  <data name="BulkOperationUnknown" xml:space="preserve">
+    <value>عملية غير معروفة «{0}». استخدم «create» أو «update».</value>
+  </data>
   <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
     <value>تعذّر استعراض الدليل بالكامل، لذا لا يمكن تحديد ما إذا كان هذا المستخدم موجودًا.</value>
   </data>

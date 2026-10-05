@@ -1,6 +1,10 @@
+using System.Collections.Concurrent;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Domain.Authorization;
+using Nelsar.Axia.Domain.Entities;
+using Nelsar.Axia.Domain.Repositories;
 using Nelsar.Axia.Contracts.Abstractions;
 
 namespace Nelsar.Axia.Tests;
@@ -22,6 +26,35 @@ internal static class AuthorizedPipeline
     {
         services.AddSingleton<ICurrentUser>(new TestCurrentUser("admin@example.com"));
         services.AddSingleton<IPermissionResolver>(new FixedPermissionResolver([.. Permissions.All]));
+        return services.WithAuditTrail();
+    }
+
+    /// <summary>
+    /// Somewhere for AuditBehaviour to write. Every command is audited, so a pipeline with no
+    /// audit repository cannot run one; tests that are not about the trail get this in-memory one,
+    /// and a test that registers its own keeps it.
+    /// </summary>
+    public static IServiceCollection WithAuditTrail(this IServiceCollection services)
+    {
+        services.TryAddSingleton<IAuditRepository>(new RecordingAuditRepository());
         return services;
     }
+}
+
+/// <summary>Keeps what was written to the audit trail, in order, for a test to read back.</summary>
+internal sealed class RecordingAuditRepository : IAuditRepository
+{
+    private readonly ConcurrentQueue<AuditEvent> _events = new();
+
+    public IReadOnlyList<AuditEvent> Events => [.. _events];
+
+    public Task AddAsync(AuditEvent evt)
+    {
+        _events.Enqueue(evt);
+        return Task.CompletedTask;
+    }
+
+    public Task<(IReadOnlyList<AuditEvent> Items, bool HasMore)> GetRecentAsync(int offset, int pageSize) =>
+        Task.FromResult<(IReadOnlyList<AuditEvent>, bool)>(
+            ([.. _events.Reverse().Skip(offset).Take(pageSize)], _events.Count > offset + pageSize));
 }

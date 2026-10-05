@@ -54,6 +54,10 @@ public class ApiTestFactory : WebApplicationFactory<Program>
                 ["Jwt:Audience"] = TestAuth.Audience,
                 ["Jwt:ExpiresInMinutes"] = "60",
 
+                // The host refuses to start without a usable key (see SecretRequirements), so
+                // every test host gets one. Zero bytes are as good as any for a test.
+                ["Encryption:Key"] = TestAuth.EncryptionKey,
+
                 // No sinks under test. The file sink is the one that matters: xUnit runs these
                 // classes in parallel, each with its own host and its own logger, and they would
                 // all reach for the same day's log file. The console is off for the reader's

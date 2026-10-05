@@ -54,7 +54,9 @@ public class BulkJobProviderRoutingTests
         services.AddSingleton(queue.Object);
         services.AddSingleton(new Mock<IBulkJobStore>().Object);
         services.AddSingleton<ICurrentUser>(new TestCurrentUser("admin@example.com", callerProviderId));
-        services.AddSingleton<IPermissionResolver>(new FixedPermissionResolver(Permissions.UsersBulk));
+        services.AddSingleton<IPermissionResolver>(
+            new FixedPermissionResolver(Permissions.UsersBulk, Permissions.UsersCreate));
+        services.WithAuditTrail();
 
         return (services.BuildServiceProvider().GetRequiredService<ISender>(), queued);
     }
@@ -83,6 +85,17 @@ public class BulkJobProviderRoutingTests
         Assert.Null(Assert.Single(queued).ProviderId);
     }
 
+    [Fact]
+    public async Task Enqueue_RecordsWhoAskedForTheBatch()
+    {
+        // The worker runs the job as this person; without it the batch ran as nobody.
+        var (sender, queued) = EnqueuePipeline(callerProviderId: null);
+
+        await sender.Send(new EnqueueBulkUserJobCommand(OneRow));
+
+        Assert.Equal("admin@example.com", Assert.Single(queued).RequestedBy);
+    }
+
     // ---- Worker: the recorded directory is the one the scope resolves to ----
 
     /// <summary>
@@ -90,22 +103,32 @@ public class BulkJobProviderRoutingTests
     /// <see cref="LdapProviderScope"/> held at the moment the batch reached the module —
     /// which is what every directory call in that scope would go on to resolve through.
     /// </summary>
-    private static async Task<Guid?> ObserveScopeWhileProcessing(BulkUserJob job)
+    private static async Task<Guid?> ObserveScopeWhileProcessing(BulkUserJob job) =>
+        (await ObserveWorkerScope(job)).ProviderId;
+
+    /// <summary>
+    /// What the worker's scope held when the batch reached the module: the directory, and the
+    /// principal the batch runs as.
+    /// </summary>
+    private static async Task<(Guid? ProviderId, BackgroundPrincipal Principal)> ObserveWorkerScope(BulkUserJob job)
     {
-        var observed = new TaskCompletionSource<Guid?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var observed = new TaskCompletionSource<(Guid?, BackgroundPrincipal)>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
 
         var services = new ServiceCollection();
         services.AddScoped<LdapProviderScope>();
+        services.AddScoped<BackgroundPrincipal>();
         services.AddScoped<IUsersModule>(sp =>
         {
             // Resolved from the worker's own scope, so this is the very instance the factory
             // would read — not a second one that happens to agree.
             var scope = sp.GetRequiredService<LdapProviderScope>();
+            var principal = sp.GetRequiredService<BackgroundPrincipal>();
 
             var users = new Mock<IUsersModule>();
             users.Setup(x => x.ProcessBulkAsync(
                     It.IsAny<IEnumerable<BulkUserRequest>?>(), It.IsAny<CancellationToken>()))
-                .Callback(() => observed.TrySetResult(scope.ProviderId))
+                .Callback(() => observed.TrySetResult((scope.ProviderId, principal)))
                 .ReturnsAsync(new BulkOperationResponse<BulkUserResult> { Items = Array.Empty<BulkUserResult>() });
             return users.Object;
         });
@@ -161,6 +184,23 @@ public class BulkJobProviderRoutingTests
         });
 
         Assert.Null(resolved);
+    }
+
+    [Fact]
+    public async Task TheWorker_RunsTheBatchAsThePersonWhoQueuedIt()
+    {
+        var branch = Guid.NewGuid();
+
+        var (_, principal) = await ObserveWorkerScope(new BulkUserJob
+        {
+            Requests = [.. OneRow],
+            ProviderId = branch,
+            RequestedBy = "helpdesk@example.com"
+        });
+
+        Assert.True(principal.IsSet);
+        Assert.Equal("helpdesk@example.com", principal.Subject);
+        Assert.Equal(branch, principal.ProviderId);
     }
 
     // ---- The seam itself ----

@@ -40,8 +40,10 @@ public class AesGcmEncryptionServiceTests
     }
 
     [Fact]
-    public void Encrypt_ReturnsPlain_WhenKeyNotConfigured()
+    public void Encrypt_Refuses_WhenKeyNotConfigured()
     {
+        // It used to hand the plaintext back, which the caller stored as if it were encrypted:
+        // a missing key put every bind password in the database in the clear.
         var config = new ConfigurationBuilder().Build();
 
         var type = Type.GetType("Nelsar.Axia.Infrastructure.Identity.AesGcmEncryptionService, Nelsar.Axia.Infrastructure");
@@ -54,8 +56,9 @@ public class AesGcmEncryptionServiceTests
         var encryptMethod = type!.GetMethod("Encrypt");
         Assert.NotNull(encryptMethod);
 
-        var encrypted = (string)encryptMethod.Invoke(svc, new object[] { secret })!;
+        var thrown = Assert.Throws<System.Reflection.TargetInvocationException>(
+            () => encryptMethod.Invoke(svc, new object[] { secret }));
 
-        Assert.Equal(secret, encrypted);
+        Assert.IsType<InvalidOperationException>(thrown.InnerException);
     }
 }

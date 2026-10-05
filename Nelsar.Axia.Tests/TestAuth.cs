@@ -13,6 +13,9 @@ namespace Nelsar.Axia.Tests;
 public static class TestAuth
 {
     public const string SigningKey = "test-signing-key-0123456789ABCDEF";
+
+    /// <summary>A valid 32-byte AES key, base64-encoded, for Encryption:Key.</summary>
+    public static readonly string EncryptionKey = Convert.ToBase64String(new byte[32]);
     public const string Issuer = "Nelsar.Axia.Tests";
     public const string Audience = "Nelsar.Axia.Tests";
 

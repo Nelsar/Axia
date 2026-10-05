@@ -24,8 +24,8 @@ internal static class RequestPrincipal
     /// request from such an account then asked the directory for an entry named by a Guid, and
     /// failed the whole request with 502.
     ///
-    /// Email and NameIdentifier stay as fallbacks for the Basic scheme, which puts the typed
-    /// login in both and mints no preferred_username.
+    /// Email and NameIdentifier stay as fallbacks for tokens minted before preferred_username was
+    /// added to them.
     /// </summary>
     public static string? Subject(ClaimsPrincipal? user)
     {

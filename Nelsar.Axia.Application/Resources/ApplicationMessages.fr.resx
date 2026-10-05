@@ -58,6 +58,9 @@
   <data name="BulkCreateFieldsRequired" xml:space="preserve">
     <value>La création exige une adresse e-mail, un nom et un mot de passe.</value>
   </data>
+  <data name="BulkOperationUnknown" xml:space="preserve">
+    <value>Opération inconnue « {0} ». Utilisez « create » ou « update ».</value>
+  </data>
   <data name="DirectoryEnumerationIncomplete" xml:space="preserve">
     <value>L’annuaire n’a pas pu être parcouru en entier, il est donc impossible d’établir si cet utilisateur existe.</value>
   </data>

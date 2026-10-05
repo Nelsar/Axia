@@ -36,6 +36,7 @@ public class UseCaseAuthorizationTests
         services.AddSingleton(new Mock<IEncryptionService>().Object);
         services.AddSingleton(currentUser);
         services.AddSingleton(permissions);
+        services.WithAuditTrail();
         return services.BuildServiceProvider().GetRequiredService<ISender>();
     }
 
@@ -172,7 +173,6 @@ public class UseCaseAuthorizationTests
         // This test states the arrangement so the next person meets it deliberately rather than
         // reading the missing requirement as an oversight.
         Assert.False(typeof(IRequirePermission).IsAssignableFrom(typeof(CreateUserCommand)));
-        Assert.False(typeof(IRequirePermission).IsAssignableFrom(typeof(ProcessBulkUsersCommand)));
     }
 
     [Fact]

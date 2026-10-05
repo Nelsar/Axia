@@ -1,5 +1,6 @@
 using FluentValidation;
 using MediatR;
+using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Contracts.Common;
 using Nelsar.Axia.Domain.Authorization;
@@ -14,10 +15,16 @@ internal sealed record UpdateRoleMappingCommand(
     Guid? ProviderId,
     string GroupName,
     string RoleName,
-    int Priority) : IRequest<RoleMappingDto?>, IRequirePermission
+    int Priority) : IRequest<RoleMappingDto?>, IRequirePermission, IAuditedCommand
 {
     /// <inheritdoc />
     public string RequiredPermission => Permissions.RolesManage;
+
+    /// <inheritdoc />
+    public string AuditTarget => Id.ToString();
+
+    /// <inheritdoc />
+    public string? AuditDescription => $"group={GroupName}, role={RoleName}, provider={(ProviderId?.ToString() ?? "all")}, priority={Priority}";
 }
 
 internal sealed class UpdateRoleMappingCommandValidator : AbstractValidator<UpdateRoleMappingCommand>

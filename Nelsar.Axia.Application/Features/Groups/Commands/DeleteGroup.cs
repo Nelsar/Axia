@@ -1,4 +1,5 @@
 using MediatR;
+using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Domain.Authorization;
@@ -6,10 +7,13 @@ using Nelsar.Axia.Domain.Authorization;
 namespace Nelsar.Axia.Application.Features.Groups.Commands;
 
 /// <summary>False when there is no such group.</summary>
-internal sealed record DeleteGroupCommand(Guid Id) : IRequest<bool>, IRequirePermission
+internal sealed record DeleteGroupCommand(Guid Id) : IRequest<bool>, IRequirePermission, IAuditedCommand
 {
     /// <inheritdoc />
     public string RequiredPermission => Permissions.GroupsManage;
+
+    /// <inheritdoc />
+    public string AuditTarget => Id.ToString();
 }
 
 internal sealed class DeleteGroupCommandHandler : IRequestHandler<DeleteGroupCommand, bool>

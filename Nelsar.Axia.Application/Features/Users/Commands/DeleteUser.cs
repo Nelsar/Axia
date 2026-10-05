@@ -1,4 +1,5 @@
 using MediatR;
+using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Domain.Authorization;
@@ -6,10 +7,13 @@ using Nelsar.Axia.Domain.Authorization;
 namespace Nelsar.Axia.Application.Features.Users.Commands;
 
 /// <summary>False when there is no such account.</summary>
-internal sealed record DeleteUserCommand(Guid Id) : IRequest<bool>, IRequirePermission
+internal sealed record DeleteUserCommand(Guid Id) : IRequest<bool>, IRequirePermission, IAuditedCommand
 {
     /// <inheritdoc />
     public string RequiredPermission => Permissions.UsersDelete;
+
+    /// <inheritdoc />
+    public string AuditTarget => Id.ToString();
 }
 
 internal sealed class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, bool>
