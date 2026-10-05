@@ -45,12 +45,17 @@ Inside that, the following are meant to hold, and a case where they do not is wo
 
 - **An operation cannot be performed without the permission for it.** Permissions are resolved per
   request from directory group membership and the role mappings, never from a claim the token
-  carries. Every guarded use case has a test asserting the refusal.
+  carries. Every guarded use case has a test asserting the refusal. Signing in grants read access
+  and nothing more; a bulk batch needs the single-account permission for each kind of row it holds.
 - **An operation cannot cross into another directory.** The directory is bound to the session at
   sign-in and carried in the token; a request naming a different one in `X-LDAP-Provider-Id` is
   refused rather than silently served from the default.
 - **A login cannot change the query it lands in.** Filters and distinguished names are escaped at
   the boundary, and the escaping is tested against the metacharacters that matter.
+- **Every change is attributable.** Every attempt to change a directory or this application's
+  settings is written to the audit trail with the principal who made it — the signed-in caller, or
+  for a queued bulk job the person who queued it — whether it was permitted or refused. A test
+  requires every command to be audited.
 - **Secrets do not reach the log.** Bind passwords are encrypted at rest with AES-GCM; log
   properties whose names read like a secret are redacted on the way to every sink. Logins and
   distinguished names are masked in the diagnostic log; the audit trail records the actor in full,
@@ -72,7 +77,8 @@ them before deploying.
   the account entirely does not end a session already issued. Shorten `Jwt:ExpiresInMinutes` where
   that matters.
 - **`Jwt:Key` and `Encryption:Key` are read from configuration**, so their protection is the
-  deployment's: environment variables, a mounted secret, a vault. There is no key rotation
+  deployment's: environment variables, a mounted secret, a vault. The API refuses to start when
+  either is missing, malformed, too short or the example placeholder. There is no key rotation
   procedure — rotating `Encryption:Key` without re-encrypting the stored bind passwords makes
   every configured directory unusable until they are re-entered (reported as such, rather than as
   a crash).

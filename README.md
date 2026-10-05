@@ -61,7 +61,8 @@ directory that is not on a trusted network.
   one with the `X-LDAP-Provider-Id` header, and a session stays bound to the directory it signed
   in to.
 - **Role mappings** — directory groups map to application roles, globally or per directory.
-- **Audit log** — authentications and changes to directory objects.
+- **Audit log** — every sign-in, and every attempt to change a directory or this application's
+  settings, permitted or refused, with who made it.
 - **Rate limiting** — per client address, retunable through the API without a restart.
 - **Nine interface languages**, including Arabic and Hebrew with a mirrored layout.
 
@@ -114,6 +115,10 @@ Put the first in `appsettings.Development.json` under `Encryption:Key`, the seco
 `appsettings.json` under `Jwt:Key`. Then point `Ldap:*` at your directory — the example file
 documents each setting.
 
+The API refuses to start while either key is missing, malformed, too short or still the
+placeholder from the example file, and says which one. The placeholders are published in this
+repository: a host signing tokens with one would accept a token anybody can forge.
+
 ### 2. Run the API
 
 ```bash
@@ -145,8 +150,28 @@ membership through the role mappings seeded on first run:
 | `UserEditors` | `UserEditor` |
 | `UserDeleters` | `UserDeleter` |
 
-An account in none of them signs in as `User` and may read little. Mappings are editable in the
-console under **Role mappings**.
+What each role may do on a fresh database:
+
+| Role | May |
+| --- | --- |
+| `User` | Read users, groups, organizational units and computers. Nothing else. |
+| `UserCreator` | Also list all users, create accounts, run bulk batches and the name generator. |
+| `UserEditor` | Also edit accounts, including passwords, singly or in bulk. |
+| `UserDeleter` | Also delete accounts. |
+| `Admin` | Everything, including groups, units, computers, directories, role mappings and rate limits. |
+
+A bulk batch needs `users.create` for its create rows and `users.update` for its update rows, as
+well as `users.bulk`: it is a faster way to do what its submitter could do one account at a time,
+never a way to do more.
+
+An account in none of the groups signs in as `User`. Mappings are editable in the console under
+**Role mappings**.
+
+> **Upgrading from an earlier build:** its first run gave every signed-in account the right to
+> manage groups, organizational units and computers, and to run bulk batches — enough to make
+> oneself an administrator or reset anyone's password. The `RevokeAccidentalDefaultGrants`
+> migration takes those grants back when the new version starts. Only those exact grants are
+> removed; anything else in the table is left as it was.
 
 ## Configuration
 
@@ -160,8 +185,8 @@ standard double-underscore form (`Auth__AllowSelfRegistration=true`).
 | `Https:RedirectToHttps` | `false` | Whether plain HTTP is redirected. Leave off when a reverse proxy terminates TLS. |
 | `ReverseProxy:KnownProxies` / `KnownNetworks` | — | Proxy addresses whose `X-Forwarded-For` and `X-Forwarded-Proto` are believed. Empty means none. |
 | `Ldap:*` | — | The default directory: host, port, base DN, bind account, search filter. |
-| `Jwt:Key` / `Jwt:ExpiresInMinutes` | — / `60` | Token signing key and lifetime. |
-| `Encryption:Key` | — | AES key for provider bind passwords at rest. |
+| `Jwt:Key` / `Jwt:ExpiresInMinutes` | — / `60` | Token signing key and lifetime. Required: at least 32 bytes, not the example placeholder. |
+| `Encryption:Key` | — | AES key for provider bind passwords at rest. Required: base64 of 16, 24 or 32 bytes, not the example placeholder. |
 | `Observability:Console` / `File` | on | Structured logs: compact JSON to stdout and a rolling file. |
 | `Observability:Logstash` / `Loki` | off | Shippers. Set `Enabled` and a `Uri` to turn one on. |
 | `Serilog:MinimumLevel` | `Information` | Levels and per-namespace overrides, in the standard Serilog section. |
