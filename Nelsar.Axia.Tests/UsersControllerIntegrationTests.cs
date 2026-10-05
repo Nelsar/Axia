@@ -700,6 +700,39 @@ public class UsersControllerIntegrationTests
     }
 
     [Theory]
+    [InlineData(null, "An unexpected error occurred")]
+    [InlineData("en", "An unexpected error occurred")]
+    [InlineData("ru", "Произошла непредвиденная ошибка")]
+    [InlineData("de", "Ein unerwarteter Fehler ist aufgetreten")]
+    public async Task UnexpectedErrorBody_IsLocalisedFromAcceptLanguage(string? acceptLanguage, string expected)
+    {
+        // Unlike a domain exception's message, which was resolved where it was thrown, the 500
+        // text is looked up by GlobalExceptionHandler itself — outside the request's culture. It
+        // came out in the host's own language whatever the client asked for.
+        var ldapServiceMock = new Mock<ILdapService>();
+        ldapServiceMock.Setup(x => x.GetAllUsersAsync()).ThrowsAsync(new InvalidOperationException("boom"));
+
+        using var factory = new ApiTestFactory(services =>
+        {
+            services.RemoveAll(typeof(ILdapService));
+            services.AddSingleton(ldapServiceMock.Object);
+        });
+
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
+        if (acceptLanguage != null)
+            client.DefaultRequestHeaders.Add("Accept-Language", acceptLanguage);
+
+        var response = await client.GetAsync("/api/v1/users");
+
+        Assert.Equal(System.Net.HttpStatusCode.InternalServerError, response.StatusCode);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Contains(expected, body);
+        Assert.DoesNotContain("boom", body);
+    }
+
+    [Theory]
     [InlineData("en", "must contain at least one item")]
     [InlineData("ru", "хотя бы один элемент")]
     public async Task ControllerWrittenBody_IsAlsoLocalised(string acceptLanguage, string expected)

@@ -1,4 +1,6 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Localization;
 using Nelsar.Axia.Api.Resources;
 using Nelsar.Axia.Contracts.Exceptions;
 using Nelsar.Axia.Domain.Exceptions;
@@ -42,7 +44,7 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             // The route exists and the caller used it correctly; we simply have not built what
             // sits behind it. 501 says that, where a 404 would send them hunting for a typo.
             FeatureNotImplementedException => (StatusCodes.Status501NotImplemented, exception.Message),
-            _ => (StatusCodes.Status500InternalServerError, ApiMessages.UnexpectedError())
+            _ => (StatusCodes.Status500InternalServerError, InRequestCulture(httpContext, ApiMessages.UnexpectedError))
         };
 
         if (exception is DirectoryUnavailableException)
@@ -85,5 +87,34 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
         await httpContext.Response.WriteAsJsonAsync(new { message }, cancellationToken);
 
         return true;
+    }
+
+    /// <summary>
+    /// Resolves a message in the language the request asked for.
+    ///
+    /// Every other message here was produced where the exception was thrown, inside the request,
+    /// in the request's culture. This one is produced here, and here is outside it: the culture
+    /// UseRequestLocalization sets flows down into the request but not back out to this handler,
+    /// which runs after the exception has unwound past it. The 500 body therefore came out in the
+    /// server's own language whatever the client sent — Russian for everybody on a Russian
+    /// Windows host, English for everybody in a container. The culture the request settled on is
+    /// still recorded on the context, so it is applied again for the one lookup.
+    /// </summary>
+    private static string InRequestCulture(HttpContext httpContext, Func<string> message)
+    {
+        var requested = httpContext.Features.Get<IRequestCultureFeature>()?.RequestCulture.UICulture
+            // Localisation never ran — it failed itself, say. The neutral language, not the host's.
+            ?? CultureInfo.GetCultureInfo(SupportedCultures.Neutral);
+
+        var previous = CultureInfo.CurrentUICulture;
+        CultureInfo.CurrentUICulture = requested;
+        try
+        {
+            return message();
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previous;
+        }
     }
 }

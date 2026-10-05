@@ -234,11 +234,12 @@ try
     // limiter's OnRejected below, not just the controllers.
     //
     // It sits after UseExceptionHandler so that a failure in localisation itself is still turned
-    // into a clean 500. Bodies written by GlobalExceptionHandler are localised all the same, even
-    // though it runs while an exception unwinds back past this middleware: the request culture is
-    // scoped to the request, not to the frame that set it. That is verified rather than assumed —
-    // see UsersControllerIntegrationTests.ErrorBody_IsLocalisedFromAcceptLanguage, which fails if
-    // this stops holding.
+    // into a clean 500. The culture this sets does not flow back out to GlobalExceptionHandler,
+    // which runs after the exception has unwound past here. Messages carried by an exception were
+    // resolved where it was thrown, inside the request, so they are localised regardless; the one
+    // message the handler resolves itself is looked up in the request's culture explicitly. Both
+    // are verified rather than assumed — see ErrorBody_IsLocalisedFromAcceptLanguage and
+    // UnexpectedErrorBody_IsLocalisedFromAcceptLanguage in UsersControllerIntegrationTests.
     app.UseRequestLocalization();
 
     if (app.Environment.IsDevelopment())
