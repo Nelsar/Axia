@@ -3,7 +3,7 @@ import type { MessageKey } from "./messages.en";
 /** Kazakh (Cyrillic). See messages.en.ts for how completeness is enforced. */
 export const kk: Record<MessageKey, string> = {
   // --- Shared ---------------------------------------------------------------------------------
-  "app.title": "DirCore — AD / LDAP консолі",
+  "app.title": "Nelsar.Axia — AD / LDAP консолі",
   "common.save": "Сақтау",
   "common.create": "Жасау",
   "common.cancel": "Бас тарту",

@@ -3,7 +3,7 @@ import type { MessageKey } from "./messages.en";
 /** Russian. See messages.en.ts for how completeness is enforced. */
 export const ru: Record<MessageKey, string> = {
   // --- Общее: то, что повторяется на каждом втором экране -------------------------------------
-  "app.title": "DirCore — консоль AD / LDAP",
+  "app.title": "Nelsar.Axia — консоль AD / LDAP",
   "common.save": "Сохранить",
   "common.create": "Создать",
   "common.cancel": "Отмена",

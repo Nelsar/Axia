@@ -47,6 +47,7 @@ function Sidebar({ children }: SidebarProps): JSX.Element {
 }
 
 export interface BrandProps {
+  /** URL of the logo image. */
   logo: string;
   name: string;
 }
@@ -54,9 +55,7 @@ export interface BrandProps {
 function Brand({ logo, name }: BrandProps): JSX.Element {
   return (
     <div className="sidebar__brand">
-      <div className="sidebar__logo" aria-hidden="true">
-        {logo}
-      </div>
+      <img className="sidebar__logo" src={logo} alt="" />
       <div className="sidebar__brand-name">{name}</div>
     </div>
   );

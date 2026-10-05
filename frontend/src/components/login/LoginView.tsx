@@ -157,8 +157,8 @@ export function LoginView({
     <div className="login-screen">
       <div className="login-card">
         <div className="login-card__logo">
-          <div className="sidebar__logo">D</div>
-          <div style={{ fontWeight: 700, fontSize: "18px" }}>DirCore</div>
+          <img className="sidebar__logo" src="/favicon.svg" alt="" />
+          <div style={{ fontWeight: 700, fontSize: "18px" }}>Axia</div>
           {/* The language control has to be reachable before signing in: someone who cannot read
               the current language cannot get past this screen to change it. */}
           <div style={{ marginInlineStart: "auto" }}>

@@ -3,7 +3,7 @@ import type { MessageKey } from "./messages.en";
 /** Hebrew (right-to-left). See messages.en.ts for how completeness is enforced. */
 export const he: Record<MessageKey, string> = {
   // --- Shared ---------------------------------------------------------------------------------
-  "app.title": "DirCore — מסוף AD / LDAP",
+  "app.title": "Nelsar.Axia — מסוף AD / LDAP",
   "common.save": "שמירה",
   "common.create": "יצירה",
   "common.cancel": "ביטול",

@@ -44,7 +44,7 @@ export function ShellView({
   return (
     <AppShell activePath={activePath}>
       <AppShell.Sidebar>
-        <AppShell.Brand logo="D" name="DirCore" />
+        <AppShell.Brand logo="/favicon.svg" name="Axia" />
         <AppShell.ApiBadge url={apiBaseUrl} />
         {directoryName !== null && <AppShell.DirectoryBadge name={directoryName} />}
 
