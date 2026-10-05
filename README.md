@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/logo-dark.svg">
+    <img src="docs/brand/logo.svg" alt="Nelsar.Axia" width="300" height="64">
+  </picture>
+</p>
+
 # Nelsar.Axia — open-source web console and REST API for Active Directory and LDAP
 
 [![CI](https://github.com/Nelsar/Nelsar.Axia/actions/workflows/ci.yml/badge.svg)](https://github.com/Nelsar/Nelsar.Axia/actions/workflows/ci.yml)
