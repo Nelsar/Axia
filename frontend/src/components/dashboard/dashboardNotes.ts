@@ -11,7 +11,7 @@ import type { DirectoryCount } from "../../hooks/useDashboardData";
  * caveat".
  */
 
-// GET /api/users answers with { items, isComplete }. isComplete === false means the directory
+// GET /api/v1/users answers with { items, isComplete }. isComplete === false means the directory
 // walk stopped early: the users shown are real, but they are not the whole directory.
 export function usersCountNote(users: UserListingResponse | null, canListUsers: boolean): string | null {
   if (!canListUsers) return t("dashboard.noRightsUsers");

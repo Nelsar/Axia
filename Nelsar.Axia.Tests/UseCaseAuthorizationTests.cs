@@ -162,7 +162,7 @@ public class UseCaseAuthorizationTests
     [Fact]
     public void CreateUserCommand_CarriesNoRequirement_BecauseTwoRoutesReachIt()
     {
-        // POST /api/v1/users dispatches this command behind users.create; POST /api/auth/register
+        // POST /api/v1/users dispatches this command behind users.create; POST /api/v1/auth/register
         // dispatches the very same one for a caller who has not authenticated at all. A
         // requirement attached here would close both, so the difference between them is the
         // host's to enforce — and it does: registration answers 404 unless a deployment sets

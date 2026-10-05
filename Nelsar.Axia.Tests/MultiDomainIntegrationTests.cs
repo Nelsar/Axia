@@ -179,7 +179,7 @@ public class MultiDomainIntegrationTests
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Add(ProviderHeader, AdProviderId.ToString());
 
-        var response = await client.PostAsJsonAsync("/api/auth/login", new AuthenticateRequest
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new AuthenticateRequest
         {
             Email = "jsmith@corp.example.com",
             Password = "AdPassw0rd!"
@@ -201,7 +201,7 @@ public class MultiDomainIntegrationTests
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Add(ProviderHeader, OpenLdapProviderId.ToString());
 
-        var response = await client.PostAsJsonAsync("/api/auth/login", new AuthenticateRequest
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new AuthenticateRequest
         {
             Email = "jdoe@nelsar.com",
             Password = "Test123!"
@@ -236,7 +236,7 @@ public class MultiDomainIntegrationTests
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Add(ProviderHeader, OpenLdapProviderId.ToString());
 
-        var response = await client.PostAsJsonAsync("/api/auth/login", new AuthenticateRequest
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new AuthenticateRequest
         {
             Email = "impostor@nelsar.com",
             Password = "Test123!"
@@ -255,7 +255,7 @@ public class MultiDomainIntegrationTests
         var client = factory.CreateClient();
         // No X-LDAP-Provider-Id: routed to the default provider, where jsmith doesn't exist.
 
-        var response = await client.PostAsJsonAsync("/api/auth/login", new AuthenticateRequest
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new AuthenticateRequest
         {
             Email = "jsmith@corp.example.com",
             Password = "AdPassw0rd!"
@@ -307,7 +307,7 @@ public class MultiDomainIntegrationTests
             "Bearer", TestAuth.GenerateToken(UserRoles.Admin, providerId: OpenLdapProviderId));
         client.DefaultRequestHeaders.Add(ProviderHeader, AdProviderId.ToString());
 
-        var response = await client.GetAsync("/api/users");
+        var response = await client.GetAsync("/api/v1/users");
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         adDomain.Verify(x => x.GetAllUsers(), Times.Never);
@@ -326,7 +326,7 @@ public class MultiDomainIntegrationTests
             new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
         client.DefaultRequestHeaders.Add(ProviderHeader, AdProviderId.ToString());
 
-        var response = await client.GetAsync("/api/users");
+        var response = await client.GetAsync("/api/v1/users");
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         adDomain.Verify(x => x.GetAllUsers(), Times.Never);
@@ -344,7 +344,7 @@ public class MultiDomainIntegrationTests
             "Bearer", TestAuth.GenerateToken(UserRoles.Admin, providerId: OpenLdapProviderId));
         client.DefaultRequestHeaders.Add(ProviderHeader, AdProviderId.ToString());
 
-        var response = await client.PostAsJsonAsync("/api/auth/login", new AuthenticateRequest
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new AuthenticateRequest
         {
             Email = "jsmith@corp.example.com",
             Password = "AdPassw0rd!"
@@ -367,7 +367,7 @@ public class MultiDomainIntegrationTests
         var signIn = factory.CreateClient();
         signIn.DefaultRequestHeaders.Add(ProviderHeader, AdProviderId.ToString());
 
-        var login = await signIn.PostAsJsonAsync("/api/auth/login", new AuthenticateRequest
+        var login = await signIn.PostAsJsonAsync("/api/v1/auth/login", new AuthenticateRequest
         {
             Email = "jsmith@corp.example.com",
             Password = "AdPassw0rd!"
@@ -379,7 +379,7 @@ public class MultiDomainIntegrationTests
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", issued.Token);
 
-        var response = await client.GetAsync("/api/users");
+        var response = await client.GetAsync("/api/v1/users");
 
         response.EnsureSuccessStatusCode();
         var users = await response.Content.ReadFromJsonAsync<UserListingResponse>();
@@ -397,7 +397,7 @@ public class MultiDomainIntegrationTests
         if (sendHeader)
             client.DefaultRequestHeaders.Add(ProviderHeader, domain.ToString());
 
-        var response = await client.GetAsync("/api/users");
+        var response = await client.GetAsync("/api/v1/users");
         response.EnsureSuccessStatusCode();
 
         var users = await response.Content.ReadFromJsonAsync<UserListingResponse>();
@@ -414,7 +414,7 @@ public class MultiDomainIntegrationTests
         // authenticates only its own accounts.
         client.DefaultRequestHeaders.Add(ProviderHeader, OpenLdapProviderId.ToString());
 
-        var response = await client.PostAsJsonAsync("/api/auth/login", new AuthenticateRequest
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new AuthenticateRequest
         {
             Email = "jsmith@corp.example.com",
             Password = "AdPassw0rd!"
@@ -439,7 +439,7 @@ public class MultiDomainIntegrationTests
             "Bearer", TestAuth.GenerateToken(UserRoles.Admin, providerId: unknownDomain));
         client.DefaultRequestHeaders.Add(ProviderHeader, unknownDomain.ToString());
 
-        var response = await client.GetAsync("/api/users");
+        var response = await client.GetAsync("/api/v1/users");
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
@@ -465,7 +465,7 @@ public class MultiDomainIntegrationTests
             "Bearer", TestAuth.GenerateToken(UserRoles.Admin, providerId: unknownDomain));
         client.DefaultRequestHeaders.Add(ProviderHeader, unknownDomain.ToString());
 
-        var response = await client.DeleteAsync($"/api/users/{Guid.NewGuid()}");
+        var response = await client.DeleteAsync($"/api/v1/users/{Guid.NewGuid()}");
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Contains(unknownDomain.ToString(), await response.Content.ReadAsStringAsync());

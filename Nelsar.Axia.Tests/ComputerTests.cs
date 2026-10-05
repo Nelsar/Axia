@@ -293,7 +293,7 @@ public class ComputerTests
             services.AddSingleton(DirectoryHolding(Ws01, Srv2012).Object);
         });
 
-        var response = await AuthorisedClient(factory).GetAsync("/api/computers?filter=SRV-FILE");
+        var response = await AuthorisedClient(factory).GetAsync("/api/v1/computers?filter=SRV-FILE");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var payload = await response.Content.ReadFromJsonAsync<PagedResponse<ComputerDto>>();
@@ -316,7 +316,7 @@ public class ComputerTests
             services.AddSingleton(ldap.Object);
         });
 
-        var response = await AuthorisedClient(factory).GetAsync("/api/computers");
+        var response = await AuthorisedClient(factory).GetAsync("/api/v1/computers");
 
         Assert.Equal(HttpStatusCode.NotImplemented, response.StatusCode);
         Assert.Contains("not implemented", await response.Content.ReadAsStringAsync(),

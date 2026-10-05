@@ -53,14 +53,14 @@ export const api = {
      * recorded in the issued token, and requests no longer name it.
      */
     login: (email: string, password: string, providerId = ""): Promise<AuthenticateResponse> =>
-      request<AuthenticateResponse>("/api/auth/login", {
+      request<AuthenticateResponse>("/api/v1/auth/login", {
         method: "POST",
         body: { email, password },
         auth: false,
         providerId,
       }),
     register: (email: string, name: string, password: string, providerId = ""): Promise<UserDto> =>
-      request<UserDto>("/api/auth/register", {
+      request<UserDto>("/api/v1/auth/register", {
         method: "POST",
         body: { email, name, password } satisfies UserCreateRequest,
         auth: false,
@@ -69,30 +69,30 @@ export const api = {
   },
 
   users: {
-    getAll: (): Promise<UserListingResponse> => request<UserListingResponse>("/api/users"),
-    getById: (id: Uuid): Promise<UserDto> => request<UserDto>(`/api/users/${id}`),
+    getAll: (): Promise<UserListingResponse> => request<UserListingResponse>("/api/v1/users"),
+    getById: (id: Uuid): Promise<UserDto> => request<UserDto>(`/api/v1/users/${id}`),
     /**
      * Every attribute of the entry, under the directory's own names. Deliberately separate from
      * getById: it is another trip to the directory, worth making only once a user is opened.
      */
     getAttributes: (id: Uuid): Promise<UserAttributesDto> =>
-      request<UserAttributesDto>(`/api/users/${id}/attributes`),
+      request<UserAttributesDto>(`/api/v1/users/${id}/attributes`),
     search: (query: PageQuery): Promise<PagedResponse<UserDto>> =>
-      request<PagedResponse<UserDto>>(`/api/users/search${pageQuery(query)}`),
+      request<PagedResponse<UserDto>>(`/api/v1/users/search${pageQuery(query)}`),
     create: (payload: UserCreateRequest): Promise<UserDto> =>
-      request<UserDto>("/api/users", { method: "POST", body: payload }),
+      request<UserDto>("/api/v1/users", { method: "POST", body: payload }),
     update: (id: Uuid, payload: UserUpdateRequest): Promise<UserDto> =>
-      request<UserDto>(`/api/users/${id}`, { method: "PUT", body: payload }),
-    remove: (id: Uuid): Promise<void> => requestNoContent(`/api/users/${id}`, { method: "DELETE" }),
+      request<UserDto>(`/api/v1/users/${id}`, { method: "PUT", body: payload }),
+    remove: (id: Uuid): Promise<void> => requestNoContent(`/api/v1/users/${id}`, { method: "DELETE" }),
     bulkSync: (items: BulkUserRequest[]): Promise<BulkOperationResponse> =>
-      request<BulkOperationResponse>("/api/users/bulk/sync", { method: "POST", body: items }),
+      request<BulkOperationResponse>("/api/v1/users/bulk/sync", { method: "POST", body: items }),
     bulkEnqueue: (items: BulkUserRequest[]): Promise<BulkEnqueueResponse> =>
-      request<BulkEnqueueResponse>("/api/users/bulk", { method: "POST", body: items }),
+      request<BulkEnqueueResponse>("/api/v1/users/bulk", { method: "POST", body: items }),
     /** The backend may answer with an empty body for a job that has not started — hence null. */
     bulkStatus: (jobId: string): Promise<BulkOperationResponse | null> =>
-      request<BulkOperationResponse | null>(`/api/users/bulk/status/${jobId}`),
+      request<BulkOperationResponse | null>(`/api/v1/users/bulk/status/${jobId}`),
     generate: (payload: PatternGeneratorRequest): Promise<PatternGeneratorResponse> =>
-      request<PatternGeneratorResponse>("/api/users/generate", { method: "POST", body: payload }),
+      request<PatternGeneratorResponse>("/api/v1/users/generate", { method: "POST", body: payload }),
   },
 
   /**
@@ -102,26 +102,26 @@ export const api = {
    */
   groups: {
     search: (query: PageQuery): Promise<PagedResponse<GroupDto>> =>
-      request<PagedResponse<GroupDto>>(`/api/groups${pageQuery(query)}`),
-    getById: (id: Uuid): Promise<GroupDto> => request<GroupDto>(`/api/groups/${id}`),
+      request<PagedResponse<GroupDto>>(`/api/v1/groups${pageQuery(query)}`),
+    getById: (id: Uuid): Promise<GroupDto> => request<GroupDto>(`/api/v1/groups/${id}`),
     create: (payload: GroupWriteRequest): Promise<GroupDto> =>
-      request<GroupDto>("/api/groups", { method: "POST", body: payload }),
+      request<GroupDto>("/api/v1/groups", { method: "POST", body: payload }),
     update: (id: Uuid, payload: GroupWriteRequest): Promise<GroupDto> =>
-      request<GroupDto>(`/api/groups/${id}`, { method: "PUT", body: payload }),
-    remove: (id: Uuid): Promise<void> => requestNoContent(`/api/groups/${id}`, { method: "DELETE" }),
+      request<GroupDto>(`/api/v1/groups/${id}`, { method: "PUT", body: payload }),
+    remove: (id: Uuid): Promise<void> => requestNoContent(`/api/v1/groups/${id}`, { method: "DELETE" }),
   },
 
   orgUnits: {
     search: (query: PageQuery): Promise<PagedResponse<OrganizationalUnitDto>> =>
-      request<PagedResponse<OrganizationalUnitDto>>(`/api/organizationalunits${pageQuery(query)}`),
+      request<PagedResponse<OrganizationalUnitDto>>(`/api/v1/organizational-units${pageQuery(query)}`),
     getById: (id: Uuid): Promise<OrganizationalUnitDto> =>
-      request<OrganizationalUnitDto>(`/api/organizationalunits/${id}`),
+      request<OrganizationalUnitDto>(`/api/v1/organizational-units/${id}`),
     create: (payload: OrgUnitWriteRequest): Promise<OrganizationalUnitDto> =>
-      request<OrganizationalUnitDto>("/api/organizationalunits", { method: "POST", body: payload }),
+      request<OrganizationalUnitDto>("/api/v1/organizational-units", { method: "POST", body: payload }),
     update: (id: Uuid, payload: OrgUnitWriteRequest): Promise<OrganizationalUnitDto> =>
-      request<OrganizationalUnitDto>(`/api/organizationalunits/${id}`, { method: "PUT", body: payload }),
+      request<OrganizationalUnitDto>(`/api/v1/organizational-units/${id}`, { method: "PUT", body: payload }),
     remove: (id: Uuid): Promise<void> =>
-      requestNoContent(`/api/organizationalunits/${id}`, { method: "DELETE" }),
+      requestNoContent(`/api/v1/organizational-units/${id}`, { method: "DELETE" }),
   },
 
   /**
@@ -131,13 +131,13 @@ export const api = {
    */
   computers: {
     search: (query: PageQuery): Promise<PagedResponse<ComputerDto>> =>
-      request<PagedResponse<ComputerDto>>(`/api/computers${pageQuery(query)}`),
-    getById: (id: Uuid): Promise<ComputerDto> => request<ComputerDto>(`/api/computers/${id}`),
+      request<PagedResponse<ComputerDto>>(`/api/v1/computers${pageQuery(query)}`),
+    getById: (id: Uuid): Promise<ComputerDto> => request<ComputerDto>(`/api/v1/computers/${id}`),
     create: (payload: ComputerCreateRequest): Promise<ComputerDto> =>
-      request<ComputerDto>("/api/computers", { method: "POST", body: payload }),
+      request<ComputerDto>("/api/v1/computers", { method: "POST", body: payload }),
     update: (id: Uuid, payload: ComputerUpdateRequest): Promise<ComputerDto> =>
-      request<ComputerDto>(`/api/computers/${id}`, { method: "PUT", body: payload }),
-    remove: (id: Uuid): Promise<void> => requestNoContent(`/api/computers/${id}`, { method: "DELETE" }),
+      request<ComputerDto>(`/api/v1/computers/${id}`, { method: "PUT", body: payload }),
+    remove: (id: Uuid): Promise<void> => requestNoContent(`/api/v1/computers/${id}`, { method: "DELETE" }),
   },
 
   providers: {

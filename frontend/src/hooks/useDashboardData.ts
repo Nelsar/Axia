@@ -12,7 +12,7 @@ import type {
 import { hasRole } from "../lib/auth";
 import type { PageRequest } from "./usePagedList";
 
-// Neither /api/groups nor /api/organizationalunits returns a total — the response carries a page
+// Neither /api/v1/groups nor /api/v1/organizational-units returns a total — the response carries a page
 // and a hasMore flag. So the counter here is the length of one deliberately large page, and
 // hasMore means the number shown is a lower bound rather than a total. The backend walks the
 // whole directory before paginating anyway, so a large pageSize adds it no work.

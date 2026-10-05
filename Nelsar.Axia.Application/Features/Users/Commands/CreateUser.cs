@@ -18,7 +18,7 @@ namespace Nelsar.Axia.Application.Features.Users.Commands;
 /// Deliberately carries no <c>IRequirePermission</c>, unlike every other use case a guarded
 /// endpoint dispatches, because two endpoints dispatch this one and they disagree about who may
 /// call it: <c>POST /api/v1/users</c> requires <see cref="Permissions.UsersCreate"/>, while
-/// <c>POST /api/auth/register</c> is open to anyone who can reach it. Attaching the permission
+/// <c>POST /api/v1/auth/register</c> is open to anyone who can reach it. Attaching the permission
 /// here would silently close self-registration; leaving it off keeps both endpoints behaving
 /// exactly as they do today.
 ///

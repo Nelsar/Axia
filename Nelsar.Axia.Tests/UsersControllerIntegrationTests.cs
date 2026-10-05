@@ -52,7 +52,7 @@ public class UsersControllerIntegrationTests
 
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
-        var response = await client.GetAsync("/api/users");
+        var response = await client.GetAsync("/api/v1/users");
 
         response.EnsureSuccessStatusCode();
         var users = await response.Content.ReadFromJsonAsync<UserListingResponse>();
@@ -76,7 +76,7 @@ public class UsersControllerIntegrationTests
         });
 
         var client = factory.CreateClient();
-        var response = await client.GetAsync("/api/users");
+        var response = await client.GetAsync("/api/v1/users");
 
         Assert.Equal(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -99,7 +99,7 @@ public class UsersControllerIntegrationTests
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.User));
 
-        var response = await client.PostAsJsonAsync("/api/users", new UserCreateRequest
+        var response = await client.PostAsJsonAsync("/api/v1/users", new UserCreateRequest
         {
             Email = "newuser@example.com",
             Name = "New User",
@@ -124,7 +124,7 @@ public class UsersControllerIntegrationTests
 
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
-        var response = await client.PostAsJsonAsync("/api/users/bulk", new[]
+        var response = await client.PostAsJsonAsync("/api/v1/users/bulk", new[]
         {
             new BulkUserRequest
             {
@@ -166,7 +166,7 @@ public class UsersControllerIntegrationTests
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
 
-        var response = await client.PostAsJsonAsync("/api/users/bulk/sync", new[]
+        var response = await client.PostAsJsonAsync("/api/v1/users/bulk/sync", new[]
         {
             new BulkUserRequest { Operation = "create", Email = "ok@example.com", Name = "Ok User", Password = "Pass123!" },
             new BulkUserRequest { Operation = "create", Email = "dup@example.com", Name = "Dup User", Password = "Pass123!" }
@@ -193,7 +193,7 @@ public class UsersControllerIntegrationTests
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
 
-        var response = await client.PostAsJsonAsync("/api/users/bulk/sync", Array.Empty<BulkUserRequest>());
+        var response = await client.PostAsJsonAsync("/api/v1/users/bulk/sync", Array.Empty<BulkUserRequest>());
 
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -217,7 +217,7 @@ public class UsersControllerIntegrationTests
 
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
-        var response = await client.PostAsJsonAsync("/api/users/generate", new PatternGeneratorRequest
+        var response = await client.PostAsJsonAsync("/api/v1/users/generate", new PatternGeneratorRequest
         {
             Pattern = "node-{01..02}",
             MaxItems = 10
@@ -262,7 +262,7 @@ public class UsersControllerIntegrationTests
 
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
-        var response = await client.GetAsync("/api/users/search?filter=alice&pageSize=10");
+        var response = await client.GetAsync("/api/v1/users/search?filter=alice&pageSize=10");
 
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<PagedResponse<UserDto>>();
@@ -298,7 +298,7 @@ public class UsersControllerIntegrationTests
             Password = "Password123!"
         };
 
-        var response = await client.PostAsJsonAsync("/api/users", request);
+        var response = await client.PostAsJsonAsync("/api/v1/users", request);
 
         Assert.Equal(System.Net.HttpStatusCode.Created, response.StatusCode);
         var created = await response.Content.ReadFromJsonAsync<UserDto>();
@@ -334,7 +334,7 @@ public class UsersControllerIntegrationTests
             Password = "wrong"
         };
 
-        var response = await client.PostAsJsonAsync("/api/auth/login", request);
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", request);
 
         Assert.Equal(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -366,13 +366,13 @@ public class UsersControllerIntegrationTests
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
 
         // First load users to populate cache
-        var getAllResponse = await client.GetAsync("/api/users");
+        var getAllResponse = await client.GetAsync("/api/v1/users");
         getAllResponse.EnsureSuccessStatusCode();
         var allUsers = await getAllResponse.Content.ReadFromJsonAsync<UserListingResponse>();
         var userId_actual = allUsers?.Items.FirstOrDefault()?.Id ?? Guid.NewGuid();
 
         // Then get by ID
-        var response = await client.GetAsync($"/api/users/{userId_actual}");
+        var response = await client.GetAsync($"/api/v1/users/{userId_actual}");
 
         response.EnsureSuccessStatusCode();
         var user = await response.Content.ReadFromJsonAsync<UserDto>();
@@ -398,7 +398,7 @@ public class UsersControllerIntegrationTests
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
         var nonExistentId = Guid.NewGuid();
 
-        var response = await client.GetAsync($"/api/users/{nonExistentId}");
+        var response = await client.GetAsync($"/api/v1/users/{nonExistentId}");
 
         Assert.Equal(System.Net.HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -431,7 +431,7 @@ public class UsersControllerIntegrationTests
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
 
         // First load users to populate cache
-        var getAllResponse = await client.GetAsync("/api/users");
+        var getAllResponse = await client.GetAsync("/api/v1/users");
         getAllResponse.EnsureSuccessStatusCode();
         var allUsers = await getAllResponse.Content.ReadFromJsonAsync<UserListingResponse>();
         var userId = allUsers?.Items.FirstOrDefault()?.Id ?? Guid.NewGuid();
@@ -444,7 +444,7 @@ public class UsersControllerIntegrationTests
             Password = "NewPassword123!"
         };
 
-        var response = await client.PutAsJsonAsync($"/api/users/{userId}", updateRequest);
+        var response = await client.PutAsJsonAsync($"/api/v1/users/{userId}", updateRequest);
 
         response.EnsureSuccessStatusCode();
         var updated = await response.Content.ReadFromJsonAsync<UserDto>();
@@ -480,13 +480,13 @@ public class UsersControllerIntegrationTests
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
 
         // First load users to populate cache
-        var getAllResponse = await client.GetAsync("/api/users");
+        var getAllResponse = await client.GetAsync("/api/v1/users");
         getAllResponse.EnsureSuccessStatusCode();
         var allUsers = await getAllResponse.Content.ReadFromJsonAsync<UserListingResponse>();
         var userId = allUsers?.Items.FirstOrDefault()?.Id ?? Guid.NewGuid();
 
         // Then delete
-        var response = await client.DeleteAsync($"/api/users/{userId}");
+        var response = await client.DeleteAsync($"/api/v1/users/{userId}");
 
         Assert.Equal(System.Net.HttpStatusCode.NoContent, response.StatusCode);
     }
@@ -509,7 +509,7 @@ public class UsersControllerIntegrationTests
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
         var nonExistentId = Guid.NewGuid();
 
-        var response = await client.DeleteAsync($"/api/users/{nonExistentId}");
+        var response = await client.DeleteAsync($"/api/v1/users/{nonExistentId}");
 
         Assert.Equal(System.Net.HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -531,7 +531,7 @@ public class UsersControllerIntegrationTests
             services.AddSingleton(ldap.Object);
         });
 
-        var response = await factory.CreateClient().PostAsJsonAsync("/api/auth/register", new UserCreateRequest
+        var response = await factory.CreateClient().PostAsJsonAsync("/api/v1/auth/register", new UserCreateRequest
         {
             Email = "intruder@example.com",
             Name = "Intruder",
@@ -571,7 +571,7 @@ public class UsersControllerIntegrationTests
             Password = "Password123!"
         };
 
-        var response = await client.PostAsJsonAsync("/api/auth/register", request);
+        var response = await client.PostAsJsonAsync("/api/v1/auth/register", request);
 
         Assert.Equal(System.Net.HttpStatusCode.Created, response.StatusCode);
         var created = await response.Content.ReadFromJsonAsync<UserDto>();
@@ -617,7 +617,7 @@ public class UsersControllerIntegrationTests
             Password = "correct_password"
         };
 
-        var response = await client.PostAsJsonAsync("/api/auth/login", request);
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", request);
 
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<AuthenticateResponse>();
@@ -643,7 +643,7 @@ public class UsersControllerIntegrationTests
         client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
 
-        var response = await client.PostAsJsonAsync("/api/users", new UserCreateRequest
+        var response = await client.PostAsJsonAsync("/api/v1/users", new UserCreateRequest
         {
             Email = "existing@example.com",
             Name = "Existing",
@@ -686,7 +686,7 @@ public class UsersControllerIntegrationTests
         if (acceptLanguage != null)
             client.DefaultRequestHeaders.Add("Accept-Language", acceptLanguage);
 
-        var response = await client.PostAsJsonAsync("/api/users", new UserCreateRequest
+        var response = await client.PostAsJsonAsync("/api/v1/users", new UserCreateRequest
         {
             Email = "existing@example.com",
             Name = "Existing",
@@ -711,7 +711,7 @@ public class UsersControllerIntegrationTests
         client.DefaultRequestHeaders.Add("Accept-Language", acceptLanguage);
 
         // Returned straight from the action, not through the exception handler — the other path.
-        var response = await client.PostAsJsonAsync("/api/users/bulk", Array.Empty<BulkUserRequest>());
+        var response = await client.PostAsJsonAsync("/api/v1/users/bulk", Array.Empty<BulkUserRequest>());
 
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Contains(expected, await response.Content.ReadAsStringAsync());

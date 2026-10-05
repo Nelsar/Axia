@@ -21,6 +21,7 @@ each other.
 | OpenAPI generated from the code, served at `/swagger` | **done** |
 | `X-LDAP-Provider-Id` on the CRUD and search endpoints, documented through an OpenAPI filter | **done** |
 | Connection profiles as an API — `/api/v1/providers` | **done** |
+| Every endpoint under one versioned prefix, `/api/v1/…` | **done** |
 | `ILdapProviderFactory` resolving a provider per request, from the database with a fall back to configuration | **done** |
 | Failover across a pool of hosts, with the unreachable ones cached briefly rather than re-probed per request | **done** |
 | Attribute differences abstracted — `sAMAccountName` (Active Directory) against `uid` (OpenLDAP) — through `LdapConfiguration`/`LdapAttributeMapping` | **done** |
@@ -34,7 +35,7 @@ holding them all in memory.
 | | |
 | --- | --- |
 | RFC 2696 paging (`SimplePagedResultsControl`) in `StandardLdapProvider` | **done** |
-| `GET /api/users/search` with `filter`, `pageSize`, `pageToken` | **done** |
+| `GET /api/v1/users/search` with `filter`, `pageSize`, `pageToken` | **done** |
 | Friendly search terms converted to LDAP filters, with every value escaped at the boundary | **done** |
 | Page tokens as opaque strings | **partial** — `OffsetPageToken` is Base64 of an offset, not encrypted, and the directory's own LDAP cookie is not what travels to the browser |
 
@@ -44,8 +45,8 @@ holding them all in memory.
 
 | | |
 | --- | --- |
-| `POST /api/users/bulk/sync` answering `207 Multi-Status` with a per-item report | **done** |
-| `POST /api/users/bulk` as a background job with status polling | **done** |
+| `POST /api/v1/users/bulk/sync` answering `207 Multi-Status` with a per-item report | **done** |
+| `POST /api/v1/users/bulk` as a background job with status polling | **done** |
 | Numeric and alphabetic ranges — `node-{01..99}` | **done** |
 | A regular-expression parser for pasted raw text, with named groups | **done** |
 | Transliteration (Cyrillic and Kazakh to Latin) and case normalisation for logins | **done** |
@@ -113,5 +114,3 @@ Decisions that need making rather than coding, and which block the items above t
   `Swashbuckle.AspNetCore` 6.6.2 → 10.x (OpenApi.NET v2, new namespaces and schema API) and
   `Novell.Directory.Ldap.NETStandard` 3.6.0 → 4.x (a reworked connection and control API). Each is
   its own piece of work, not a version bump.
-- **Route prefixes.** Some controllers sit under `/api/v1/…` and others under `/api/…`. Unifying
-  them is a breaking change and should happen before there is anything to break.

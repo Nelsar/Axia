@@ -38,7 +38,7 @@ public static class DbInitializer
     {
         var defaults = new[]
         {
-            // Sign-in attempts per client address, on /api/auth/login and /api/auth/register.
+            // Sign-in attempts per client address, on /api/v1/auth/login and /api/v1/auth/register.
             ("auth-login", 5, 60),
 
             // The anonymous directory picker on /api/v1/providers/selectable. Looser than

@@ -1,16 +1,50 @@
-# Nelsar.Axia
+# Nelsar.Axia — open-source web console and REST API for Active Directory and LDAP
 
-A REST API and web console for administering Active Directory and LDAP directories — users,
-groups, organizational units and computer accounts — across several directories from one instance.
+[![CI](https://github.com/Nelsar/Nelsar.Axia/actions/workflows/ci.yml/badge.svg)](https://github.com/Nelsar/Nelsar.Axia/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/Nelsar/Nelsar.Axia/actions/workflows/codeql.yml/badge.svg)](https://github.com/Nelsar/Nelsar.Axia/actions/workflows/codeql.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![.NET 10](https://img.shields.io/badge/.NET-10-512BD4.svg)](https://dotnet.microsoft.com/)
+[![React + TypeScript](https://img.shields.io/badge/console-React%20%2B%20TypeScript-3178C6.svg)](frontend/)
 
-Built on .NET 10 with a React/TypeScript console. Licensed under
+**Nelsar.Axia** is a self-hosted web interface and REST API for managing **Active Directory**,
+**OpenLDAP** and other LDAP directories from the browser: users, groups, organizational units (OUs)
+and computer accounts, across several directories from one instance — with role-based access,
+an audit log and bulk user provisioning.
+
+Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
 [Apache 2.0](LICENSE).
 
 > **Status: MVP.** The API and console do what is described below, and 545 tests cover it. What is
 > not yet here is listed under [Not in scope yet](#not-in-scope-yet) — read it before deciding
 > whether this fits.
 
-## What it does
+## Who it is for
+
+- **IT administrators** who want to hand routine directory work — creating accounts, resetting
+  attributes, adding people to groups — to helpdesk or HR staff through a browser, without giving
+  them RSAT, a domain-joined Windows machine or a direct LDAP client.
+- **Teams running OpenLDAP or a mix of AD and LDAP** who want one console and one API for all of
+  their directories.
+- **Developers automating identity lifecycle** — onboarding, offboarding, bulk account creation —
+  who would rather call a documented REST API (OpenAPI/Swagger) than script LDAP by hand.
+
+## How it compares
+
+| | Nelsar.Axia | ADUC / RSAT | phpLDAPadmin | Apache Directory Studio |
+| --- | --- | --- | --- | --- |
+| Runs in a browser | yes | no — Windows desktop | yes | no — desktop |
+| REST API for automation | yes | no (PowerShell) | no | no |
+| Active Directory and OpenLDAP | both | AD only | both | both |
+| Several directories in one instance | yes | one domain at a time | yes | yes |
+| Permissions mapped from directory groups | yes | AD delegation | no — the bind account's rights | no |
+| Audit log of changes | yes | Windows event log | no | no |
+| Bulk creation with name patterns | yes | no — csvde or PowerShell | LDIF import | LDIF import |
+| LDAPS / StartTLS to the directory | **not yet** | yes | yes | yes |
+
+The last row matters: read [Not in scope yet](#not-in-scope-yet) before putting it in front of a
+directory that is not on a trusted network.
+
+## Features
 
 - **Users** — search, read, create, update, delete; raw directory attributes on demand; bulk
   operations (synchronous or queued); a pattern generator for bulk account names with
@@ -114,7 +148,7 @@ standard double-underscore form (`Auth__AllowSelfRegistration=true`).
 
 | Setting | Default | What it is |
 | --- | --- | --- |
-| `Auth:AllowSelfRegistration` | `false` | Whether `POST /api/auth/register` creates an account for an unauthenticated caller. See [Security defaults](#security-defaults). |
+| `Auth:AllowSelfRegistration` | `false` | Whether `POST /api/v1/auth/register` creates an account for an unauthenticated caller. See [Security defaults](#security-defaults). |
 | `Cors:AllowedOrigins` | — | Origins the browser console may call the API from, as a list. Empty means loopback only. |
 | `Https:RedirectToHttps` | `false` | Whether plain HTTP is redirected. Leave off when a reverse proxy terminates TLS. |
 | `ReverseProxy:KnownProxies` / `KnownNetworks` | — | Proxy addresses whose `X-Forwarded-For` and `X-Forwarded-Proto` are believed. Empty means none. |
@@ -129,7 +163,7 @@ standard double-underscore form (`Auth__AllowSelfRegistration=true`).
 
 Read this before exposing the API anywhere.
 
-- **Self-registration is off.** `POST /api/auth/register` writes to the directory with no
+- **Self-registration is off.** `POST /api/v1/auth/register` writes to the directory with no
   authentication in front of it. Left open, anyone who can reach the port can create accounts in
   your directory; the rate limiter makes that slow rather than impossible. Administrators create
   accounts through `POST /api/v1/users`, behind the `users.create` permission, which is the same
@@ -204,8 +238,6 @@ Said plainly, so nobody discovers it after deploying:
 - **No Docker quick start.** The compose files in the repository are not currently in a working
   state, and the OpenLDAP bootstrap fixtures are missing. Point the API at a directory you already
   have.
-- **Route prefixes are inconsistent** — some controllers are under `/api/v1/…`, others under
-  `/api/…`. This will be unified, and it will be a breaking change when it is.
 - **Password policy, account lockout and group membership editing from the user screen** are not
   implemented.
 - The `ActiveDirectory` provider is Windows-only and manages fewer object types than

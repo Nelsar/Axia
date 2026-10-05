@@ -36,7 +36,7 @@ public class AuthRateLimitingIntegrationTests
         var statuses = new List<HttpStatusCode>();
         for (var i = 0; i < 6; i++)
         {
-            var response = await client.PostAsJsonAsync("/api/auth/login", request);
+            var response = await client.PostAsJsonAsync("/api/v1/auth/login", request);
             statuses.Add(response.StatusCode);
         }
 
@@ -62,7 +62,7 @@ public class AuthRateLimitingIntegrationTests
 
         for (var i = 0; i < 3; i++)
         {
-            var response = await client.PostAsJsonAsync("/api/auth/login", request);
+            var response = await client.PostAsJsonAsync("/api/v1/auth/login", request);
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
     }
