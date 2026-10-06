@@ -193,7 +193,7 @@ container through the environment or a mounted file.
 | `Encryption:Key` | — | AES key for provider bind passwords at rest. Required: base64 of 16, 24 or 32 bytes, not the example placeholder. |
 | `Observability:Console` / `File` | on | Structured logs: compact JSON to stdout and a rolling file. |
 | `Observability:Logstash` / `Loki` | off | Shippers. Set `Enabled` and a `Uri` to turn one on. |
-| `Serilog:MinimumLevel` | `Information` | Levels and per-namespace overrides, in the standard Serilog section. |
+| `Serilog:MinimumLevel` | `Information` | Levels and per-namespace overrides, in the standard Serilog section. ASP.NET Core's own request events, EF Core's SQL statements and `HttpClient` are held at `Warning` unless an override here says otherwise. |
 
 ## Security defaults
 

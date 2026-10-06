@@ -291,7 +291,73 @@ public class ObservabilityTests
         Assert.Equal("kept", Assert.Single(sink.Events).MessageTemplate.Text);
     }
 
+    [Theory]
+    [InlineData("Microsoft.EntityFrameworkCore.Database.Command")]
+    [InlineData("Microsoft.AspNetCore.Hosting.Diagnostics")]
+    [InlineData("Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker")]
+    [InlineData("System.Net.Http.HttpClient.Default.LogicalHandler")]
+    public void TheFrameworksOwnChatter_IsHeldBack_WithNoConfigurationAtAll(string source)
+    {
+        // The container case: no appsettings.json, so no Serilog section. These sources used to
+        // write at Information there, and every SQL statement reached Logstash and Loki.
+        var events = WriteFromSources(new Dictionary<string, string?>(), (source, LogEventLevel.Information), (source, LogEventLevel.Warning));
+
+        var kept = Assert.Single(events);
+        Assert.Equal(LogEventLevel.Warning, kept.Level);
+    }
+
+    [Theory]
+    [InlineData("Microsoft.Hosting.Lifetime")]   // "Now listening on" — how an operator knows it started
+    [InlineData("Microsoft.EntityFrameworkCore.Migrations")]
+    [InlineData("Nelsar.Axia.Application.Common.Behaviours.LoggingBehaviour")]
+    public void EverythingElse_StillLogsAtInformation(string source)
+    {
+        var events = WriteFromSources(new Dictionary<string, string?>(), (source, LogEventLevel.Information));
+
+        Assert.Single(events);
+    }
+
+    [Fact]
+    public void ADefaultOverride_GivesWayToConfiguration()
+    {
+        // Someone chasing a request that never reaches a controller needs the framework's events
+        // back, and the documented place to ask for them has to win over the built-in default.
+        var events = WriteFromSources(
+            new Dictionary<string, string?> { ["Serilog:MinimumLevel:Override:Microsoft.AspNetCore"] = "Information" },
+            ("Microsoft.AspNetCore.Hosting.Diagnostics", LogEventLevel.Information));
+
+        Assert.Single(events);
+    }
+
     // ---- Helpers -----------------------------------------------------------------------------
+
+    /// <summary>
+    /// Writes one event per (source, level) pair through a logger built the way the host builds
+    /// one from <paramref name="settings"/>, and returns the events that got through.
+    /// </summary>
+    private static IReadOnlyList<LogEvent> WriteFromSources(
+        Dictionary<string, string?> settings,
+        params (string Source, LogEventLevel Level)[] writes)
+    {
+        settings["Observability:Console:Enabled"] = "false";
+        settings["Observability:File:Enabled"] = "false";
+
+        var configuration = Configuration(settings);
+        var options = configuration.GetSection(ObservabilityOptions.SectionName).Get<ObservabilityOptions>()!;
+        var sink = new CapturingSink();
+
+        using (var logger = SerilogRegistration
+                   .Configure(new LoggerConfiguration(), configuration, Environment(), options)
+                   .WriteTo.Sink(sink)
+                   .CreateLogger())
+        {
+            foreach (var (source, level) in writes)
+                logger.ForContext(Constants.SourceContextPropertyName, source).Write(level, "from {Source}", source);
+        }
+
+        return sink.Events;
+    }
+
 
     /// <summary>
     /// Runs <paramref name="write"/> through a logger built exactly the way the host builds one —

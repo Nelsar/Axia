@@ -22,6 +22,28 @@ namespace Nelsar.Axia.Api.Observability;
 public static class SerilogRegistration
 {
     /// <summary>
+    /// Namespaces held at Warning unless <c>Serilog:MinimumLevel:Override</c> says otherwise.
+    ///
+    /// These used to live only in appsettings.json.example, so an instance configured through the
+    /// environment alone — which is every container — ran without them. On such an instance a
+    /// start and four requests wrote 178 events, 125 of them SQL statements, and every one of them
+    /// went to Logstash and Loki along with the rest.
+    /// </summary>
+    internal static readonly IReadOnlyDictionary<string, LogEventLevel> DefaultOverrides =
+        new Dictionary<string, LogEventLevel>
+        {
+            // UseSerilogRequestLogging writes the one event a request deserves. These are the
+            // framework's own half-dozen on top of it, query string included — and a query string
+            // here can be a directory search for somebody's name.
+            ["Microsoft.AspNetCore"] = LogEventLevel.Warning,
+            // The text of every statement EF Core runs, at Information. Its parameters stay out
+            // unless EnableSensitiveDataLogging is on, but the statements themselves are noise in
+            // a log that is paid for by the gigabyte.
+            ["Microsoft.EntityFrameworkCore.Database.Command"] = LogEventLevel.Warning,
+            ["System.Net.Http.HttpClient"] = LogEventLevel.Warning
+        };
+
+    /// <summary>
     /// Binds <see cref="ObservabilityOptions"/> and installs Serilog as the logging provider.
     /// </summary>
     public static WebApplicationBuilder AddAxiaObservability(this WebApplicationBuilder builder)
@@ -129,6 +151,11 @@ public static class SerilogRegistration
         IHostEnvironment environment,
         ObservabilityOptions options)
     {
+        // Ahead of ReadFrom.Configuration, so that an override of the same namespace in
+        // configuration replaces the default rather than being replaced by it.
+        foreach (var (source, level) in DefaultOverrides)
+            logger.MinimumLevel.Override(source, level);
+
         logger
             // Levels, per-namespace overrides and any filters come from the standard `Serilog`
             // section, which is where an operator expects to find them and where every Serilog

@@ -3,6 +3,10 @@
     // there. Anything Serilog documents for this section (Filter, Destructure, a WriteTo array)
     // is still read, so the standard configuration route stays open for cases the switches
     // below do not cover.
+    //
+    // The three overrides below are also the built-in defaults, so an instance configured only
+    // through the environment gets them too. They are spelled out so that turning one back up
+    // to Information is an edit here rather than something to look up.
     "Serilog": {
         "MinimumLevel": {
             "Default": "Information",
