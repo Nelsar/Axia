@@ -146,12 +146,18 @@ try
     var corsOptions = builder.Configuration.GetSection(CorsOptions.SectionName).Get<CorsOptions>()
         ?? new CorsOptions();
 
+    // Read before the host is built, for the same reason as the proxy list: an entry that can
+    // never match stops startup here instead of surfacing as a console that cannot reach the API.
+    var allowedOrigins = corsOptions.ParseAllowedOrigins();
+
     builder.Services.AddCors(options =>
     {
         options.AddPolicy(FrontendCorsPolicy, policy =>
         {
-            if (corsOptions.AllowedOrigins.Length > 0)
-                policy.WithOrigins(corsOptions.AllowedOrigins);
+            if (corsOptions.AllowAnyOrigin)
+                policy.AllowAnyOrigin();
+            else if (allowedOrigins.Count > 0)
+                policy.WithOrigins([.. allowedOrigins]);
             else
                 // Nothing configured: the console talking to a locally-run API, on whichever port
                 // Vite picked. A predicate rather than a fixed list because the port moves and an
@@ -163,7 +169,11 @@ try
                 // Response headers are hidden from browser script unless named here. Without it
                 // the frontend cannot read the correlation id off a failed call, and the id stops
                 // being something a user can quote when they report the failure.
-                .WithExposedHeaders("X-Correlation-ID");
+                .WithExposedHeaders("X-Correlation-ID")
+                // Every console call carries Authorization, so every one is preflighted. Without
+                // a max age the browser keeps a preflight for about five seconds and nearly every
+                // request went out twice.
+                .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
         });
     });
 
@@ -224,11 +234,12 @@ try
     // limiter's OnRejected below, not just the controllers.
     //
     // It sits after UseExceptionHandler so that a failure in localisation itself is still turned
-    // into a clean 500. Bodies written by GlobalExceptionHandler are localised all the same, even
-    // though it runs while an exception unwinds back past this middleware: the request culture is
-    // scoped to the request, not to the frame that set it. That is verified rather than assumed —
-    // see UsersControllerIntegrationTests.ErrorBody_IsLocalisedFromAcceptLanguage, which fails if
-    // this stops holding.
+    // into a clean 500. The culture this sets does not flow back out to GlobalExceptionHandler,
+    // which runs after the exception has unwound past here. Messages carried by an exception were
+    // resolved where it was thrown, inside the request, so they are localised regardless; the one
+    // message the handler resolves itself is looked up in the request's culture explicitly. Both
+    // are verified rather than assumed — see ErrorBody_IsLocalisedFromAcceptLanguage and
+    // UnexpectedErrorBody_IsLocalisedFromAcceptLanguage in UsersControllerIntegrationTests.
     app.UseRequestLocalization();
 
     if (app.Environment.IsDevelopment())

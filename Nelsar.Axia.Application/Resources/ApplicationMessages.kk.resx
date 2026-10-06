@@ -67,6 +67,9 @@
   <data name="DirectoryUnreachable" xml:space="preserve">
     <value>Каталогқа қосылу мүмкін болмады.</value>
   </data>
+  <data name="DirectoryServerNotConfigured" xml:space="preserve">
+    <value>Бұл каталог үшін сервер бапталмаған. Басқа каталогты таңдаңыз немесе әкімшіден серверді көрсетуді сұраңыз.</value>
+  </data>
   <data name="DirectoryProviderUnknown" xml:space="preserve">
     <value>«{0}» каталог провайдері бапталмаған немесе белсенді емес.</value>
   </data>

@@ -49,6 +49,8 @@ public static class ApplicationMessages
 
     public static string DirectoryUnreachable() => Get(nameof(DirectoryUnreachable));
 
+    public static string DirectoryServerNotConfigured() => Get(nameof(DirectoryServerNotConfigured));
+
     /// <summary>
     /// The caller named a directory that does not exist or has been switched off. It echoes the
     /// id back because the caller supplied it — that tells them which of their headers is wrong,

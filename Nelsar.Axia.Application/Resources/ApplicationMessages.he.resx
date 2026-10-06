@@ -67,6 +67,9 @@
   <data name="DirectoryUnreachable" xml:space="preserve">
     <value>לא ניתן היה להגיע לספרייה.</value>
   </data>
+  <data name="DirectoryServerNotConfigured" xml:space="preserve">
+    <value>לא הוגדר שרת עבור ספרייה זו. בחרו ספרייה אחרת או בקשו ממנהל להגדיר את השרת שלה.</value>
+  </data>
   <data name="DirectoryProviderUnknown" xml:space="preserve">
     <value>ספק הספרייה «{0}» אינו מוגדר או אינו פעיל.</value>
   </data>

@@ -67,6 +67,9 @@
   <data name="DirectoryUnreachable" xml:space="preserve">
     <value>Не удалось подключиться к каталогу.</value>
   </data>
+  <data name="DirectoryServerNotConfigured" xml:space="preserve">
+    <value>Для этого каталога не настроен сервер. Выберите другой каталог или попросите администратора указать сервер.</value>
+  </data>
   <data name="DirectoryProviderUnknown" xml:space="preserve">
     <value>Каталог «{0}» не настроен или отключён.</value>
   </data>

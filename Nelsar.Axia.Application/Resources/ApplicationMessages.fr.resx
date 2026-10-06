@@ -67,6 +67,9 @@
   <data name="DirectoryUnreachable" xml:space="preserve">
     <value>L’annuaire n’a pas pu être joint.</value>
   </data>
+  <data name="DirectoryServerNotConfigured" xml:space="preserve">
+    <value>Aucun serveur n’est configuré pour cet annuaire. Choisissez un autre annuaire ou demandez à un administrateur de définir son serveur.</value>
+  </data>
   <data name="DirectoryProviderUnknown" xml:space="preserve">
     <value>Le fournisseur d’annuaire « {0} » n’est pas configuré ou n’est pas actif.</value>
   </data>

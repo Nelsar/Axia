@@ -67,6 +67,9 @@
   <data name="DirectoryUnreachable" xml:space="preserve">
     <value>无法连接到目录。</value>
   </data>
+  <data name="DirectoryServerNotConfigured" xml:space="preserve">
+    <value>此目录未配置服务器。请选择其他目录，或请管理员设置其服务器。</value>
+  </data>
   <data name="DirectoryProviderUnknown" xml:space="preserve">
     <value>目录提供程序“{0}”未配置或未启用。</value>
   </data>

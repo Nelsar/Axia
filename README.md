@@ -185,7 +185,8 @@ container through the environment or a mounted file.
 | Setting | Default | What it is |
 | --- | --- | --- |
 | `Auth:AllowSelfRegistration` | `false` | Whether `POST /api/v1/auth/register` creates an account for an unauthenticated caller. See [Security defaults](#security-defaults). |
-| `Cors:AllowedOrigins` | — | Origins the browser console may call the API from, as a list. Empty means loopback only. |
+| `Cors:AllowedOrigins` | — | Origins the browser console may call the API from, as a list of bare origins (`https://host[:port]`, no trailing slash). Empty means loopback only. |
+| `Cors:AllowAnyOrigin` | `false` | Admit every website. A switch of its own rather than `*` in the list — see [Security defaults](#security-defaults). |
 | `Https:RedirectToHttps` | `false` | Whether plain HTTP is redirected. Leave off when a reverse proxy terminates TLS. |
 | `ReverseProxy:KnownProxies` / `KnownNetworks` | — | Proxy addresses whose `X-Forwarded-For` and `X-Forwarded-Proto` are believed. Empty means none. |
 | `Ldap:*` | — | The default directory: host, port, base DN, bind account, search filter. |
@@ -214,9 +215,17 @@ Read this before exposing the API anywhere.
   ```
 
   Naming any origin replaces the loopback default rather than adding to it, so a deployment
-  that wants both lists both. Note what the policy is for: it decides which *websites* may read
-  responses in a browser. It is not a network control, and nothing about it restrains a
-  non-browser client — that is the authentication's job.
+  that wants both lists both. An entry that can never match a browser's origin — a trailing
+  slash, a path, a `*.example.com` wildcard, an empty value — stops the API at startup with the
+  value it should have been, rather than leaving a console that cannot reach it.
+
+  `*` is refused too. Admitting every website is `"AllowAnyOrigin": true`, and worth thinking
+  about first: on an API reachable only inside a network, it lets any page an employee opens use
+  their browser to try passwords against `/api/v1/auth/login` and read the answers.
+
+  Note what the policy is for: it decides which *websites* may read responses in a browser. It
+  is not a network control, and nothing about it restrains a non-browser client — that is the
+  authentication's job.
 - **HTTPS redirection is off, HSTS is on outside Development.** The shipped default suits the
   common deployment, where a reverse proxy terminates TLS and talks plain HTTP to the API; with
   redirection on, that proxy's request would be bounced back to itself. Set

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Nelsar.Axia.Application.Common;
 using Nelsar.Axia.Application.Configuration;
 using Nelsar.Axia.Application.Resources;
+using Nelsar.Axia.Contracts.Exceptions;
 using Nelsar.Axia.Domain.Exceptions;
 using Nelsar.Axia.Domain.ValueObjects;
 
@@ -19,9 +20,27 @@ public class LdapConnectionFactory
 
     public LdapConnection CreateAdminConnection()
     {
+        var conn = Connect();
+        conn.Bind(_settings.AdminUsername, _settings.AdminPassword);
+        return conn;
+    }
+
+    /// <summary>
+    /// Opens a connection to the configured server, or says plainly that there is none.
+    ///
+    /// An empty server used to reach the socket layer as-is and come back as an ArgumentException
+    /// from DnsEndPoint — a 500, "an unexpected error occurred", on every sign-in to a deployment
+    /// that keeps its directories in the database and leaves Ldap:Server unset. It is a directory
+    /// that cannot be used, and is now reported as one.
+    /// </summary>
+    /// <exception cref="DirectoryUnavailableException">No server is configured.</exception>
+    private LdapConnection Connect()
+    {
+        if (string.IsNullOrWhiteSpace(_settings.Server))
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryServerNotConfigured());
+
         var conn = new LdapConnection();
         conn.Connect(_settings.Server, _settings.Port);
-        conn.Bind(_settings.AdminUsername, _settings.AdminPassword);
         return conn;
     }
 
@@ -60,8 +79,7 @@ public class LdapConnectionFactory
 
     public LdapConnection CreateUserConnection(string username, string password)
     {
-        var conn = new LdapConnection();
-        conn.Connect(_settings.Server, _settings.Port);
+        var conn = Connect();
         var userDn = FindUserDn(conn, username);
         conn.Bind(userDn, password);
         return conn;

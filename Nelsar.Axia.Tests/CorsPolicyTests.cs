@@ -101,4 +101,34 @@ public class CorsPolicyTests
 
         Assert.Contains("X-Correlation-ID", response.Headers.GetValues("Access-Control-Expose-Headers").First());
     }
+
+    [Fact]
+    public async Task TheExplicitSwitch_AdmitsAnyOrigin()
+    {
+        using var factory = new ApiTestFactory(
+            _ => { },
+            new Dictionary<string, string?> { ["Cors:AllowAnyOrigin"] = "true" });
+
+        var response = await CallWithOrigin(factory, "https://anywhere.example.com");
+
+        Assert.Equal("*", response.Headers.GetValues(AllowOrigin).Single());
+    }
+
+    [Fact]
+    public async Task APreflight_IsCachedByTheBrowser()
+    {
+        // Every console call carries Authorization and so is preflighted. Without a max age the
+        // browser keeps the answer for about five seconds, and nearly every request went twice.
+        using var factory = new ApiTestFactory(_ => { });
+        var client = factory.CreateClient();
+
+        var preflight = new HttpRequestMessage(HttpMethod.Options, "/api/v1/users");
+        preflight.Headers.Add("Origin", "http://localhost:5500");
+        preflight.Headers.Add("Access-Control-Request-Method", "GET");
+        preflight.Headers.Add("Access-Control-Request-Headers", "authorization");
+
+        var response = await client.SendAsync(preflight);
+
+        Assert.Equal("600", response.Headers.GetValues("Access-Control-Max-Age").Single());
+    }
 }
