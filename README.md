@@ -178,6 +178,10 @@ An account in none of the groups signs in as `User`. Mappings are editable in th
 Everything below is settable through `appsettings.json` or environment variables, using the
 standard double-underscore form (`Auth__AllowSelfRegistration=true`).
 
+A Docker image never contains your local `appsettings.json`: `.dockerignore` keeps it out, along
+with local databases and logs, so the secrets in it cannot travel with the image. Configure a
+container through the environment or a mounted file.
+
 | Setting | Default | What it is |
 | --- | --- | --- |
 | `Auth:AllowSelfRegistration` | `false` | Whether `POST /api/v1/auth/register` creates an account for an unauthenticated caller. See [Security defaults](#security-defaults). |

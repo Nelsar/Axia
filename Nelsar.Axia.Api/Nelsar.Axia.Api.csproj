@@ -25,6 +25,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The file sink writes to logs/ under the working directory, which is this folder when the
+         API is started from an IDE, and the Web SDK publishes every .json it finds here. Without
+         this the next publish ships the log files — masked logins, DNs, request paths — next to
+         the binaries. -->
+    <Content Remove="logs/**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../Nelsar.Axia.Infrastructure/Nelsar.Axia.Infrastructure.csproj" />
     <ProjectReference Include="../Nelsar.Axia.Contracts/Nelsar.Axia.Contracts.csproj" />
   </ItemGroup>
