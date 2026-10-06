@@ -52,10 +52,13 @@ namespace Nelsar.Axia.Infrastructure.Persistence.Migrations
                     b.Property<bool>("Success")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("Timestamp")
+                    b.Property<string>("Timestamp")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Timestamp");
 
                     b.ToTable("AuditEvents", (string)null);
                 });
