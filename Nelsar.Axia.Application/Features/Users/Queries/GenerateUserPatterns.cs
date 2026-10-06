@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Nelsar.Axia.Contracts.Diagnostics;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Contracts.Exceptions;
 using Nelsar.Axia.Application.Interfaces;
@@ -122,7 +123,7 @@ internal sealed class GenerateUserPatternsQueryHandler
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Conflict check failed for generated item [{Item}]", item);
+                    _logger.LogWarning(ex, "Conflict check failed for generated login {Login}.", LogMask.Login(item));
                 }
                 details.Add(new PatternGeneratorItem { Value = item, Exists = exists });
             }

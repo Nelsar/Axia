@@ -5,9 +5,19 @@
 **/.idea/
 **/.venv/
 **/.venv-1/
-**/*.db
 .git/
 .gitignore
 .env
 *.md
 OpenLdap/
+
+# Local secrets and local state. The Dockerfile copies whole project folders, and the Web SDK
+# publishes every .json it finds in one, so anything that is not excluded here ends up in the
+# image: the bind password and keys filled into a local appsettings.json as the README says to,
+# the SQLite database with its encrypted bind passwords, and the file sink's logs. Configure a
+# container through the environment or a mounted file instead.
+**/appsettings*.json
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/logs/

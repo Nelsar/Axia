@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Nelsar.Axia.Contracts.Diagnostics;
 using Nelsar.Axia.Application.Common;
 using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Common.Authorization;
@@ -159,7 +160,7 @@ internal sealed class ProcessBulkUsersCommandHandler
             {
                 item.Status = BulkOperationStatus.Failed;
                 item.Message = ex.Message;
-                _logger.LogWarning(ex, "Bulk user operation failed for [{Email}]", request.Email);
+                _logger.LogWarning(ex, "Bulk user operation failed for {Login}.", LogMask.Login(request.Email));
             }
 
             await AuditRowAsync(operation, request, item, dn);

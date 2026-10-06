@@ -29,16 +29,20 @@ namespace Nelsar.Axia.Infrastructure.Persistence.Repositories
 
         public async Task<(IReadOnlyList<AuditEvent> Items, bool HasMore)> GetRecentAsync(int offset, int pageSize)
         {
-            // SQLite's EF Core provider can't translate ORDER BY over a DateTimeOffset
-            // column server-side ("Convert the values to a supported type, or use LINQ
-            // to Objects" — this is Microsoft's own guidance for this exact limitation),
-            // so order/page client-side after loading. Audit volume here is modest
-            // (login + modification events only); revisit if this table grows large.
-            var all = await _db.AuditEvents.AsNoTracking().ToListAsync();
-            var ordered = all.OrderByDescending(e => e.Timestamp).ToList();
-            var items = ordered.Skip(offset).Take(pageSize).ToList();
-            var hasMore = ordered.Count > offset + pageSize;
-            return (items, hasMore);
+            // Ordered and paged by the database. This used to load every row and sort in memory,
+            // because EF Core cannot ORDER BY a DateTimeOffset on SQLite; the timestamp is now
+            // stored as UTC text that sorts correctly (see AuditEventConfiguration). One row past
+            // the page answers whether there is another page, without counting the table.
+            // Id breaks ties, so two entries in the same tick cannot swap between pages.
+            var rows = await _db.AuditEvents.AsNoTracking()
+                .OrderByDescending(e => e.Timestamp)
+                .ThenByDescending(e => e.Id)
+                .Skip(offset)
+                .Take(pageSize + 1)
+                .ToListAsync();
+
+            var hasMore = rows.Count > pageSize;
+            return (hasMore ? rows.GetRange(0, pageSize) : rows, hasMore);
         }
     }
 }

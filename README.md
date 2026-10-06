@@ -178,6 +178,10 @@ An account in none of the groups signs in as `User`. Mappings are editable in th
 Everything below is settable through `appsettings.json` or environment variables, using the
 standard double-underscore form (`Auth__AllowSelfRegistration=true`).
 
+A Docker image never contains your local `appsettings.json`: `.dockerignore` keeps it out, along
+with local databases and logs, so the secrets in it cannot travel with the image. Configure a
+container through the environment or a mounted file.
+
 | Setting | Default | What it is |
 | --- | --- | --- |
 | `Auth:AllowSelfRegistration` | `false` | Whether `POST /api/v1/auth/register` creates an account for an unauthenticated caller. See [Security defaults](#security-defaults). |
@@ -189,7 +193,7 @@ standard double-underscore form (`Auth__AllowSelfRegistration=true`).
 | `Encryption:Key` | — | AES key for provider bind passwords at rest. Required: base64 of 16, 24 or 32 bytes, not the example placeholder. |
 | `Observability:Console` / `File` | on | Structured logs: compact JSON to stdout and a rolling file. |
 | `Observability:Logstash` / `Loki` | off | Shippers. Set `Enabled` and a `Uri` to turn one on. |
-| `Serilog:MinimumLevel` | `Information` | Levels and per-namespace overrides, in the standard Serilog section. |
+| `Serilog:MinimumLevel` | `Information` | Levels and per-namespace overrides, in the standard Serilog section. ASP.NET Core's own request events, EF Core's SQL statements and `HttpClient` are held at `Warning` unless an override here says otherwise. |
 
 ## Security defaults
 
