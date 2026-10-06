@@ -5,6 +5,7 @@ using Nelsar.Axia.Domain.ValueObjects;
 using System.DirectoryServices.AccountManagement;
 using System.Runtime.Versioning;
 using Microsoft.Extensions.Logging;
+using Nelsar.Axia.Contracts.Diagnostics;
 using Microsoft.Extensions.Options;
 using Nelsar.Axia.Application.Configuration;
 using Nelsar.Axia.Contracts.Exceptions;
@@ -45,7 +46,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
         }
         catch (Exception ex)
         {
-            _logger.LogError($"AD authentication could not be completed for [{username}]: {ex.Message}");
+            _logger.LogError(ex, "AD authentication could not be completed for {Login}.", LogMask.Login(username));
             throw new DirectoryUnavailableException(
                 ApplicationMessages.DirectoryCredentialCheckFailed(username), ex);
         }
@@ -63,7 +64,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
         {
             // See StandardLdapProvider.FindUser: null has to mean "searched, found nobody",
             // otherwise a directory outage reads as "this account is free to create".
-            _logger.LogError($"Error finding AD user [{username}]: {ex.Message}");
+            _logger.LogError(ex, "Error finding AD user {Login}.", LogMask.Login(username));
             throw new DirectoryUnavailableException(
                 ApplicationMessages.DirectorySearchFailed(username), ex);
         }
@@ -81,7 +82,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error enumerating AD users after {users.Count} entries: {ex.Message}");
+            _logger.LogError(ex, "Error enumerating AD users after {EntryCount} entries.", users.Count);
             return DirectoryUserListing.Truncated(users);
         }
 
@@ -99,7 +100,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
             Name = name
         };
         user.Save();
-        _logger.LogInformation($"AD user created: {samAccount}");
+        _logger.LogInformation("AD user created: {Login}", LogMask.Login(samAccount));
     }
 
     public void UpdateUser(string username, string? newName, string? newEmail, string? newPassword)
@@ -120,7 +121,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
             user.SetPassword(newPassword);
 
         user.Save();
-        _logger.LogInformation($"AD user updated: {username}");
+        _logger.LogInformation("AD user updated: {Login}", LogMask.Login(username));
     }
 
     public bool DeleteUser(string username)
@@ -131,14 +132,14 @@ internal class ActiveDirectoryProvider : ILdapProvider
             using var user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username);
             if (user == null) return false;
             user.Delete();
-            _logger.LogInformation($"AD user deleted: {username}");
+            _logger.LogInformation("AD user deleted: {Login}", LogMask.Login(username));
             return true;
         }
         catch (Exception ex)
         {
             // Matches StandardLdapProvider.DeleteUser: false means the account genuinely was
             // not there, so a failure must not borrow that meaning and be reported as 404.
-            _logger.LogError($"Error deleting AD user [{username}]: {ex.Message}");
+            _logger.LogError(ex, "Error deleting AD user {Login}.", LogMask.Login(username));
             throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(username), ex);
         }
     }
@@ -167,7 +168,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error getting AD groups for [{username}]: {ex.Message}");
+            _logger.LogError(ex, "Error getting AD groups for {Login}.", LogMask.Login(username));
             throw new DirectoryUnavailableException(
                 ApplicationMessages.DirectoryGroupMembershipFailed(username), ex);
         }
