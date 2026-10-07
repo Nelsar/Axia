@@ -230,7 +230,8 @@ container through the environment or a mounted file.
 | `Ldap:Port` | `636`; `389` for `StartTls` and `None` | Leave unset for the mode's standard port. LDAPS on 389, or plain LDAP on 636, stops the API at startup. |
 | `Ldap:TrustedCaCertificatePath` | — | A PEM or DER file with a CA — or a self-signed directory's own certificate — to trust besides the system store. The certificate must still name the host; verification cannot be turned off. Applies to `StandardLdap` directories, including those in the database. |
 | `Ldap:*` | — | The rest of the default directory: host, base DN, bind account, search filter. |
-| `Jwt:Key` / `Jwt:ExpiresInMinutes` | — / `60` | Token signing key and lifetime. Required: at least 32 bytes, not the example placeholder. |
+| `Jwt:Key` / `Jwt:ExpiresInMinutes` | — / `60` | Token signing key and lifetime. Required: at least 32 bytes, not the example placeholder. A lifetime below one minute stops startup. |
+| `Jwt:Issuer` / `Jwt:Audience` | `Nelsar.Axia.Api` | Written into every token and required of it on the way back. Set them to name the deployment; set to empty, they stop startup. |
 | `Encryption:Key` | — | AES key for provider bind passwords at rest. Required: base64 of 16, 24 or 32 bytes, not the example placeholder. |
 | `Observability:Console` / `File` | on | Structured logs: compact JSON to stdout and a rolling file. |
 | `Observability:Logstash` / `Loki` | off | Shippers. Set `Enabled` and a `Uri` to turn one on. |

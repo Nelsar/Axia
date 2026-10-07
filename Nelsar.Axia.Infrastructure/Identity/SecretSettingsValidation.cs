@@ -82,9 +82,38 @@ internal static class SecretRequirements
 internal sealed class JwtSettingsValidation : IValidateOptions<JwtSettings>
 {
     public ValidateOptionsResult Validate(string? name, JwtSettings options) =>
-        SecretRequirements.JwtKeyProblem(options.Key) is { } problem
+        Problem(options) is { } problem
             ? ValidateOptionsResult.Fail(problem)
             : ValidateOptionsResult.Success;
+
+    /// <summary>
+    /// The key, and then the settings that make a token unusable without being secret: a token
+    /// is checked against Issuer and Audience on every request, so an empty one is refused by the
+    /// very instance that issued it. Unset is fine — see the defaults on <see cref="JwtSettings"/>.
+    /// Set to nothing is the mistake caught here.
+    /// </summary>
+    internal static string? Problem(JwtSettings options)
+    {
+        if (SecretRequirements.JwtKeyProblem(options.Key) is { } keyProblem)
+            return keyProblem;
+
+        if (string.IsNullOrWhiteSpace(options.Issuer))
+            return "Jwt:Issuer is set but empty. Tokens would be issued naming no issuer and then refused by "
+                + $"this same instance on every request after sign-in. Remove the setting to use "
+                + $"'{JwtSettings.DefaultIssuerAndAudience}', or name this deployment.";
+
+        if (string.IsNullOrWhiteSpace(options.Audience))
+            return "Jwt:Audience is set but empty. Tokens would be issued for no audience and then refused by "
+                + $"this same instance on every request after sign-in. Remove the setting to use "
+                + $"'{JwtSettings.DefaultIssuerAndAudience}', or name this deployment.";
+
+        if (options.ExpiresInMinutes < 1)
+            return $"Jwt:ExpiresInMinutes is {options.ExpiresInMinutes}, so every token would be expired as it "
+                + $"was issued. Remove the setting to use {JwtSettings.DefaultExpiresInMinutes}, or give a "
+                + "positive number of minutes.";
+
+        return null;
+    }
 }
 
 internal sealed class EncryptionSettingsValidation : IValidateOptions<EncryptionSettings>

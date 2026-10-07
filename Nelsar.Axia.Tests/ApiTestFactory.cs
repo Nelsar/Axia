@@ -49,10 +49,11 @@ public class ApiTestFactory : WebApplicationFactory<Program>
         {
             configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
             {
+                // The key and nothing else about tokens, which is what a container is given:
+                // issuer, audience and lifetime are left to their defaults, so every test that
+                // signs in also proves an instance accepts the tokens it issues with them. They
+                // used to be set here, and that is how defaulting to empty went unnoticed.
                 ["Jwt:Key"] = TestAuth.SigningKey,
-                ["Jwt:Issuer"] = TestAuth.Issuer,
-                ["Jwt:Audience"] = TestAuth.Audience,
-                ["Jwt:ExpiresInMinutes"] = "60",
 
                 // The host refuses to start without a usable key (see SecretRequirements), so
                 // every test host gets one. Zero bytes are as good as any for a test.
