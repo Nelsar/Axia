@@ -82,7 +82,7 @@ holding them all in memory.
 | Deterministic, stable object ids — `SHA256` of the DN, narrowed to a GUID | **done** |
 | Permission-based authorisation resolved per request from directory group membership | **done** |
 | Structured logging with switchable sinks (console, file, Logstash, Loki) and a correlation id | **done** |
-| **LDAPS or StartTLS to the directory** | **planned** — and the project's largest security gap: user passwords currently cross the network to the directory in the clear. [SECURITY.md](SECURITY.md#known-limitations) |
+| LDAPS or StartTLS to the directory | **done** — LDAPS by default; the certificate must chain to a trusted CA and name the host. Revocation is not checked yet. |
 | Ending a session — sign-out, refresh tokens, or a deny list | **planned** — a token is valid until it expires |
 | Password policy and account lockout | **planned** — whatever the directory enforces is what applies |
 

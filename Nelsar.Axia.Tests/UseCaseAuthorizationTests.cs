@@ -117,7 +117,7 @@ public class UseCaseAuthorizationTests
         // 400 that would have described the command's fields is never produced.
         await Assert.ThrowsAsync<PermissionDeniedException>(
             () => sender.Send(new CreateProviderCommand(
-                "", "", 389, "", true, null, "", "", null, "(uid={0})", 500)));
+                "", "", 389, null, "", true, null, "", "", null, "(uid={0})", 500)));
     }
 
     [Fact]

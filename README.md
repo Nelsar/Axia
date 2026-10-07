@@ -21,7 +21,7 @@ an audit log and bulk user provisioning.
 Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
 [Apache 2.0](LICENSE).
 
-> **Status: MVP.** The API and console do what is described below, and 545 tests cover it. What is
+> **Status: MVP.** The API and console do what is described below, and 681 tests cover it. What is
 > not yet here is listed under [Not in scope yet](#not-in-scope-yet) — read it before deciding
 > whether this fits.
 
@@ -46,10 +46,7 @@ Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
 | Permissions mapped from directory groups | yes | AD delegation | no — the bind account's rights | no |
 | Audit log of changes | yes | Windows event log | no | no |
 | Bulk creation with name patterns | yes | no — csvde or PowerShell | LDIF import | LDIF import |
-| LDAPS / StartTLS to the directory | **not yet** | yes | yes | yes |
-
-The last row matters: read [Not in scope yet](#not-in-scope-yet) before putting it in front of a
-directory that is not on a trusted network.
+| LDAPS / StartTLS to the directory | yes — LDAPS by default | yes | yes | yes |
 
 ## Features
 
@@ -66,8 +63,8 @@ directory that is not on a trusted network.
 - **Rate limiting** — per client address, retunable through the API without a restart.
 - **Nine interface languages**, including Arabic and Hebrew with a mirrored layout.
 
-Active Directory and OpenLDAP are both supported. The `StandardLdap` provider speaks plain LDAP
-(RFC 4511) and works against AD, OpenLDAP and eDirectory alike; a Windows-only `ActiveDirectory`
+Active Directory and OpenLDAP are both supported. The `StandardLdap` provider speaks standard LDAP
+(RFC 4511) over LDAPS or StartTLS and works against AD, OpenLDAP and eDirectory alike; a Windows-only `ActiveDirectory`
 provider using `System.DirectoryServices` also exists but manages fewer object types.
 
 ## Architecture
@@ -229,12 +226,22 @@ container through the environment or a mounted file.
 | `Cors:AllowAnyOrigin` | `false` | Admit every website. A switch of its own rather than `*` in the list — see [Security defaults](#security-defaults). |
 | `Https:RedirectToHttps` | `false` | Whether plain HTTP is redirected. Leave off when a reverse proxy terminates TLS. |
 | `ReverseProxy:KnownProxies` / `KnownNetworks` | — | Proxy addresses whose `X-Forwarded-For` and `X-Forwarded-Proto` are believed. Empty means none. |
-| `Ldap:*` | — | The default directory: host, port, base DN, bind account, search filter. |
+| `Ldap:Security` | `Ldaps` | How the connection to the directory is protected: `Ldaps`, `StartTls`, or `None` — plain LDAP, which sends every password unencrypted. |
+| `Ldap:Port` | `636`; `389` for `StartTls` and `None` | Leave unset for the mode's standard port. LDAPS on 389, or plain LDAP on 636, stops the API at startup. |
+| `Ldap:TrustedCaCertificatePath` | — | A PEM or DER file with a CA — or a self-signed directory's own certificate — to trust besides the system store. The certificate must still name the host; verification cannot be turned off. Applies to `StandardLdap` directories, including those in the database. |
+| `Ldap:*` | — | The rest of the default directory: host, base DN, bind account, search filter. |
 | `Jwt:Key` / `Jwt:ExpiresInMinutes` | — / `60` | Token signing key and lifetime. Required: at least 32 bytes, not the example placeholder. |
 | `Encryption:Key` | — | AES key for provider bind passwords at rest. Required: base64 of 16, 24 or 32 bytes, not the example placeholder. |
 | `Observability:Console` / `File` | on | Structured logs: compact JSON to stdout and a rolling file. |
 | `Observability:Logstash` / `Loki` | off | Shippers. Set `Enabled` and a `Uri` to turn one on. |
 | `Serilog:MinimumLevel` | `Information` | Levels and per-namespace overrides, in the standard Serilog section. ASP.NET Core's own request events, EF Core's SQL statements and `HttpClient` are held at `Warning` unless an override here says otherwise. |
+
+> **Upgrading from an earlier build:** directory connections are now LDAPS unless configured
+> otherwise. An `appsettings.json` that says `"Port": 389` and nothing about security stops the
+> API at startup, naming the ways out: port 636 for LDAPS, `Ldap:Security=StartTls` to stay on 389
+> with TLS, or `Ldap:Security=None` to keep plain LDAP. Directories stored in the database were set
+> to `None` by the `AddProviderSecurity` migration, so they keep working exactly as before; the
+> console marks them *not encrypted*, and each can be switched once its server offers TLS.
 
 ## Security defaults
 
@@ -266,6 +273,13 @@ Read this before exposing the API anywhere.
   Note what the policy is for: it decides which *websites* may read responses in a browser. It
   is not a network control, and nothing about it restrains a non-browser client — that is the
   authentication's job.
+- **Directory connections use LDAPS.** Signing in is a simple bind, so a user's password travels to
+  the directory as typed, and so does the bind account's on every request; TLS is what keeps them
+  off the wire. The certificate has to chain to a CA the system trusts, or to the one named in
+  `Ldap:TrustedCaCertificatePath`, and it has to name the host connected to — there is no setting
+  that accepts anything else. `StartTls` upgrades a connection on 389 and fails rather than
+  continuing unencrypted. Plain LDAP is `Ldap:Security=None`, chosen by name, and logged as a
+  warning when used.
 - **HTTPS redirection is off, HSTS is on outside Development.** The shipped default suits the
   common deployment, where a reverse proxy terminates TLS and talks plain HTTP to the API; with
   redirection on, that proxy's request would be bounced back to itself. Set
@@ -305,7 +319,7 @@ the tests if a message is left untranslated.
 dotnet test
 ```
 
-545 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
+681 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
 authorisation on every guarded use case, what may reach a log sink, multi-directory isolation, and
 translation completeness in every supported language.
 
@@ -313,11 +327,8 @@ translation completeness in every supported language.
 
 Said plainly, so nobody discovers it after deploying:
 
-- **The connection to the directory is plain LDAP** — no LDAPS, no StartTLS. Every sign-in binds
-  as the user, so the user's password crosses the network to the directory in the clear, and so
-  does the bind credential on every connection. The API and the directory have to sit on a network
-  where that is acceptable. This is the project's largest security gap; see
-  [SECURITY.md](SECURITY.md#known-limitations) for the rest.
+- **Directory certificates are not checked for revocation.** A revoked certificate that still
+  chains and names the host is accepted. See [SECURITY.md](SECURITY.md#known-limitations).
 - **A session cannot be ended.** Tokens are bearer JWTs valid until they expire, 60 minutes by
   default, with no sign-out and no deny list.
 - **No Docker quick start.** The compose files in the repository are not currently in a working

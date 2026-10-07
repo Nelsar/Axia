@@ -29,6 +29,12 @@ public static class DomainMessages
     public static string LdapPortOutOfRange(int value, int minimum, int maximum) =>
         Format(nameof(LdapPortOutOfRange), value, minimum, maximum);
 
+    /// <param name="security">The mode, as its name: Ldaps, StartTls or None.</param>
+    /// <param name="port">The port it was given.</param>
+    /// <param name="standardPort">The port that mode is normally served on.</param>
+    public static string LdapSecurityContradictsPort(string security, int port, int standardPort) =>
+        Format(nameof(LdapSecurityContradictsPort), security, port, standardPort);
+
     /// <param name="field">The property whose value is missing.</param>
     public static string ValueRequired(string field) =>
         Format(nameof(ValueRequired), field);

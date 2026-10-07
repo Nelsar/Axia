@@ -18,6 +18,18 @@ export function providerColumns({ onEdit, onDelete }: ProviderColumnsConfig): Ar
       className: "cell-mono",
       cell: (provider) => `${provider.host}:${provider.port}`,
     },
+    {
+      key: "security",
+      header: t("providers.security"),
+      // Plain LDAP stands out on purpose: it is the one setting in this table that hands
+      // passwords to anyone on the network path.
+      cell: (provider) =>
+        provider.security === "None" ? (
+          <Badge tone="warning">{t("providers.securityBadgeNone")}</Badge>
+        ) : (
+          <Badge tone="success">{provider.security === "Ldaps" ? "LDAPS" : "StartTLS"}</Badge>
+        ),
+    },
     { key: "type", header: t("audit.columnType"), cell: (provider) => provider.providerType },
     {
       key: "status",

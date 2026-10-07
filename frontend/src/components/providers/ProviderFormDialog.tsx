@@ -1,6 +1,6 @@
 import type { ChangeEvent, CSSProperties, FormEvent } from "react";
 import { t } from "../../lib/i18n";
-import type { ProviderType } from "../../api/dto";
+import type { LdapSecurity, ProviderType } from "../../api/dto";
 import type { FormErrors } from "../../hooks/useEntityForm";
 import type { ProviderFormValues } from "../../containers/ProviderFormDialogContainer";
 import { Modal } from "../Modal";
@@ -9,6 +9,13 @@ import { ErrorBanner, FormRow } from "../primitives";
 const PROVIDER_TYPES: ReadonlyArray<{ value: ProviderType; label: string }> = [
   { value: "StandardLdap", label: "StandardLdap (AD/OpenLDAP/eDirectory)" },
   { value: "ActiveDirectory", label: "ActiveDirectory (Windows-only)" },
+];
+
+/** Labels are looked up when rendered rather than here, so they follow a change of language. */
+const SECURITY_MODES: ReadonlyArray<{ value: LdapSecurity; label: () => string }> = [
+  { value: "Ldaps", label: () => t("providers.securityLdaps") },
+  { value: "StartTls", label: () => t("providers.securityStartTls") },
+  { value: "None", label: () => t("providers.securityNone") },
 ];
 
 const twoColumns: CSSProperties = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" };
@@ -25,8 +32,8 @@ export interface ProviderFormDialogProps {
   onClose: () => void;
 }
 
-/** The form fields whose value is a string (unlike providerType and isActive). */
-type TextField = Exclude<keyof ProviderFormValues, "providerType" | "isActive">;
+/** The form fields whose value is free text (unlike security, providerType and isActive). */
+type TextField = Exclude<keyof ProviderFormValues, "security" | "providerType" | "isActive">;
 
 export function ProviderFormDialog({
   isEdit,
@@ -59,6 +66,29 @@ export function ProviderFormDialog({
             <input type="number" value={values.port} onChange={onText("port")} />
           </FormRow>
         </div>
+
+        <FormRow
+          label={t("providers.security")}
+          hint={
+            values.security === "None" ? (
+              <span className="text-danger">{t("providers.securityNoneWarning")}</span>
+            ) : undefined
+          }
+        >
+          <select
+            value={values.security}
+            onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+              const next = SECURITY_MODES.find((mode) => mode.value === event.target.value);
+              if (next !== undefined) onFieldChange("security", next.value);
+            }}
+          >
+            {SECURITY_MODES.map((mode) => (
+              <option key={mode.value} value={mode.value}>
+                {mode.label()}
+              </option>
+            ))}
+          </select>
+        </FormRow>
 
         <FormRow label={t("audit.columnType")}>
           {/* A <select> value is a string; narrowing it to ProviderType here is safer than

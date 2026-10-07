@@ -48,6 +48,14 @@ public class Provider
     public string Name { get; private set; } = string.Empty;
     public string Host { get; private set; } = string.Empty;
     public LdapPort Port { get; private set; } = LdapPort.Default;
+
+    /// <summary>
+    /// How the connection is protected. Rows written before this existed were migrated to
+    /// <see cref="LdapSecurity.None"/>, which is what they had always been; anything created since
+    /// gets LDAPS unless it says otherwise.
+    /// </summary>
+    public LdapSecurity Security { get; private set; } = LdapSecurity.Ldaps;
+
     public string ProviderType { get; private set; } = string.Empty;
     public bool IsActive { get; private set; }
 
@@ -79,6 +87,7 @@ public class Provider
         string? name,
         string? host,
         LdapPort port,
+        LdapSecurity security,
         string? providerType,
         bool isActive,
         string? failoverHosts,
@@ -91,7 +100,7 @@ public class Provider
         var provider = new Provider { Id = Guid.NewGuid() };
 
         provider.Rename(name);
-        provider.PointAt(host, port, failoverHosts);
+        provider.PointAt(host, port, security, failoverHosts);
         provider.ChangeType(providerType);
         provider.UseSearchRoot(baseDn);
         provider.UseAdminAccount(adminUsername);
@@ -110,16 +119,31 @@ public class Provider
         Name = DomainGuard.RequiredText(name, nameof(Name), MaximumNameLength);
 
     /// <summary>
-    /// Moves the provider to a different endpoint. Host, port and failover list change together
-    /// because they describe one thing — where to connect — and a half-applied change points the
-    /// provider at a host on a port that was meant for the other one.
+    /// Moves the provider to a different endpoint. Host, port, security and failover list change
+    /// together because they describe one thing — where and how to connect — and a half-applied
+    /// change points the provider at a host on a port that was meant for the other one.
     /// </summary>
-    public void PointAt(string? host, LdapPort port, string? failoverHosts)
+    /// <exception cref="DomainValidationException">
+    /// The security mode cannot work on that port — LDAPS on 389, say, or plain LDAP on 636.
+    /// </exception>
+    public void PointAt(string? host, LdapPort port, LdapSecurity security, string? failoverHosts)
     {
         ArgumentNullException.ThrowIfNull(port);
 
+        if (!Enum.IsDefined(security))
+            throw new ArgumentOutOfRangeException(nameof(security), security, null);
+
+        // Refused here rather than discovered at connect, where it surfaces as a TLS handshake
+        // that fails or a server that hangs up — neither of which mentions the setting.
+        if (LdapSecurityPorts.Contradicts(security, port.Value))
+        {
+            throw new DomainValidationException(DomainMessages.LdapSecurityContradictsPort(
+                security.ToString(), port.Value, LdapSecurityPorts.StandardPortFor(security)));
+        }
+
         Host = DomainGuard.RequiredText(host, nameof(Host), MaximumHostLength);
         Port = port;
+        Security = security;
         FailoverHosts = DomainGuard.OptionalText(failoverHosts, nameof(FailoverHosts), MaximumFailoverHostsLength);
     }
 

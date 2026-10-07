@@ -8,6 +8,7 @@ using Nelsar.Axia.Application.Configuration;
 using Nelsar.Axia.Contracts.Common;
 using Nelsar.Axia.Domain.Entities;
 using Nelsar.Axia.Domain.Repositories;
+using Nelsar.Axia.Domain.ValueObjects;
 
 namespace Nelsar.Axia.Tests;
 
@@ -60,6 +61,7 @@ public class SelectableProvidersTests
             name: "Branch",
             host: "dc01.internal.example.kz",
             port: 636,
+            security: LdapSecurity.Ldaps,
             failoverHosts: "dc02.internal.example.kz",
             baseDn: "dc=branch,dc=example,dc=kz",
             adminUsername: "svc-bind",
@@ -79,7 +81,8 @@ public class SelectableProvidersTests
                      "svc-bind",
                      "should-never-appear",
                      "objectClass",
-                     "636"
+                     "636",
+                     "Ldaps"
                  })
         {
             Assert.DoesNotContain(secret, body, StringComparison.OrdinalIgnoreCase);

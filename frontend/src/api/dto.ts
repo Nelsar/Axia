@@ -211,6 +211,9 @@ export interface ComputerUpdateRequest extends ComputerCreateRequest {
 /** Which kind of directory provider this is. */
 export type ProviderType = "StandardLdap" | "ActiveDirectory";
 
+/** How the connection to a directory is protected. None sends every password unencrypted. */
+export type LdapSecurity = "Ldaps" | "StartTls" | "None";
+
 /**
  * SelectableProviderDto — a directory available to sign in to, as the anonymous
  * /api/v1/providers/selectable returns it: an id and a name, nothing about how it is reached.
@@ -226,6 +229,7 @@ export interface ProviderDto {
   name: string;
   host: string;
   port: number;
+  security: LdapSecurity;
   providerType: ProviderType;
   isActive: boolean;
   failoverHosts: string | null;
@@ -240,6 +244,7 @@ export interface ProviderWriteRequest {
   name: string;
   host: string;
   port: number;
+  security: LdapSecurity;
   providerType: ProviderType;
   isActive: boolean;
   failoverHosts: string | null;

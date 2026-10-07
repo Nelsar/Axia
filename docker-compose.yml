@@ -13,7 +13,9 @@ services:
   #     # throws PlatformNotSupportedException in this Linux container.
   #     - Ldap__ProviderType=${LDAP_PROVIDER_TYPE:-StandardLdap}
   #     - Ldap__Server=${LDAP_SERVER:-openldap}
-  #     - Ldap__Port=${LDAP_PORT:-389}
+  #     - Ldap__Security=${LDAP_SECURITY:-Ldaps}
+  #     - Ldap__Port=${LDAP_PORT:-636}
+  #     - Ldap__TrustedCaCertificatePath=${LDAP_TRUSTED_CA:-}
   #     - Ldap__BaseDn=${LDAP_BASE_DN:-dc=nelsar,dc=kz}
   #     - Ldap__AdminUsername=${LDAP_ADMIN_USERNAME:-cn=admin,dc=nelsar,dc=kz}
   #     - Ldap__AdminPassword=${LDAP_ADMIN_PASSWORD:-password@}

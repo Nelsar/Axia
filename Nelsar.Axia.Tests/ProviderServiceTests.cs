@@ -59,7 +59,7 @@ public class ProviderServiceTests
 
         var sender = CreateSender(repo.Object, NewEncryptionServiceMock().Object);
 
-        var result = await sender.Send(new CreateProviderCommand("main", "ldap.example.com", 389, "StandardLdap", true, null, string.Empty, string.Empty, null, "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))", 500));
+        var result = await sender.Send(new CreateProviderCommand("main", "ldap.example.com", 389, "None", "StandardLdap", true, null, string.Empty, string.Empty, null, "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))", 500));
 
         Assert.NotEqual(Guid.Empty, result.Id);
         Assert.Equal("main", result.Name);
@@ -84,7 +84,7 @@ public class ProviderServiceTests
         var encryption = NewEncryptionServiceMock();
         var sender = CreateSender(repo.Object, encryption.Object);
 
-        var result = await sender.Send(new CreateProviderCommand("main", "ldap.example.com", 389, "StandardLdap", true, null, string.Empty, "admin@example.com", "SuperSecret1", "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))", 500));
+        var result = await sender.Send(new CreateProviderCommand("main", "ldap.example.com", 389, "None", "StandardLdap", true, null, string.Empty, "admin@example.com", "SuperSecret1", "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))", 500));
 
         Assert.NotNull(saved);
         Assert.Equal("enc:SuperSecret1", saved!.EncryptedAdminPassword.Reveal());
@@ -112,7 +112,7 @@ public class ProviderServiceTests
         var encryption = NewEncryptionServiceMock();
         var sender = CreateSender(repo.Object, encryption.Object);
 
-        await sender.Send(new UpdateProviderCommand(providerId, "main-renamed", "ldap.example.com", 389, "StandardLdap", true, null, string.Empty, string.Empty, null, "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))", 500));
+        await sender.Send(new UpdateProviderCommand(providerId, "main-renamed", "ldap.example.com", 389, null, "StandardLdap", true, null, string.Empty, string.Empty, null, "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))", 500));
 
         Assert.NotNull(saved);
         Assert.Equal("enc:OldSecret", saved!.EncryptedAdminPassword.Reveal());
@@ -131,7 +131,7 @@ public class ProviderServiceTests
 
         var sender = CreateSender(repo.Object, NewEncryptionServiceMock().Object);
 
-        var result = await sender.Send(new UpdateProviderCommand(Guid.NewGuid(), "main", "ldap.example.com", 636, "StandardLdap", false, null, string.Empty, string.Empty, null, "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))", 500));
+        var result = await sender.Send(new UpdateProviderCommand(Guid.NewGuid(), "main", "ldap.example.com", 389, null, "StandardLdap", false, null, string.Empty, string.Empty, null, "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))", 500));
 
         Assert.Null(result);
     }
@@ -147,7 +147,7 @@ public class ProviderServiceTests
 
         // [Required] on a non-nullable int never rejected these, so they used to be persisted
         // and then handed to LdapConnection.Connect.
-        await Assert.ThrowsAsync<DomainValidationException>(() => sender.Send(new CreateProviderCommand("main", "ldap.example.com", port, "StandardLdap", true, null, string.Empty, string.Empty, null, "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))", 500)));
+        await Assert.ThrowsAsync<DomainValidationException>(() => sender.Send(new CreateProviderCommand("main", "ldap.example.com", port, "None", "StandardLdap", true, null, string.Empty, string.Empty, null, "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))", 500)));
 
         repo.Verify(x => x.AddAsync(It.IsAny<Provider>()), Times.Never);
     }

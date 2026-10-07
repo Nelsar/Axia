@@ -9,6 +9,9 @@ namespace Nelsar.Axia.Tests;
 /// <see cref="Provider.Create"/> takes eleven arguments because a provider genuinely has eleven
 /// things that must be right; a test about failover hosts should still not have to state a search
 /// filter to say so. Named defaults here keep each test to the one field it is about.
+///
+/// Security defaults to None, the one mode port 389 is valid for without saying more; a test
+/// about connection security names its mode and port.
 /// </summary>
 internal static class TestProvider
 {
@@ -16,6 +19,7 @@ internal static class TestProvider
         string name = "main",
         string host = "ldap.example.com",
         int port = 389,
+        LdapSecurity security = LdapSecurity.None,
         string providerType = "StandardLdap",
         bool isActive = true,
         string? failoverHosts = null,
@@ -28,6 +32,7 @@ internal static class TestProvider
             name,
             host,
             LdapPort.Create(port),
+            security,
             providerType,
             isActive,
             failoverHosts,

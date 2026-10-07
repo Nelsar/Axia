@@ -19,6 +19,7 @@ internal sealed record UpdateProviderCommand(
     string Name,
     string Host,
     int Port,
+    string? Security,
     string ProviderType,
     bool IsActive,
     string? FailoverHosts,
@@ -35,7 +36,9 @@ internal sealed record UpdateProviderCommand(
     public string AuditTarget => Id.ToString();
 
     /// <inheritdoc />
-    public string? AuditDescription => $"host={Host}:{Port}" + (string.IsNullOrEmpty(AdminPassword) ? string.Empty : ", bind password changed");
+    public string? AuditDescription => $"host={Host}:{Port}"
+        + (Security is null ? string.Empty : $", security={Security}")
+        + (string.IsNullOrEmpty(AdminPassword) ? string.Empty : ", bind password changed");
 }
 
 internal sealed class UpdateProviderCommandValidator : AbstractValidator<UpdateProviderCommand>
@@ -45,6 +48,7 @@ internal sealed class UpdateProviderCommandValidator : AbstractValidator<UpdateP
         RuleFor(c => c.Name).NotEmpty();
         RuleFor(c => c.Host).NotEmpty();
         RuleFor(c => c.ProviderType).NotEmpty();
+        RuleFor(c => c.Security).MustBeASecurityMode();
     }
 }
 

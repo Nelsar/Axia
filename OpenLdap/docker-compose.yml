@@ -9,8 +9,9 @@ services:
       - LDAP_DOMAIN=nelsar.com
       - LDAP_ADMIN_USERNAME=admin
       - LDAP_ADMIN_PASSWORD=password@
-      # TLS for the container's own listener on 636. The API does not use it — it speaks plain
-      # LDAP on 389; see SECURITY.md under known limitations.
+      # TLS for the listener on 636, which the API uses by default (Ldap:Security=Ldaps). The
+      # certificate the image generates is self-signed: give the API its CA through
+      # Ldap:TrustedCaCertificatePath, or set Ldap:Security=None for a throwaway local setup.
       - LDAP_TLS=true
     volumes:
       - ldap_data:/var/lib/ldap

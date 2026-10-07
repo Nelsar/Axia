@@ -49,7 +49,13 @@ public static class DependencyInjection
 
     private static IServiceCollection AddLdapIdentity(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<LdapSettings>(configuration.GetSection("Ldap"));
+        // Checked when the host starts: a security mode that cannot work on the configured port
+        // — LDAPS on 389, the shape of every configuration written before LDAPS was the default —
+        // stops startup with what to change, instead of failing every sign-in. See LdapSettingsRules.
+        services.AddOptions<LdapSettings>()
+            .Bind(configuration.GetSection("Ldap"))
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<LdapSettings>, LdapSettingsValidation>();
 
         // The provider is chosen by configuration: Ldap:ProviderType = "ActiveDirectory" | "StandardLdap"
         var ldapSettings = configuration.GetSection("Ldap").Get<LdapSettings>();

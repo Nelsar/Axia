@@ -34,7 +34,7 @@ public class ProviderInvariantTests
     public void AProviderCannotBePointedAtNoHost(string? host)
     {
         Assert.Throws<DomainValidationException>(
-            () => TestProvider.Create().PointAt(host, LdapPort.Default, null));
+            () => TestProvider.Create().PointAt(host, LdapPort.Default, LdapSecurity.None, null));
     }
 
     [Theory]
