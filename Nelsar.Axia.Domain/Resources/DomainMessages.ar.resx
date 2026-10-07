@@ -88,4 +88,7 @@
   <data name="GroupMappingNeedsDistinguishedName" xml:space="preserve">
     <value>'{0}' يسمّي مجموعة دون تحديد موقعها. أدخل الاسم المميّز الكامل للمجموعة، مثل CN=Administrators,OU=Groups,DC=example,DC=com: فالاسم وحده يطابق كل مجموعة تحمله.</value>
   </data>
+  <data name="LdapSecurityContradictsPort" xml:space="preserve">
+    <value>لا يمكن أن يعمل وضع أمان الاتصال {0} على المنفذ {1}: استخدم المنفذ {2} أو وضعًا آخر.</value>
+  </data>
 </root>

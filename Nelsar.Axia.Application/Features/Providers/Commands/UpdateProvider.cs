@@ -88,7 +88,11 @@ internal sealed class UpdateProviderCommandHandler : IRequestHandler<UpdateProvi
             throw new DomainValidationException(ApplicationMessages.BindPasswordRequiredForNewEndpoint());
 
         existing.Rename(request.Name);
-        existing.PointAt(request.Host, port, request.FailoverHosts);
+        existing.PointAt(
+            request.Host,
+            port,
+            ProviderSecurity.Parse(request.Security, whenOmitted: existing.Security),
+            request.FailoverHosts);
         existing.ChangeType(request.ProviderType);
         existing.UseSearchRoot(request.BaseDn);
         existing.UseAdminAccount(request.AdminUsername);

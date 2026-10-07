@@ -88,4 +88,7 @@
   <data name="GroupMappingNeedsDistinguishedName" xml:space="preserve">
     <value>„{0}“ nennt eine Gruppe, aber nicht, wo sie liegt. Geben Sie den vollständigen Distinguished Name der Gruppe an, z. B. CN=Administrators,OU=Groups,DC=example,DC=com: Ein Name allein passt auf jede Gruppe, die ihn trägt.</value>
   </data>
+  <data name="LdapSecurityContradictsPort" xml:space="preserve">
+    <value>Die Verbindungssicherheit {0} kann auf Port {1} nicht funktionieren: Verwenden Sie Port {2} oder einen anderen Modus.</value>
+  </data>
 </root>

@@ -223,4 +223,10 @@
   <data name="PasswordChangeUnsupported" xml:space="preserve">
     <value>该目录没有提供安全设置密码的方式（既不是 Active Directory，也不支持 LDAP Password Modify 操作），因此未写入任何密码。</value>
   </data>
+  <data name="DirectoryCertificateRejected" xml:space="preserve">
+    <value>无法验证目录的 TLS 证书，因此未使用该连接。请让管理员检查证书和受信任的证书颁发机构。</value>
+  </data>
+  <data name="LdapSecurityUnknown" xml:space="preserve">
+    <value>'{0}' 不是有效的连接安全模式。请使用 Ldaps、StartTls 或 None。</value>
+  </data>
 </root>

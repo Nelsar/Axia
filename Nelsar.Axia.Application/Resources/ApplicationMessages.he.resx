@@ -223,4 +223,10 @@
   <data name="PasswordChangeUnsupported" xml:space="preserve">
     <value>ספרייה זו אינה מציעה דרך בטוחה להגדיר סיסמה (לא Active Directory ולא פעולת LDAP Password Modify), ולכן לא נכתבה סיסמה.</value>
   </data>
+  <data name="DirectoryCertificateRejected" xml:space="preserve">
+    <value>לא ניתן היה לאמת את תעודת ה-TLS של הספרייה, ולכן החיבור לא נוצל. בקשו ממנהל לבדוק את התעודה ואת רשות האישורים המהימנה.</value>
+  </data>
+  <data name="LdapSecurityUnknown" xml:space="preserve">
+    <value>'{0}' אינו מצב אבטחת חיבור. השתמשו ב-Ldaps, ב-StartTls או ב-None.</value>
+  </data>
 </root>

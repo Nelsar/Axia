@@ -261,4 +261,11 @@
     <value>This directory offers no safe way to set a password (neither Active Directory nor the LDAP Password Modify operation), so none was written.</value>
     <comment>The directory offers neither Active Directory's unicodePwd nor the LDAP Password Modify operation.</comment>
   </data>
+  <data name="DirectoryCertificateRejected" xml:space="preserve">
+    <value>The directory's TLS certificate could not be verified, so the connection was not used. Ask an administrator to check the certificate and the trusted certificate authority.</value>
+  </data>
+  <data name="LdapSecurityUnknown" xml:space="preserve">
+    <value>'{0}' is not a connection security mode. Use Ldaps, StartTls or None.</value>
+    <comment>{0} = the rejected value.</comment>
+  </data>
 </root>

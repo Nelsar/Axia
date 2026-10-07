@@ -223,4 +223,10 @@
   <data name="PasswordChangeUnsupported" xml:space="preserve">
     <value>Бұл каталогта құпиясөзді қауіпсіз орнату тәсілі жоқ (Active Directory де, LDAP Password Modify операциясы да жоқ), сондықтан ешқандай құпиясөз жазылмады.</value>
   </data>
+  <data name="DirectoryCertificateRejected" xml:space="preserve">
+    <value>Каталогтың TLS сертификатын тексеру мүмкін болмады, сондықтан қосылым пайдаланылмады. Әкімшіден сертификатты және сенімді сертификаттау орталығын тексеруді сұраңыз.</value>
+  </data>
+  <data name="LdapSecurityUnknown" xml:space="preserve">
+    <value>'{0}' қосылымды қорғау режимі емес. Ldaps, StartTls немесе None қолданыңыз.</value>
+  </data>
 </root>
