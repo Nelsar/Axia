@@ -21,7 +21,7 @@ an audit log and bulk user provisioning.
 Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
 [Apache 2.0](LICENSE).
 
-> **Status: MVP.** The API and console do what is described below, and 681 tests cover it. What is
+> **Status: MVP.** The API and console do what is described below, and 773 tests cover it. What is
 > not yet here is listed under [Not in scope yet](#not-in-scope-yet) — read it before deciding
 > whether this fits.
 
@@ -169,6 +169,11 @@ never a way to do more.
 
 An account in none of the groups signs in as `User`. Mappings are editable in the console under
 **Role mappings**.
+
+Membership is read from the account's `memberOf` and from the groups themselves —
+`groupOfNames` and Active Directory's `group` by `member`, `groupOfUniqueNames` by
+`uniqueMember`, `posixGroup` by the login in `memberUid` — so an OpenLDAP without the memberof
+overlay works too. Nested groups are not followed: map the group an account is directly in.
 
 A mapping that names its group by CN alone, as earlier builds seeded them (`Administrators`),
 grants its role to members of *every* group with that name, wherever it is — so anyone able to
@@ -320,7 +325,7 @@ the tests if a message is left untranslated.
 dotnet test
 ```
 
-681 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
+773 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
 authorisation on every guarded use case, what may reach a log sink, multi-directory isolation, and
 translation completeness in every supported language.
 
