@@ -190,4 +190,10 @@
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>Die Anzahl der zu erzeugenden Elemente muss zwischen {0} und {1} liegen.</value>
   </data>
+  <data name="DirectoryCertificateRejected" xml:space="preserve">
+    <value>Das TLS-Zertifikat des Verzeichnisses konnte nicht überprüft werden, daher wurde die Verbindung nicht verwendet. Bitten Sie einen Administrator, das Zertifikat und die vertrauenswürdige Zertifizierungsstelle zu prüfen.</value>
+  </data>
+  <data name="LdapSecurityUnknown" xml:space="preserve">
+    <value>'{0}' ist kein Modus für die Verbindungssicherheit. Verwenden Sie Ldaps, StartTls oder None.</value>
+  </data>
 </root>

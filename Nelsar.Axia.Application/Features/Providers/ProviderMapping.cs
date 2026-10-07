@@ -14,7 +14,8 @@ internal static class ProviderMapping
 {
     public static ProviderDto ToDto(Provider p) => new(
         p.Id, p.Name, p.Host, p.Port.Value, p.ProviderType, p.IsActive,
-        p.FailoverHosts, p.BaseDn, p.AdminUsername, p.UserSearchFilter.Template, p.UserSearchPageSize);
+        p.FailoverHosts, p.BaseDn, p.AdminUsername, p.UserSearchFilter.Template, p.UserSearchPageSize,
+        p.Security.ToString());
 
     /// <summary>
     /// The same provider as an anonymous caller is allowed to see it: a label and the id to put

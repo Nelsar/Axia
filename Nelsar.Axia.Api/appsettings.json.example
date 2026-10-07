@@ -118,9 +118,18 @@
         "KnownNetworks": []
     },
 
+    // The default directory. Security is how the connection is protected: "Ldaps" (the default),
+    // "StartTls" to upgrade a connection on 389, or "None" — plain LDAP, which sends every
+    // password to the directory unencrypted. Leave Port out to use the mode's standard one.
+    //
+    // The directory's certificate must chain to a CA this host trusts and name Server. For an
+    // internal CA the host does not carry — or a self-signed directory — name its PEM file:
+    //
+    //   "TrustedCaCertificatePath": "/etc/nelsar-axia/ldap-ca.pem"
     "Ldap": {
         "Server": "openldap",
-        "Port": 389,
+        "Security": "Ldaps",
+        "Port": 636,
         "BaseDn": "dc=nelsar,dc=kz",
         "AdminUsername": "cn=admin,dc=nelsar,dc=kz",
         "AdminPassword": "CHANGE_ME",

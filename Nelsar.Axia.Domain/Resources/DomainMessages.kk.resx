@@ -85,4 +85,7 @@
   <data name="PermissionUnknown" xml:space="preserve">
     <value>«{0}» — бұл қолданба анықтайтын рұқсат емес.</value>
   </data>
+  <data name="LdapSecurityContradictsPort" xml:space="preserve">
+    <value>{0} қосылымды қорғау режимі {1} портында жұмыс істей алмайды: {2} портын немесе басқа режимді қолданыңыз.</value>
+  </data>
 </root>

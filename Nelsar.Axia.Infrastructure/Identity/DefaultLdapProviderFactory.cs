@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Http;
@@ -16,6 +17,7 @@ using Nelsar.Axia.Domain.Exceptions;
 using Nelsar.Axia.Infrastructure.Identity.Abstractions;
 using Nelsar.Axia.Infrastructure.Identity.Providers;
 using Nelsar.Axia.Domain.Repositories;
+using Nelsar.Axia.Domain.ValueObjects;
 using Novell.Directory.Ldap;
 
 namespace Nelsar.Axia.Infrastructure.Identity;
@@ -174,10 +176,19 @@ internal class DefaultLdapProviderFactory : ILdapProviderFactory
         }
 
         var settings = section.Get<LdapSettings>() ?? new LdapSettings();
+        settings.TrustedCaCertificatePath ??= HostTrustedCaCertificatePath;
         var servers = section.GetValue<string>("Servers") ?? settings.Server;
-        var port = section.GetValue<int?>("Port") ?? settings.Port;
 
-        var resolvedFromConfig = TryResolveFromHosts(SplitHosts(servers), port, settings, isActiveDirectory: false);
+        // Checked here rather than at startup because these sections are only read when a
+        // request names one. Misconfigured, like a database row that cannot work: retrying will
+        // not change the port.
+        if (LdapSettingsRules.Problem(settings, $"Ldap:Providers:{providerId}") is { } problem)
+        {
+            _logger.LogError("Configured provider {ProviderId} cannot be used: {Problem}", providerId, problem);
+            return Resolution.Misconfigured;
+        }
+
+        var resolvedFromConfig = TryResolveFromHosts(SplitHosts(servers), settings.ResolvedPort, settings, isActiveDirectory: false);
         if (resolvedFromConfig != null)
             return Resolution.Resolved(resolvedFromConfig);
 
@@ -220,6 +231,9 @@ internal class DefaultLdapProviderFactory : ILdapProviderFactory
         {
             Server = dbProvider.Host,
             Port = dbProvider.Port.Value,
+            Security = dbProvider.Security,
+            // A row has no CA of its own; the host's is the one there is.
+            TrustedCaCertificatePath = HostTrustedCaCertificatePath,
             BaseDn = dbProvider.BaseDn,
             AdminUsername = dbProvider.AdminUsername,
             AdminPassword = bindPassword,
@@ -240,6 +254,15 @@ internal class DefaultLdapProviderFactory : ILdapProviderFactory
                 "DB provider {ProviderId} ({Name}) asks for ProviderType=ActiveDirectory, which needs "
                 + "Windows; this host is {OperatingSystem}. StandardLdap reaches Active Directory too.",
                 providerId, dbProvider.Name, RuntimeInformation.OSDescription);
+            return Resolution.Misconfigured;
+        }
+
+        if (isActiveDirectory && dbProvider.Security == LdapSecurity.StartTls)
+        {
+            _logger.LogError(
+                "DB provider {ProviderId} ({Name}) asks for ProviderType=ActiveDirectory with StartTls, which "
+                + "System.DirectoryServices cannot do. Use Ldaps, or ProviderType StandardLdap.",
+                providerId, dbProvider.Name);
             return Resolution.Misconfigured;
         }
 
@@ -309,17 +332,7 @@ internal class DefaultLdapProviderFactory : ILdapProviderFactory
             if (!TryConnect(host, port))
                 continue;
 
-            var options = Options.Create(new LdapSettings
-            {
-                Server = host,
-                Port = port,
-                BaseDn = baseSettings.BaseDn,
-                AdminUsername = baseSettings.AdminUsername,
-                AdminPassword = baseSettings.AdminPassword,
-                UserSearchFilter = baseSettings.UserSearchFilter,
-                ProviderType = baseSettings.ProviderType,
-                UserSearchPageSize = baseSettings.UserSearchPageSize
-            });
+            var options = Options.Create(baseSettings.ForEndpoint(host, port));
 
             if (isActiveDirectory)
             {
@@ -336,22 +349,34 @@ internal class DefaultLdapProviderFactory : ILdapProviderFactory
             }
 
             var logger = _sp.GetService<ILogger<StandardLdapProvider>>();
-            return new StandardLdapProvider(options, new LdapConnectionFactory(options), logger!);
+            return new StandardLdapProvider(
+                options, new LdapConnectionFactory(options, _sp.GetService<ILogger<LdapConnectionFactory>>()), logger!);
         }
 
         return null;
     }
 
+    /// <summary>The host-wide CA for directories that do not name one of their own.</summary>
+    private string? HostTrustedCaCertificatePath => _configuration["Ldap:TrustedCaCertificatePath"];
+
     private static string[] SplitHosts(string? hosts) =>
         (hosts ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
+    /// <summary>
+    /// Whether anything accepts a TCP connection at the endpoint — nothing more, and nothing is
+    /// sent. This used to be an LDAP connect and disconnect, which ends with an unbind written in
+    /// plain text: on an LDAPS port, LDAP bytes where a TLS handshake belongs. Whether TLS works is
+    /// the real connection's question, where a failure is reported as what it is. A directory may
+    /// still log the probe as a connection closed before its handshake; that is the probe, once
+    /// per resolution, not a fault.
+    /// </summary>
     private bool TryConnect(string host, int port, int timeoutMs = 2000)
     {
         try
         {
-            using var conn = new LdapConnection { ConnectionTimeout = timeoutMs };
-            conn.Connect(host, port);
-            conn.Disconnect();
+            using var timeout = new CancellationTokenSource(timeoutMs);
+            using var client = new TcpClient();
+            client.ConnectAsync(host, port, timeout.Token).AsTask().GetAwaiter().GetResult();
             return true;
         }
         catch (Exception ex)

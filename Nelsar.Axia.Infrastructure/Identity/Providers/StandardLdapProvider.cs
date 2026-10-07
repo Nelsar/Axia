@@ -134,8 +134,9 @@ internal class StandardLdapProvider : ILdapProvider
 
         try
         {
-            using var bindConn = new LdapConnection();
-            bindConn.Connect(_settings.Server, _settings.Port);
+            // The one connection that carries the user's own password, so it is the one that must
+            // not be opened any other way: through the factory, with the directory's TLS.
+            using var bindConn = _connectionFactory.Open();
             bindConn.Bind(entry.Dn, password);
             return bindConn.Bound;
         }
@@ -1290,7 +1291,7 @@ internal class StandardLdapProvider : ILdapProvider
 
     private void EnsureWriteOperationsSupported()
     {
-        if (_settings.Port is 3268 or 3269)
+        if (_settings.ResolvedPort is LdapSecurityPorts.GlobalCatalog or LdapSecurityPorts.GlobalCatalogOverTls)
         {
             throw new DirectoryUnavailableException(
                 ApplicationMessages.WriteOperationsUnsupportedOnGlobalCatalog());

@@ -95,4 +95,8 @@
     <value>'{0}' is not a permission this application defines.</value>
     <comment>{0} = the rejected permission.</comment>
   </data>
+  <data name="LdapSecurityContradictsPort" xml:space="preserve">
+    <value>Connection security {0} cannot work on port {1}: use port {2}, or a different mode.</value>
+    <comment>{0} = the mode (Ldaps, StartTls, None), {1} = the port given, {2} = the port the mode is normally served on.</comment>
+  </data>
 </root>

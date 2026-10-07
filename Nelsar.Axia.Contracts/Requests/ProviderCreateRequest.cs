@@ -13,6 +13,12 @@ public class ProviderCreateRequest
     [Required]
     public int Port { get; set; }
 
+    /// <summary>
+    /// How the connection is protected: <c>Ldaps</c>, <c>StartTls</c> or <c>None</c>. Omitted
+    /// means <c>Ldaps</c>. <c>None</c> sends every bind, the bind password included, unencrypted.
+    /// </summary>
+    public string? Security { get; set; }
+
     [Required]
     public string ProviderType { get; set; } = string.Empty;
 

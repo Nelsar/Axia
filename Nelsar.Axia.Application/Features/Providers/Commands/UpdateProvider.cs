@@ -17,6 +17,7 @@ internal sealed record UpdateProviderCommand(
     string Name,
     string Host,
     int Port,
+    string? Security,
     string ProviderType,
     bool IsActive,
     string? FailoverHosts,
@@ -33,7 +34,9 @@ internal sealed record UpdateProviderCommand(
     public string AuditTarget => Id.ToString();
 
     /// <inheritdoc />
-    public string? AuditDescription => $"host={Host}:{Port}" + (string.IsNullOrEmpty(AdminPassword) ? string.Empty : ", bind password changed");
+    public string? AuditDescription => $"host={Host}:{Port}"
+        + (Security is null ? string.Empty : $", security={Security}")
+        + (string.IsNullOrEmpty(AdminPassword) ? string.Empty : ", bind password changed");
 }
 
 internal sealed class UpdateProviderCommandValidator : AbstractValidator<UpdateProviderCommand>
@@ -43,6 +46,7 @@ internal sealed class UpdateProviderCommandValidator : AbstractValidator<UpdateP
         RuleFor(c => c.Name).NotEmpty();
         RuleFor(c => c.Host).NotEmpty();
         RuleFor(c => c.ProviderType).NotEmpty();
+        RuleFor(c => c.Security).MustBeASecurityMode();
     }
 }
 
@@ -69,7 +73,11 @@ internal sealed class UpdateProviderCommandHandler : IRequestHandler<UpdateProvi
         // password took a ternary: the copy started blank, so the old value had to be carried
         // over explicitly or it was erased. Here, not rotating the credential simply leaves it.
         existing.Rename(request.Name);
-        existing.PointAt(request.Host, LdapPort.Create(request.Port), request.FailoverHosts);
+        existing.PointAt(
+            request.Host,
+            LdapPort.Create(request.Port),
+            ProviderSecurity.Parse(request.Security, whenOmitted: existing.Security),
+            request.FailoverHosts);
         existing.ChangeType(request.ProviderType);
         existing.UseSearchRoot(request.BaseDn);
         existing.UseAdminAccount(request.AdminUsername);

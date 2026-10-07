@@ -52,6 +52,16 @@ public static class ApplicationMessages
     public static string DirectoryServerNotConfigured() => Get(nameof(DirectoryServerNotConfigured));
 
     /// <summary>
+    /// The TLS handshake failed on the certificate. Deliberately says nothing about why — the
+    /// subject, the issuer and the exact failure are in the log, where whoever can fix the trust
+    /// configuration is looking.
+    /// </summary>
+    public static string DirectoryCertificateRejected() => Get(nameof(DirectoryCertificateRejected));
+
+    /// <param name="value">The value given for the security mode.</param>
+    public static string LdapSecurityUnknown(string? value) => Format(nameof(LdapSecurityUnknown), value);
+
+    /// <summary>
     /// The caller named a directory that does not exist or has been switched off. It echoes the
     /// id back because the caller supplied it — that tells them which of their headers is wrong,
     /// and reveals nothing they did not already send us. The provider's name stays in the log.

@@ -85,4 +85,7 @@
   <data name="PermissionUnknown" xml:space="preserve">
     <value>„{0}“ ist keine Berechtigung, die diese Anwendung kennt.</value>
   </data>
+  <data name="LdapSecurityContradictsPort" xml:space="preserve">
+    <value>Die Verbindungssicherheit {0} kann auf Port {1} nicht funktionieren: Verwenden Sie Port {2} oder einen anderen Modus.</value>
+  </data>
 </root>

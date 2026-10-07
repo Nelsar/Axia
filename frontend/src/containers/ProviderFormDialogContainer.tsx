@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { t } from "../lib/i18n";
 import { api } from "../api";
-import type { ProviderDto, ProviderType } from "../api/dto";
+import type { LdapSecurity, ProviderDto, ProviderType } from "../api/dto";
 import { toast } from "../lib/ui";
 import { useEntityForm } from "../hooks/useEntityForm";
 import type { FormErrors } from "../hooks/useEntityForm";
@@ -9,6 +9,13 @@ import { ProviderFormDialog } from "../components/providers/ProviderFormDialog";
 
 const DEFAULT_USER_SEARCH_FILTER =
   "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))";
+
+/**
+ * The port each mode is normally served on. The API refuses LDAPS on 389 and plain LDAP on 636,
+ * so when the mode changes the port follows it — but only while it is still the standard port of
+ * the old mode. A port someone typed is theirs to keep.
+ */
+const STANDARD_PORT: Readonly<Record<LdapSecurity, string>> = { Ldaps: "636", StartTls: "389", None: "389" };
 
 /**
  * The form's numeric fields are strings: <input type="number"> returns a string, and storing them
@@ -19,6 +26,7 @@ export interface ProviderFormValues {
   name: string;
   host: string;
   port: string;
+  security: LdapSecurity;
   providerType: ProviderType;
   isActive: boolean;
   failoverHosts: string;
@@ -57,6 +65,7 @@ export function ProviderFormDialogContainer({
         name: values.name.trim(),
         host: values.host.trim(),
         port: Number.parseInt(values.port, 10),
+        security: values.security,
         providerType: values.providerType,
         isActive: values.isActive,
         failoverHosts: values.failoverHosts.trim() || null,
@@ -87,7 +96,9 @@ export function ProviderFormDialogContainer({
     initialValues: {
       name: provider?.name ?? "",
       host: provider?.host ?? "",
-      port: String(provider?.port ?? 389),
+      // A new directory starts on LDAPS, the API's own default; an existing one shows what it has.
+      port: String(provider?.port ?? STANDARD_PORT.Ldaps),
+      security: provider?.security ?? "Ldaps",
       providerType: provider?.providerType ?? "StandardLdap",
       isActive: provider?.isActive ?? true,
       failoverHosts: provider?.failoverHosts ?? "",
@@ -102,6 +113,24 @@ export function ProviderFormDialogContainer({
     onSuccess,
   });
 
+  const { setField, setValues } = form;
+  const onFieldChange = useCallback(
+    <K extends keyof ProviderFormValues>(field: K, value: ProviderFormValues[K]): void => {
+      if (field !== "security") {
+        setField(field, value);
+        return;
+      }
+      // One update for both fields, so the port never shows a value from the other mode.
+      const next = value as LdapSecurity;
+      setValues((previous) => ({
+        ...previous,
+        security: next,
+        port: previous.port === STANDARD_PORT[previous.security] ? STANDARD_PORT[next] : previous.port,
+      }));
+    },
+    [setField, setValues]
+  );
+
   return (
     <ProviderFormDialog
       isEdit={isEdit}
@@ -110,7 +139,7 @@ export function ProviderFormDialogContainer({
       errors={form.errors}
       submitError={form.submitError}
       isSubmitting={form.isSubmitting}
-      onFieldChange={form.setField}
+      onFieldChange={onFieldChange}
       onSubmit={form.submit}
       onClose={onClose}
     />

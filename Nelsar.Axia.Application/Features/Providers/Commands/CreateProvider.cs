@@ -15,6 +15,7 @@ internal sealed record CreateProviderCommand(
     string Name,
     string Host,
     int Port,
+    string? Security,
     string ProviderType,
     bool IsActive,
     string? FailoverHosts,
@@ -31,7 +32,7 @@ internal sealed record CreateProviderCommand(
     public string AuditTarget => Name;
 
     /// <inheritdoc />
-    public string? AuditDescription => $"host={Host}:{Port}";
+    public string? AuditDescription => $"host={Host}:{Port}, security={Security ?? nameof(LdapSecurity.Ldaps)}";
 }
 
 internal sealed class CreateProviderCommandValidator : AbstractValidator<CreateProviderCommand>
@@ -41,6 +42,7 @@ internal sealed class CreateProviderCommandValidator : AbstractValidator<CreateP
         RuleFor(c => c.Name).NotEmpty();
         RuleFor(c => c.Host).NotEmpty();
         RuleFor(c => c.ProviderType).NotEmpty();
+        RuleFor(c => c.Security).MustBeASecurityMode();
         // The port's range is LdapPort's rule, not restated here — the handler builds one and
         // it raises a domain validation failure that the pipeline reports the same way.
     }
@@ -67,6 +69,7 @@ internal sealed class CreateProviderCommandHandler : IRequestHandler<CreateProvi
             request.Name,
             request.Host,
             LdapPort.Create(request.Port),
+            ProviderSecurity.Parse(request.Security, whenOmitted: LdapSecurity.Ldaps),
             request.ProviderType,
             request.IsActive,
             request.FailoverHosts,

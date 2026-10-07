@@ -16,5 +16,6 @@ public record ProviderDto
     string BaseDn = "",
     string AdminUsername = "",
     string UserSearchFilter = "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))",
-    int UserSearchPageSize = 500
+    int UserSearchPageSize = 500,
+    string Security = "Ldaps"
 );
