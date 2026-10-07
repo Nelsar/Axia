@@ -40,8 +40,20 @@ internal class StandardLdapProvider : ILdapProvider
 
     // Covers both OpenLDAP/eDirectory (uid) and AD (sAMAccountName/userPrincipalName)
     // login attributes so MapEntry can resolve a username regardless of directory type.
+    // objectClass tells an account from a computer or a contact (see IsAccount); adminCount is
+    // how Active Directory marks the privileged (see LdapUserInfo.IsPrivileged).
     private static readonly string[] RequestedUserAttributes =
-        ["cn", "displayName", "mail", "uid", "sAMAccountName", "userPrincipalName", "memberOf"];
+        ["cn", "displayName", "mail", "uid", "sAMAccountName", "userPrincipalName", "memberOf", "objectClass", "adminCount"];
+
+    /// <summary>
+    /// Structural classes that derive from person in Active Directory without being a person's
+    /// account. "(objectClass=person)" matches all three, so every computer and every mail contact
+    /// used to be listed, looked up and edited as a user — users.delete could remove a computer
+    /// account, and users.read reached a computer's attributes, LAPS password included. Checked
+    /// on the entry rather than in the filter, because a negated objectClass assertion is only
+    /// safe in a directory that defines the class, and OpenLDAP defines neither.
+    /// </summary>
+    private static readonly string[] NonAccountClasses = ["computer", "contact"];
 
     /// <summary>
     /// Everything the entry carries. "*" is all non-operational attributes; memberOf has to be
@@ -52,7 +64,7 @@ internal class StandardLdapProvider : ILdapProvider
 
     private static readonly string[] RequestedOuAttributes = ["ou", "description"];
 
-    private static readonly string[] RequestedGroupAttributes = ["cn", "description", "member", "uniqueMember"];
+    private static readonly string[] RequestedGroupAttributes = ["cn", "description", "member", "uniqueMember", "adminCount"];
 
     /// <summary>
     /// Matches a group in any of the three directory types: <c>group</c> is Active Directory's
@@ -208,7 +220,8 @@ internal class StandardLdapProvider : ILdapProvider
         {
             // A base-object read of exactly this entry. memberOf is among RequestedUserAttributes,
             // so the groups that decide the session's permissions come back with it.
-            return MapEntry(conn.Read(target.Value, RequestedUserAttributes));
+            var entry = conn.Read(target.Value, RequestedUserAttributes);
+            return IsAccount(entry) ? MapEntry(entry) : null;
         }
         catch (LdapException ex) when (ex.ResultCode == LdapException.NoSuchObject)
         {
@@ -285,7 +298,10 @@ internal class StandardLdapProvider : ILdapProvider
                 // are not entries, and must not end the enumeration as if it had failed —
                 // that reported every AD listing as truncated.
                 while (NextEntryOrNull(results) is { } entry)
-                    users.Add(MapEntry(entry));
+                {
+                    if (IsAccount(entry))
+                        users.Add(MapEntry(entry));
+                }
 
                 cookie = [];
                 var pageControl = results.ResponseControls?
@@ -312,17 +328,42 @@ internal class StandardLdapProvider : ILdapProvider
     {
         EnsureWriteOperationsSupported();
         var uid = Email.Create(email).LocalPart;
-        var dn = $"uid={uid},{_settings.BaseDn}";
-        var attrs = LdapUserMapper.BuildAttributes(dn, name, email, password, _settings.BaseDn);
+
+        // Escaped: an address's local part may hold ',', '+' or '=', and unescaped they ended the
+        // RDN and let the address choose where in the tree the account was written.
+        var dn = $"uid={LdapDistinguishedNameEscaper.Escape(uid)},{_settings.BaseDn}";
+        var attrs = LdapUserMapper.BuildAttributes(name, email);
+
+        using var conn = ConnectOrThrow();
 
         try
         {
-            using var conn = ConnectOrThrow();
             conn.Add(new LdapEntry(dn, attrs));
         }
         catch (LdapException ex)
         {
             throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedCreate(dn), ex);
+        }
+
+        // The entry is written without a password and given one the directory's own way. If that
+        // is refused — a password the policy rejects, a directory with no safe way to take one —
+        // the half-made account is removed rather than left behind with no password at all.
+        try
+        {
+            SetPassword(conn, dn, password);
+        }
+        catch
+        {
+            try
+            {
+                conn.Delete(dn);
+            }
+            catch (LdapException cleanup)
+            {
+                _logger.LogError(cleanup, "Could not remove {Dn} after its password was refused.", LogMask.DistinguishedName(dn));
+            }
+
+            throw;
         }
 
         _logger.LogInformation("LDAP user created: {Dn}", LogMask.DistinguishedName(dn));
@@ -345,8 +386,11 @@ internal class StandardLdapProvider : ILdapProvider
         // under either.
         if (!string.IsNullOrWhiteSpace(newEmail))
             mods.Add(new LdapModification(LdapModification.Replace, new LdapAttribute("mail", newEmail)));
+
+        // First, so a password the directory refuses leaves the rest of the entry as it was
+        // rather than half-updated around a reset that did not happen.
         if (!string.IsNullOrWhiteSpace(newPassword))
-            mods.Add(new LdapModification(LdapModification.Replace, new LdapAttribute("userPassword", newPassword)));
+            SetPassword(conn, target.Value, newPassword);
 
         if (mods.Count > 0)
         {
@@ -364,6 +408,100 @@ internal class StandardLdapProvider : ILdapProvider
             }
 
             _logger.LogInformation("LDAP user updated: {Dn}", LogMask.DistinguishedName(target.Value));
+        }
+    }
+
+    /// <summary>How this directory takes a password. Asked of the root DSE once per instance.</summary>
+    private PasswordWriteMode? _passwordWriteMode;
+
+    private enum PasswordWriteMode
+    {
+        /// <summary>unicodePwd, which Active Directory accepts only over an encrypted connection.</summary>
+        ActiveDirectory,
+
+        /// <summary>RFC 3062 Password Modify — OpenLDAP and most others; the server hashes.</summary>
+        PasswordModify,
+
+        /// <summary>Neither. A password is refused rather than written in the clear.</summary>
+        Unsupported
+    }
+
+    /// <summary>
+    /// Sets a password the way the directory itself expects, so that it is hashed, checked against
+    /// the directory's policy, and actually becomes the account's password. Never by writing
+    /// userPassword: see <see cref="DirectoryPasswords"/> for what that did in each directory.
+    /// </summary>
+    /// <exception cref="DomainNotFoundException">No entry has that DN.</exception>
+    /// <exception cref="DomainValidationException">The directory's password policy refused it.</exception>
+    /// <exception cref="DirectoryUnavailableException">The directory would not take it at all.</exception>
+    private void SetPassword(LdapConnection conn, string dn, string password)
+    {
+        var mode = _passwordWriteMode ??= DetectPasswordWriteMode(conn);
+
+        try
+        {
+            switch (mode)
+            {
+                case PasswordWriteMode.ActiveDirectory:
+                    conn.Modify(dn, new LdapModification(LdapModification.Replace,
+                        new LdapAttribute("unicodePwd", DirectoryPasswords.ActiveDirectoryValue(password))));
+                    break;
+
+                case PasswordWriteMode.PasswordModify:
+                    conn.ExtendedOperation(new LdapExtendedOperation(
+                        DirectoryPasswords.PasswordModifyOid,
+                        DirectoryPasswords.PasswordModifyRequest(dn, password)));
+                    break;
+
+                default:
+                    throw new DirectoryUnavailableException(ApplicationMessages.PasswordChangeUnsupported());
+            }
+        }
+        catch (LdapException ex) when (ex.ResultCode == LdapException.NoSuchObject)
+        {
+            throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInLdap(dn));
+        }
+        catch (LdapException ex) when (ex.ResultCode == LdapException.ConstraintViolation)
+        {
+            // AD's answer to a password that is too short, too simple or too recent; OpenLDAP's
+            // ppolicy answers the same way. The caller's to fix, so a 400 and not an outage.
+            throw new DomainValidationException(ApplicationMessages.PasswordRejectedByDirectory());
+        }
+        catch (LdapException ex) when (mode == PasswordWriteMode.ActiveDirectory
+                                       && ex.ResultCode == LdapException.UnwillingToPerform)
+        {
+            // What AD says to unicodePwd over a connection that is not encrypted.
+            _logger.LogError(ex, "Active Directory refused a password for {Dn}; the connection is probably not encrypted.",
+                LogMask.DistinguishedName(dn));
+            throw new DirectoryUnavailableException(ApplicationMessages.PasswordChangeNeedsEncryption(), ex);
+        }
+        catch (LdapException ex)
+        {
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(dn), ex);
+        }
+    }
+
+    private PasswordWriteMode DetectPasswordWriteMode(LdapConnection conn)
+    {
+        try
+        {
+            var rootDse = conn.Read(string.Empty, ["supportedCapabilities", "supportedExtension"]).GetAttributeSet();
+
+            bool Lists(string attribute, string oid) =>
+                rootDse.TryGetValue(attribute, out var values)
+                && (values.StringValueArray ?? []).Contains(oid, StringComparer.Ordinal);
+
+            if (Lists("supportedCapabilities", DirectoryPasswords.ActiveDirectoryCapability))
+                return PasswordWriteMode.ActiveDirectory;
+
+            if (Lists("supportedExtension", DirectoryPasswords.PasswordModifyOid))
+                return PasswordWriteMode.PasswordModify;
+
+            return PasswordWriteMode.Unsupported;
+        }
+        catch (LdapException ex)
+        {
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryUnreachable(), ex);
         }
     }
 
@@ -1157,7 +1295,8 @@ internal class StandardLdapProvider : ILdapProvider
             Name = string.IsNullOrWhiteSpace(dn.Rdn) ? cn : dn.Rdn,
             ParentDn = dn.Parent,
             Description = Get(attrs, "description"),
-            Members = members
+            Members = members,
+            IsPrivileged = IsMarkedPrivileged(attrs)
         };
     }
 
@@ -1227,9 +1366,13 @@ internal class StandardLdapProvider : ILdapProvider
                 attributes ?? RequestedUserAttributes,
                 false);
 
-            var entry = NextEntryOrNull(results);
-            if (entry != null)
-                return entry;
+            // A computer's sAMAccountName or a contact's mail can answer a login too; neither is
+            // an account a person signs in with or an administrator manages from the users screen.
+            while (NextEntryOrNull(results) is { } entry)
+            {
+                if (IsAccount(entry))
+                    return entry;
+            }
         }
 
         return null;
@@ -1314,7 +1457,7 @@ internal class StandardLdapProvider : ILdapProvider
             .Replace("\0", "\\00", StringComparison.Ordinal);
     }
 
-    private static LdapUserInfo MapEntry(LdapEntry entry)
+    private LdapUserInfo MapEntry(LdapEntry entry)
     {
         var attrs = entry.GetAttributeSet();
         return new LdapUserInfo
@@ -1323,8 +1466,45 @@ internal class StandardLdapProvider : ILdapProvider
             Username = Get(attrs, "uid", "sAMAccountName", "userPrincipalName", "cn"),
             DisplayName = Get(attrs, "displayName", "cn"),
             Email = Get(attrs, "mail"),
-            Groups = attrs.TryGetValue("memberOf", out var mo) ? mo.StringValueArray ?? [] : []
+            Groups = attrs.TryGetValue("memberOf", out var mo) ? mo.StringValueArray ?? [] : [],
+            IsPrivileged = IsMarkedPrivileged(attrs),
+            IsServiceAccount = IsServiceAccount(entry.Dn, attrs)
         };
+    }
+
+    /// <summary>
+    /// A person's account rather than a computer or contact — see <see cref="NonAccountClasses"/>.
+    /// An entry read without its objectClass is given the benefit of the doubt, as before.
+    /// </summary>
+    private static bool IsAccount(LdapEntry entry) =>
+        !entry.GetAttributeSet().TryGetValue("objectClass", out var classes)
+        || !(classes.StringValueArray ?? []).Any(value =>
+            NonAccountClasses.Contains(value, StringComparer.OrdinalIgnoreCase));
+
+    /// <summary>adminCount=1: Active Directory's own mark on protected accounts and groups.</summary>
+    private static bool IsMarkedPrivileged(LdapAttributeSet attrs) =>
+        int.TryParse(Get(attrs, "adminCount"), out var count) && count > 0;
+
+    /// <summary>
+    /// Whether the entry is the account this provider binds as. The bind name may be written as a
+    /// DN (OpenLDAP's usual cn=admin,…) or as a login (AD's svc@corp or a bare sAMAccountName), so
+    /// it is compared with the DN and with every login attribute the entry carries.
+    /// </summary>
+    private bool IsServiceAccount(string dn, LdapAttributeSet attrs)
+    {
+        var bindName = _settings.AdminUsername?.Trim();
+        if (string.IsNullOrEmpty(bindName))
+            return false;
+
+        if (DistinguishedName.TryCreate(dn, out var entryDn) && DistinguishedName.TryCreate(bindName, out var bindDn)
+            && string.Equals(entryDn!.Normalized, bindDn!.Normalized, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return new[] { "uid", "sAMAccountName", "userPrincipalName", "mail" }
+            .Select(name => Get(attrs, name))
+            .Any(value => value.Length > 0 && string.Equals(value, bindName, StringComparison.OrdinalIgnoreCase));
     }
 
     private static string Get(LdapAttributeSet attrs, params string[] names)

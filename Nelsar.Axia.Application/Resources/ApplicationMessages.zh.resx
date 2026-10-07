@@ -208,4 +208,19 @@
   <data name="CannotGrantUnheldPermission" xml:space="preserve">
     <value>您不能授予自己没有的权限。</value>
   </data>
+  <data name="TargetIsProtected" xml:space="preserve">
+    <value>此帐户或组在目录中具有特权（例如 Domain Admins 的成员）。只有本应用程序的管理员才能更改它。</value>
+  </data>
+  <data name="ServiceAccountNotManaged" xml:space="preserve">
+    <value>这是应用程序本身用于连接目录的帐户，不能通过应用程序更改。</value>
+  </data>
+  <data name="PasswordRejectedByDirectory" xml:space="preserve">
+    <value>目录拒绝了新密码，可能不符合密码策略（长度、复杂度或历史记录）。</value>
+  </data>
+  <data name="PasswordChangeNeedsEncryption" xml:space="preserve">
+    <value>Active Directory 只接受通过加密连接设置的新密码。请使用 LDAPS 连接目录。</value>
+  </data>
+  <data name="PasswordChangeUnsupported" xml:space="preserve">
+    <value>该目录没有提供安全设置密码的方式（既不是 Active Directory，也不支持 LDAP Password Modify 操作），因此未写入任何密码。</value>
+  </data>
 </root>

@@ -4,6 +4,7 @@ using Moq;
 using Nelsar.Axia.Application;
 using Nelsar.Axia.Application.Common;
 using Nelsar.Axia.Application.Configuration;
+using Microsoft.Extensions.Options;
 using Nelsar.Axia.Application.Features.Groups.Commands;
 using Nelsar.Axia.Application.Features.Users.Commands;
 using Nelsar.Axia.Application.Interfaces;
@@ -30,6 +31,15 @@ public class PrivilegeGuardTests
     private const string PeerDn = "uid=peer,ou=people,dc=example,dc=com";
     private const string AdminGroupDn = "cn=Administrators,ou=groups,dc=example,dc=com";
 
+    // Privileged in the directory, ordinary here: a domain administrator whose groups map to no
+    // role, and the account the application binds as.
+    private const string DomainAdminDn = "CN=Domain Admin,CN=Users,DC=example,DC=com";
+    private const string ServiceDn = "CN=svc-axia,OU=Service,DC=example,DC=com";
+    private const string DomainAdminsGroupDn = "CN=Domain Admins,CN=Users,DC=example,DC=com";
+    private const string LdapAdminsGroupDn = "cn=ldap-admins,ou=groups,dc=example,dc=com";
+
+    private static readonly IReadOnlySet<string> ReadOnly = new HashSet<string> { Permissions.UsersRead };
+
     private static readonly IReadOnlySet<string> Editor = new HashSet<string>
     {
         Permissions.UsersRead, Permissions.UsersUpdate, Permissions.UsersDelete, Permissions.GroupsManage
@@ -39,18 +49,27 @@ public class PrivilegeGuardTests
 
     private static Guid UserId(string login) => DeterministicIdFactory.BuildUserId($"{login}@example.com");
 
-    private static (ISender Sender, Mock<ILdapService> Ldap) Pipeline(string callerDn = EditorDn)
+    private static EntryAssessment Holding(IReadOnlySet<string> permissions, bool isProtected = false, bool isServiceAccount = false) =>
+        new(permissions, isProtected, isServiceAccount);
+
+    private static (ISender Sender, Mock<ILdapService> Ldap) Pipeline(
+        string callerDn = EditorDn,
+        params string[] protectedGroups)
     {
         var ldap = new Mock<ILdapService>();
         ldap.Setup(x => x.GetAllUsersAsync()).ReturnsAsync(DirectoryUserListing.Complete(
         [
             new LdapUserInfo { Dn = AdminDn, Username = "admin", Email = "admin@example.com" },
             new LdapUserInfo { Dn = PeerDn, Username = "peer", Email = "peer@example.com" },
-            new LdapUserInfo { Dn = EditorDn, Username = "editor", Email = "editor@example.com" }
+            new LdapUserInfo { Dn = EditorDn, Username = "editor", Email = "editor@example.com" },
+            new LdapUserInfo { Dn = DomainAdminDn, Username = "domainadmin", Email = "domainadmin@example.com" },
+            new LdapUserInfo { Dn = ServiceDn, Username = "svc-axia", Email = "svc-axia@example.com" }
         ]));
         ldap.Setup(x => x.GetGroupsAsync()).ReturnsAsync(DirectoryGroupListing.Complete(
         [
-            new LdapGroup { Dn = AdminGroupDn, Name = "Administrators", Members = [AdminDn] }
+            new LdapGroup { Dn = AdminGroupDn, Name = "Administrators", Members = [AdminDn] },
+            new LdapGroup { Dn = DomainAdminsGroupDn, Name = "Domain Admins", Members = [DomainAdminDn], IsPrivileged = true },
+            new LdapGroup { Dn = LdapAdminsGroupDn, Name = "ldap-admins", Members = [PeerDn] }
         ]));
         ldap.Setup(x => x.DeleteUserAsync(It.IsAny<string>())).ReturnsAsync(true);
         ldap.Setup(x => x.DeleteGroupAsync(It.IsAny<string>())).ReturnsAsync(true);
@@ -61,10 +80,13 @@ public class PrivilegeGuardTests
         var permissions = new Mock<IPermissionResolver>();
         permissions.Setup(x => x.ResolveAsync(EditorDn, It.IsAny<Guid?>(), It.IsAny<CancellationToken>())).ReturnsAsync(Editor);
         permissions.Setup(x => x.ResolveAsync(AdminDn, It.IsAny<Guid?>(), It.IsAny<CancellationToken>())).ReturnsAsync(Everything);
-        permissions.Setup(x => x.ResolveForEntryAsync(EditorDn, It.IsAny<Guid?>(), It.IsAny<CancellationToken>())).ReturnsAsync(Editor);
-        permissions.Setup(x => x.ResolveForEntryAsync(AdminDn, It.IsAny<Guid?>(), It.IsAny<CancellationToken>())).ReturnsAsync(Everything);
-        permissions.Setup(x => x.ResolveForEntryAsync(PeerDn, It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new HashSet<string> { Permissions.UsersRead });
+        permissions.Setup(x => x.AssessEntryAsync(EditorDn, It.IsAny<Guid?>(), It.IsAny<CancellationToken>())).ReturnsAsync(Holding(Editor));
+        permissions.Setup(x => x.AssessEntryAsync(AdminDn, It.IsAny<Guid?>(), It.IsAny<CancellationToken>())).ReturnsAsync(Holding(Everything));
+        permissions.Setup(x => x.AssessEntryAsync(PeerDn, It.IsAny<Guid?>(), It.IsAny<CancellationToken>())).ReturnsAsync(Holding(ReadOnly));
+        permissions.Setup(x => x.AssessEntryAsync(DomainAdminDn, It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Holding(ReadOnly, isProtected: true));
+        permissions.Setup(x => x.AssessEntryAsync(ServiceDn, It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Holding(ReadOnly, isServiceAccount: true));
 
         var mappings = new Mock<IRoleMappingRepository>();
         mappings.Setup(x => x.GetActiveForProviderAsync(It.IsAny<Guid?>()))
@@ -87,6 +109,7 @@ public class PrivilegeGuardTests
         services.AddSingleton(new Mock<IDomainEventPublisher>().Object);
         services.AddSingleton(new Mock<IBulkJobQueue>().Object);
         services.AddSingleton(new Mock<IBulkJobStore>().Object);
+        services.Configure<DirectoryProtectionOptions>(options => options.ProtectedGroups = protectedGroups);
         services.WithAuditTrail();
 
         return (services.BuildServiceProvider().GetRequiredService<ISender>(), ldap);
@@ -172,6 +195,71 @@ public class PrivilegeGuardTests
 
         ldap.Verify(x => x.CreateGroupAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
             It.IsAny<IReadOnlyList<string>>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task AnEditor_CannotTouchADomainAdministrator_WhomNoRoleHereMapsAsSuch()
+    {
+        // The gap the application-only rule left: Domain Admins maps to nothing here, so a domain
+        // administrator was a plain User, and every editor outranked them.
+        var (sender, ldap) = Pipeline();
+
+        await Assert.ThrowsAsync<PermissionDeniedException>(
+            () => sender.Send(new UpdateUserCommand(UserId("domainadmin"), "Domain Admin", null, "taken-over")));
+        await Assert.ThrowsAsync<PermissionDeniedException>(() => sender.Send(new DeleteUserCommand(UserId("domainadmin"))));
+
+        ldap.Verify(x => x.UpdateUserAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()),
+            Times.Never);
+        ldap.Verify(x => x.DeleteUserAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task AnAdministrator_MayStillManageADirectoryPrivilegedAccount()
+    {
+        var (sender, ldap) = Pipeline(callerDn: AdminDn);
+
+        await sender.Send(new UpdateUserCommand(UserId("domainadmin"), "Domain Admin", null, "rotated"));
+
+        ldap.Verify(x => x.UpdateUserAsync(DomainAdminDn, "Domain Admin", null, "rotated"), Times.Once);
+    }
+
+    [Fact]
+    public async Task NobodyChangesTheServiceAccountThroughTheApplication_NotEvenAnAdministrator()
+    {
+        // Its password reset here would either break every directory call the application makes,
+        // or hand the application's rights to whoever chose the new password.
+        var (sender, ldap) = Pipeline(callerDn: AdminDn);
+
+        await Assert.ThrowsAsync<PermissionDeniedException>(
+            () => sender.Send(new UpdateUserCommand(UserId("svc-axia"), "svc", null, "new-password")));
+        await Assert.ThrowsAsync<PermissionDeniedException>(() => sender.Send(new DeleteUserCommand(UserId("svc-axia"))));
+
+        ldap.Verify(x => x.UpdateUserAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()),
+            Times.Never);
+        ldap.Verify(x => x.DeleteUserAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GroupsManage_CannotChangeAGroupTheDirectoryMarksPrivileged()
+    {
+        var (sender, ldap) = Pipeline();
+        var groupId = DeterministicIdFactory.BuildDirectoryObjectId(DomainAdminsGroupDn);
+
+        await Assert.ThrowsAsync<PermissionDeniedException>(
+            () => sender.Send(new UpdateGroupCommand(groupId, null, null, null, [DomainAdminDn, EditorDn])));
+
+        ldap.Verify(x => x.UpdateGroupAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+            It.IsAny<IReadOnlyList<string>?>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task AGroupListedInDirectoryProtection_IsGuardedLikeAPrivilegedOne()
+    {
+        // OpenLDAP marks nothing; the groups that make someone its administrator are named instead.
+        var (sender, _) = Pipeline(EditorDn, " CN=LDAP-Admins, OU=Groups, DC=example, DC=com ");
+        var groupId = DeterministicIdFactory.BuildDirectoryObjectId(LdapAdminsGroupDn);
+
+        await Assert.ThrowsAsync<PermissionDeniedException>(() => sender.Send(new DeleteGroupCommand(groupId)));
     }
 
     [Fact]

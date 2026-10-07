@@ -110,7 +110,9 @@ internal class ActiveDirectoryProvider : ILdapProvider
                 // name is exactly what must not decide who is an administrator.
                 Groups = user.GetGroups()
                     .Select(group => string.IsNullOrWhiteSpace(group.DistinguishedName) ? group.Name : group.DistinguishedName)
-                    .ToArray()
+                    .ToArray(),
+                IsPrivileged = entry.IsPrivileged,
+                IsServiceAccount = entry.IsServiceAccount
             };
         }
         catch (Exception ex)
@@ -273,12 +275,32 @@ internal class ActiveDirectoryProvider : ILdapProvider
         throw new FeatureNotImplementedException(
             ApplicationMessages.UserAttributesUnsupportedByAdProvider());
 
-    private static LdapUserInfo Map(UserPrincipal user) => new()
+    private LdapUserInfo Map(UserPrincipal user) => new()
     {
         Dn = user.DistinguishedName ?? string.Empty,
         Username = user.SamAccountName ?? string.Empty,
         DisplayName = user.DisplayName ?? string.Empty,
         Email = user.EmailAddress ?? string.Empty,
-        Groups = []
+        Groups = [],
+        IsPrivileged = AdminCount(user) > 0,
+        IsServiceAccount = IsBindAccount(user)
     };
+
+    /// <summary>adminCount, which UserPrincipal does not surface; SDProp's mark on the protected.</summary>
+    private static int AdminCount(Principal principal) =>
+        principal.GetUnderlyingObject() is System.DirectoryServices.DirectoryEntry entry
+        && entry.Properties["adminCount"]?.Value is int count
+            ? count
+            : 0;
+
+    /// <summary>Whether this is the account the provider binds as, however that name is written.</summary>
+    private bool IsBindAccount(UserPrincipal user)
+    {
+        var bindName = _settings.AdminUsername?.Trim();
+        if (string.IsNullOrEmpty(bindName))
+            return false;
+
+        return new[] { user.SamAccountName, user.UserPrincipalName, user.DistinguishedName, user.EmailAddress }
+            .Any(value => !string.IsNullOrEmpty(value) && string.Equals(value, bindName, StringComparison.OrdinalIgnoreCase));
+    }
 }

@@ -208,4 +208,19 @@
   <data name="CannotGrantUnheldPermission" xml:space="preserve">
     <value>Vous ne pouvez pas accorder une autorisation que vous ne détenez pas vous-même.</value>
   </data>
+  <data name="TargetIsProtected" xml:space="preserve">
+    <value>Ce compte ou ce groupe est privilégié dans l'annuaire (par exemple membre de Domain Admins). Seul un administrateur de cette application peut le modifier.</value>
+  </data>
+  <data name="ServiceAccountNotManaged" xml:space="preserve">
+    <value>C'est le compte que l'application elle-même utilise pour se connecter à l'annuaire. Il ne peut pas être modifié par l'application.</value>
+  </data>
+  <data name="PasswordRejectedByDirectory" xml:space="preserve">
+    <value>L'annuaire a refusé le nouveau mot de passe. Il ne respecte probablement pas la stratégie de mots de passe (longueur, complexité ou historique).</value>
+  </data>
+  <data name="PasswordChangeNeedsEncryption" xml:space="preserve">
+    <value>Active Directory n'accepte un nouveau mot de passe que sur une connexion chiffrée. Connectez-vous à l'annuaire en LDAPS.</value>
+  </data>
+  <data name="PasswordChangeUnsupported" xml:space="preserve">
+    <value>Cet annuaire n'offre aucun moyen sûr de définir un mot de passe (ni Active Directory ni l'opération LDAP Password Modify) ; aucun n'a donc été écrit.</value>
+  </data>
 </root>

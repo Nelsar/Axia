@@ -27,13 +27,13 @@ public interface IPermissionResolver
     Task<IReadOnlySet<string>> ResolveAsync(string distinguishedName, Guid? providerId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// The permissions any entry would hold if it signed in — the same answer as
-    /// <see cref="ResolveAsync"/>, asked about somebody other than the caller. Null when there is
-    /// no such entry, which for a target is "not found" and not a reason to end the caller's own
-    /// session.
+    /// What changing the entry would take: the permissions it would hold if it signed in — the
+    /// same answer as <see cref="ResolveAsync"/>, asked about somebody other than the caller — and
+    /// whether the directory itself treats it as privileged. Null when there is no such entry,
+    /// which for a target is "not found" and not a reason to end the caller's own session.
     /// </summary>
     /// <exception cref="Nelsar.Axia.Contracts.Exceptions.DirectoryUnavailableException">
     /// Group membership could not be determined.
     /// </exception>
-    Task<IReadOnlySet<string>?> ResolveForEntryAsync(string distinguishedName, Guid? providerId, CancellationToken cancellationToken = default);
+    Task<EntryAssessment?> AssessEntryAsync(string distinguishedName, Guid? providerId, CancellationToken cancellationToken = default);
 }

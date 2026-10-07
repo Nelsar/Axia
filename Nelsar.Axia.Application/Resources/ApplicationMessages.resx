@@ -241,4 +241,24 @@
     <value>You cannot grant a permission you do not hold yourself.</value>
     <comment>Refusal to grant a role a permission the caller does not hold.</comment>
   </data>
+  <data name="TargetIsProtected" xml:space="preserve">
+    <value>This account or group is privileged in the directory (for example, a member of Domain Admins). Only an administrator of this application can change it.</value>
+    <comment>Refusal to change an account or group the directory treats as privileged (adminCount, protected groups).</comment>
+  </data>
+  <data name="ServiceAccountNotManaged" xml:space="preserve">
+    <value>This is the account the application itself uses to connect to the directory. It cannot be changed through the application.</value>
+    <comment>Refusal to change the account the application binds to the directory as.</comment>
+  </data>
+  <data name="PasswordRejectedByDirectory" xml:space="preserve">
+    <value>The directory rejected the new password. It probably does not meet the password policy (length, complexity or history).</value>
+    <comment>The directory refused a new password, usually because of its password policy.</comment>
+  </data>
+  <data name="PasswordChangeNeedsEncryption" xml:space="preserve">
+    <value>Active Directory only accepts a new password over an encrypted connection. Connect to the directory with LDAPS.</value>
+    <comment>Active Directory refused unicodePwd because the connection is not encrypted.</comment>
+  </data>
+  <data name="PasswordChangeUnsupported" xml:space="preserve">
+    <value>This directory offers no safe way to set a password (neither Active Directory nor the LDAP Password Modify operation), so none was written.</value>
+    <comment>The directory offers neither Active Directory's unicodePwd nor the LDAP Password Modify operation.</comment>
+  </data>
 </root>

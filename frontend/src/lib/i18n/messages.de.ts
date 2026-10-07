@@ -310,7 +310,7 @@ export const de: Record<MessageKey, string> = {
   "roleMappings.columnGroup": "Gruppe",
   "roleMappings.columnProvider": "Provider",
   "roleMappings.byNameBadge": "nur nach Name",
-  "roleMappings.byNameHint": "Als „nur nach Name“ markierte Zuordnungen gewähren ihre Rolle den Mitgliedern jeder gleichnamigen Gruppe an beliebiger Stelle im Verzeichnis. Ändern Sie sie auf den DN der Gruppe.",
+  "roleMappings.byNameHint": "Als „nur nach Name“ markierte Zuordnungen bezeichnen eine Gruppe nur über ihren CN. Der Server ignoriert sie, solange RoleMappings:AllowMappingsByName nicht aktiviert ist – und wenn doch, gewähren sie ihre Rolle jeder gleichnamigen Gruppe. Ändern Sie sie auf den DN der Gruppe.",
   "roles.hint": "Was jede Rolle darf. Eine Person hat alle Berechtigungen aller Rollen, denen ihre Gruppen zugeordnet sind. Änderungen erreichen angemeldete Sitzungen innerhalb von 30 Sekunden.",
   "roles.loadFailed": "Rollen konnten nicht geladen werden",
   "roles.permissionColumn": "Berechtigung",

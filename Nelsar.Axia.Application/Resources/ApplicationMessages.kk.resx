@@ -208,4 +208,19 @@
   <data name="CannotGrantUnheldPermission" xml:space="preserve">
     <value>Өзіңізде жоқ рұқсатты бере алмайсыз.</value>
   </data>
+  <data name="TargetIsProtected" xml:space="preserve">
+    <value>Бұл тіркелгі немесе топ каталогта артықшылықты (мысалы, Domain Admins мүшесі). Оны тек осы қолданбаның әкімшісі өзгерте алады.</value>
+  </data>
+  <data name="ServiceAccountNotManaged" xml:space="preserve">
+    <value>Бұл қолданбаның өзі каталогқа қосылу үшін пайдаланатын тіркелгі. Оны қолданба арқылы өзгертуге болмайды.</value>
+  </data>
+  <data name="PasswordRejectedByDirectory" xml:space="preserve">
+    <value>Каталог жаңа құпиясөзді қабылдамады. Ол құпиясөз саясатына (ұзындық, күрделілік немесе тарих) сай келмейтін сияқты.</value>
+  </data>
+  <data name="PasswordChangeNeedsEncryption" xml:space="preserve">
+    <value>Active Directory жаңа құпиясөзді тек шифрланған қосылым арқылы қабылдайды. Каталогқа LDAPS арқылы қосылыңыз.</value>
+  </data>
+  <data name="PasswordChangeUnsupported" xml:space="preserve">
+    <value>Бұл каталогта құпиясөзді қауіпсіз орнату тәсілі жоқ (Active Directory де, LDAP Password Modify операциясы да жоқ), сондықтан ешқандай құпиясөз жазылмады.</value>
+  </data>
 </root>

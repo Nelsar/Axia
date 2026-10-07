@@ -59,7 +59,7 @@ internal sealed class UpdateGroupCommandHandler : IRequestHandler<UpdateGroupCom
         // Both what the group confers now — editing the membership of the group mapped to Admin
         // is how one joins it — and what it would confer under its new name. See PrivilegeGuard.
         await _privilegeGuard.EnsureMayManageGroupAsync(
-            current.Dn,
+            current,
             string.IsNullOrWhiteSpace(request.Name) ? null : request.Name.Trim(),
             cancellationToken);
 

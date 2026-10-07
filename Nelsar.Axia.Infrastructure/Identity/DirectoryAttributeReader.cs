@@ -14,13 +14,33 @@ internal static class DirectoryAttributeReader
     /// <summary>
     /// Attributes whose values are credential material. Read access to an entry is not read
     /// access to its password hashes: a directory that answers these to the bind account would
-    /// otherwise have them travel through this API to anyone allowed to view a user. Kept as
-    /// names rather than a pattern because the naming has no common shape across AD, OpenLDAP
-    /// and Samba, and a pattern loose enough to catch them all would also catch ordinary
-    /// attributes.
+    /// otherwise have them travel through this API to anyone allowed to view a user.
+    ///
+    /// Names alone used to be the whole rule, and the list missed the one that mattered most in
+    /// practice: LAPS, which keeps a computer's local administrator password in clear text on the
+    /// entry (ms-Mcs-AdmPwd, msLAPS-Password). A name list is only as good as the last time
+    /// someone remembered a schema, so it is now backed by <see cref="SecretMarkers"/>: anything
+    /// whose name says password, hash, secret or credential is withheld too. That over-reaches
+    /// now and then — pwdLastSet is a date — and withholding a date is the cheap mistake.
     /// </summary>
     private static readonly HashSet<string> SecretAttributes = new(StringComparer.OrdinalIgnoreCase)
     {
+        "authPassword",
+        "unixUserPassword",
+        "msSFU30Password",
+        "ms-Mcs-AdmPwd",
+        "msLAPS-Password",
+        "msLAPS-EncryptedPassword",
+        "msLAPS-EncryptedPasswordHistory",
+        "msLAPS-EncryptedDSRMPassword",
+        "msLAPS-EncryptedDSRMPasswordHistory",
+        "msFVE-RecoveryPassword",
+        "msTPM-OwnerInformation",
+        "msTPM-TpmInformationForComputer",
+        "msPKIAccountCredentials",
+        "msPKIDPAPIMasterKeys",
+        "ipaNTHash",
+        "krbPwdHistory",
         "userPassword",
         "unicodePwd",
         "dBCSPwd",
@@ -38,6 +58,17 @@ internal static class DirectoryAttributeReader
         "userPKCS12",
         "pKIEnrollmentAccess",
     };
+
+    /// <summary>Substrings that mark an attribute as a secret whatever schema it comes from.</summary>
+    private static readonly string[] SecretMarkers = ["password", "pwd", "secret", "credential", "hash"];
+
+    /// <summary>Every attribute LAPS defines is withheld, whether or not it is a password itself.</summary>
+    private const string LapsPrefix = "msLAPS-";
+
+    internal static bool IsSecret(string name) =>
+        SecretAttributes.Contains(name)
+        || name.StartsWith(LapsPrefix, StringComparison.OrdinalIgnoreCase)
+        || SecretMarkers.Any(marker => name.Contains(marker, StringComparison.OrdinalIgnoreCase));
 
     // Strict on purpose: the default UTF-8 decoder substitutes U+FFFD for invalid bytes, which
     // would turn an objectSid into a string of replacement characters that reads as data and
@@ -63,7 +94,7 @@ internal static class DirectoryAttributeReader
     {
         var name = attribute.Name;
 
-        if (SecretAttributes.Contains(name))
+        if (IsSecret(name))
             return new DirectoryAttribute(name, [], IsRedacted: true);
 
         var rawValues = attribute.ByteValueArray;

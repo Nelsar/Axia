@@ -310,7 +310,7 @@ export const fr: Record<MessageKey, string> = {
   "roleMappings.columnGroup": "Groupe",
   "roleMappings.columnProvider": "Fournisseur",
   "roleMappings.byNameBadge": "par nom uniquement",
-  "roleMappings.byNameHint": "Les correspondances marquées « par nom uniquement » accordent leur rôle aux membres de tout groupe portant ce nom, n’importe où dans l’annuaire. Remplacez-les par le DN du groupe.",
+  "roleMappings.byNameHint": "Les correspondances marquées « par nom uniquement » désignent un groupe par son seul CN. Le serveur les ignore sauf si RoleMappings:AllowMappingsByName est activé — et dans ce cas, elles accordent leur rôle à tout groupe portant ce nom. Remplacez-les par le DN du groupe.",
   "roles.hint": "Ce que chaque rôle peut faire. Une personne détient toutes les autorisations de tous les rôles associés à ses groupes. Les modifications atteignent les sessions ouvertes en 30 secondes.",
   "roles.loadFailed": "Impossible de charger les rôles",
   "roles.permissionColumn": "Autorisation",

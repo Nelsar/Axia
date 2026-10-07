@@ -208,4 +208,19 @@
   <data name="CannotGrantUnheldPermission" xml:space="preserve">
     <value>אינך יכול להעניק הרשאה שאין לך בעצמך.</value>
   </data>
+  <data name="TargetIsProtected" xml:space="preserve">
+    <value>חשבון או קבוצה זו מוגדרים כבעלי הרשאות יתר בספרייה (למשל חבר ב-Domain Admins). רק מנהל של היישום הזה יכול לשנות אותם.</value>
+  </data>
+  <data name="ServiceAccountNotManaged" xml:space="preserve">
+    <value>זהו החשבון שבו היישום עצמו משתמש כדי להתחבר לספרייה. לא ניתן לשנות אותו דרך היישום.</value>
+  </data>
+  <data name="PasswordRejectedByDirectory" xml:space="preserve">
+    <value>הספרייה דחתה את הסיסמה החדשה. כנראה שהיא אינה עומדת במדיניות הסיסמאות (אורך, מורכבות או היסטוריה).</value>
+  </data>
+  <data name="PasswordChangeNeedsEncryption" xml:space="preserve">
+    <value>Active Directory מקבל סיסמה חדשה רק דרך חיבור מוצפן. יש להתחבר לספרייה באמצעות LDAPS.</value>
+  </data>
+  <data name="PasswordChangeUnsupported" xml:space="preserve">
+    <value>ספרייה זו אינה מציעה דרך בטוחה להגדיר סיסמה (לא Active Directory ולא פעולת LDAP Password Modify), ולכן לא נכתבה סיסמה.</value>
+  </data>
 </root>

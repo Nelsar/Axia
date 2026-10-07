@@ -208,4 +208,19 @@
   <data name="CannotGrantUnheldPermission" xml:space="preserve">
     <value>No puede conceder un permiso que usted no tiene.</value>
   </data>
+  <data name="TargetIsProtected" xml:space="preserve">
+    <value>Esta cuenta o grupo es privilegiado en el directorio (por ejemplo, miembro de Domain Admins). Solo un administrador de esta aplicación puede cambiarlo.</value>
+  </data>
+  <data name="ServiceAccountNotManaged" xml:space="preserve">
+    <value>Esta es la cuenta que usa la propia aplicación para conectarse al directorio. No se puede cambiar a través de la aplicación.</value>
+  </data>
+  <data name="PasswordRejectedByDirectory" xml:space="preserve">
+    <value>El directorio rechazó la nueva contraseña. Probablemente no cumple la directiva de contraseñas (longitud, complejidad o historial).</value>
+  </data>
+  <data name="PasswordChangeNeedsEncryption" xml:space="preserve">
+    <value>Active Directory solo acepta una contraseña nueva a través de una conexión cifrada. Conéctese al directorio con LDAPS.</value>
+  </data>
+  <data name="PasswordChangeUnsupported" xml:space="preserve">
+    <value>Este directorio no ofrece una forma segura de establecer una contraseña (ni Active Directory ni la operación LDAP Password Modify), por lo que no se escribió ninguna.</value>
+  </data>
 </root>

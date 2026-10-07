@@ -20,4 +20,11 @@ public sealed class LdapGroup
     public string ParentDn { get; init; } = string.Empty;
     public string Description { get; init; } = string.Empty;
     public IReadOnlyList<string> Members { get; init; } = Array.Empty<string>();
+
+    /// <summary>
+    /// Active Directory marks the group as privileged (adminCount=1): Domain Admins and its kind,
+    /// and any group nested into one. Adding someone to it makes them a directory administrator,
+    /// whatever role mappings this application has.
+    /// </summary>
+    public bool IsPrivileged { get; init; }
 }

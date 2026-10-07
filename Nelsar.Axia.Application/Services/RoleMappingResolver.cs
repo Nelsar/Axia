@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Nelsar.Axia.Application.Configuration;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Domain.Repositories;
@@ -8,10 +9,12 @@ namespace Nelsar.Axia.Application.Services;
 internal class RoleMappingResolver : IRoleMappingResolver
 {
     private readonly IRoleMappingRepository _repo;
+    private readonly bool _allowMappingsByName;
 
-    public RoleMappingResolver(IRoleMappingRepository repo)
+    public RoleMappingResolver(IRoleMappingRepository repo, IOptions<RoleMappingOptions> options)
     {
         _repo = repo;
+        _allowMappingsByName = options.Value.AllowMappingsByName;
     }
 
     public async Task<IReadOnlySet<string>> ResolveRolesAsync(IEnumerable<string> groupDns, Guid? providerId)
@@ -68,6 +71,9 @@ internal class RoleMappingResolver : IRoleMappingResolver
     /// rule — the exact entry its DN names, or any group with its CN for a row still written by
     /// name — so it is asked rather than restated here. This used to compare CNs for every row,
     /// which is what let any group called "Administrators" grant the Admin role.
+    ///
+    /// Rows written by name take part only where RoleMappings:AllowMappingsByName says so; by
+    /// default they grant nothing, and DbInitializer says at startup which ones are being ignored.
     /// </summary>
     private async Task<IReadOnlyList<Domain.Entities.RoleMapping>> MatchingMappingsAsync(
         IReadOnlyCollection<DistinguishedName> groups,
@@ -76,6 +82,7 @@ internal class RoleMappingResolver : IRoleMappingResolver
         var mappings = await _repo.GetActiveForProviderAsync(providerId);
 
         return mappings
+            .Where(m => _allowMappingsByName || !m.IdentifiesGroupByNameOnly)
             .Where(m => groups.Any(m.Matches))
             .ToList();
     }

@@ -141,14 +141,20 @@ change that, and a language picker.
 ### 4. Sign in
 
 Use an account from your directory. Which application role it gets is decided by its group
-membership through the role mappings seeded on first run:
+membership, through role mappings that name each group by its distinguished name. The first ones
+come from configuration, and **the Admin one is required** — the API refuses to start without it:
 
-| Directory group | Application role |
-| --- | --- |
-| `Administrators` | `Admin` |
-| `UserCreators` | `UserCreator` |
-| `UserEditors` | `UserEditor` |
-| `UserDeleters` | `UserDeleter` |
+```json
+"RoleMappings": {
+  "GroupDns": {
+    "Admin": "CN=Axia-Admins,OU=Groups,DC=corp,DC=example,DC=com",
+    "UserEditor": "CN=Axia-Editors,OU=Groups,DC=corp,DC=example,DC=com"
+  }
+}
+```
+
+or `RoleMappings__GroupDns__Admin=...` in the environment. Roles are `Admin`, `UserCreator`,
+`UserEditor` and `UserDeleter`; the rest can be added later under **Role mappings**.
 
 What each role may do on a fresh database:
 
@@ -167,24 +173,39 @@ never a way to do more.
 An account in none of the groups signs in as `User`. Mappings are editable in the console under
 **Role mappings**.
 
-The seeded mappings name their groups by CN alone, because the seeder cannot know where in your
-directory those groups live — and a mapping by name grants its role to members of *every* group
-with that name, wherever it is, so anyone able to create a group can create an `Administrators`
-of their own. Edit each one to the group's full distinguished name
-(`CN=Administrators,OU=Groups,DC=example,DC=com`) as soon as you can. The console marks the ones
-still by name, and the API logs a warning for each on every start. New and edited mappings must
-be given a DN.
+A mapping that names its group by CN alone, as earlier builds seeded them (`Administrators`),
+grants its role to members of *every* group with that name, wherever it is — so anyone able to
+create a group could create an `Administrators` of their own. Such mappings are **ignored**: the
+API logs an error for each on every start, and the console marks them. Setting
+`RoleMappings:GroupDns` converts the global ones to the DNs given at the next start.
+`RoleMappings:AllowMappingsByName=true` makes them count again, hole included, for a deployment
+that cannot yet say where its groups live.
 
-Whatever a role allows, nobody may act on an account or group that can do more than they can: an
-editor can reset a colleague's password but not an administrator's, and holding `groups.manage`
-does not let anyone into a group mapped to a role they do not hold.
+Whatever a role allows, nobody may act on an account or group that can do more than they can:
+- in this application — an editor can reset a colleague's password but not an administrator's,
+  and holding `groups.manage` does not let anyone into a group mapped to a role they do not hold;
+- in the directory — an account or group Active Directory marks privileged (`adminCount`, which
+  covers Domain Admins and the other protected groups and their members) can only be changed by an
+  administrator of this application. OpenLDAP marks nothing, so list the groups that make someone
+  its administrator under `DirectoryProtection:ProtectedGroups`;
+- and the account the application binds as (`Ldap:AdminUsername`) cannot be changed through it at
+  all.
+
+Give that bind account only the rights the application needs — create, edit and reset passwords
+in the OUs it manages — never Domain Admin: everything the application does, it does with it.
+
+Passwords are set the way the directory hashes and checks them: `unicodePwd` in Active Directory
+(which accepts it only over LDAPS) and the LDAP Password Modify operation elsewhere — never written
+as a plain `userPassword` attribute.
 
 Changing a directory's host, port or failover hosts requires entering its bind password again —
 otherwise the stored one would be sent to whatever server the new address points at.
 
-> **Upgrading from a build before DN role mappings:** every session is signed out once, because
-> tokens issued before now do not say which directory entry they belong to and are refused. Signing
-> in again issues one that does.
+> **Upgrading from a build before DN role mappings:** set `RoleMappings:GroupDns:Admin` (and the
+> other roles you use) before starting the new build — mappings by group name no longer grant
+> anything, and without an Admin mapping by DN the API will not start. Every session is also
+> signed out once: tokens issued before now do not say which directory entry they belong to and are
+> refused. Signing in again issues one that does.
 
 > **Upgrading from an earlier build:** its first run gave every signed-in account the right to
 > manage groups, organizational units and computers, and to run bulk batches — enough to make

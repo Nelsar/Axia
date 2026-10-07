@@ -337,7 +337,7 @@ export const en = {
   "roleMappings.columnGroup": "Group",
   "roleMappings.columnProvider": "Provider",
   "roleMappings.byNameBadge": "by name only",
-  "roleMappings.byNameHint": "Mappings marked “by name only” grant their role to members of any group with that name, anywhere in the directory. Edit them to the group’s DN.",
+  "roleMappings.byNameHint": "Mappings marked “by name only” name a group by CN alone. The server ignores them unless RoleMappings:AllowMappingsByName is on — and when it is, they grant their role to every group of that name. Edit them to the group’s DN.",
   "roles.hint": "What each role may do. A person holds every permission of every role their groups are mapped to. Changes reach signed-in sessions within 30 seconds.",
   "roles.loadFailed": "Could not load roles",
   "roles.permissionColumn": "Permission",

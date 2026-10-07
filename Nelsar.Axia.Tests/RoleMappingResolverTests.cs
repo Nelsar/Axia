@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Moq;
 using Nelsar.Axia.Application.Services;
 using Nelsar.Axia.Application.Interfaces;
@@ -13,11 +14,15 @@ public class RoleMappingResolverTests
     private const string Administrators = "CN=Administrators,OU=Groups,DC=example,DC=com";
     private const string UserCreators = "CN=UserCreators,OU=Groups,DC=example,DC=com";
 
-    private static RoleMappingResolver ResolverOver(Guid? providerId, params RoleMapping[] mappings)
+    private static RoleMappingResolver ResolverOver(Guid? providerId, params RoleMapping[] mappings) =>
+        ResolverOver(providerId, allowMappingsByName: false, mappings);
+
+    private static RoleMappingResolver ResolverOver(Guid? providerId, bool allowMappingsByName, params RoleMapping[] mappings)
     {
         var repo = new Mock<IRoleMappingRepository>();
         repo.Setup(x => x.GetActiveForProviderAsync(providerId)).ReturnsAsync(mappings);
-        return new RoleMappingResolver(repo.Object);
+        return new RoleMappingResolver(repo.Object,
+            Options.Create(new RoleMappingOptions { AllowMappingsByName = allowMappingsByName }));
     }
 
     [Fact]
@@ -85,10 +90,23 @@ public class RoleMappingResolverTests
     }
 
     [Fact]
-    public async Task AMappingStillWrittenByName_KeepsMatchingByCn_SoNobodyIsLockedOutOnUpgrade()
+    public async Task AMappingStillWrittenByName_GrantsNothing_UnlessTheDeploymentAllowsIt()
+    {
+        // Matched by CN, it would grant Admin to members of any group called Administrators — so
+        // by default it is ignored, and DbInitializer names it at every start.
+        var legacy = RoleMapping.SeedByGroupName(null, "Administrators", UserRoles.Admin, 0);
+
+        var roles = await ResolverOver(null, legacy)
+            .ResolveRolesAsync(new[] { "cn=administrators,OU=Groups,DC=example,DC=com" }, null);
+
+        Assert.Equal(new[] { UserRoles.User }, roles);
+    }
+
+    [Fact]
+    public async Task AMappingStillWrittenByName_MatchesByCn_WhereTheDeploymentAllowsIt()
     {
         var legacy = RoleMapping.SeedByGroupName(null, "Administrators", UserRoles.Admin, 0);
-        var resolver = ResolverOver(null, legacy);
+        var resolver = ResolverOver(null, allowMappingsByName: true, legacy);
 
         var role = await resolver.ResolvePrimaryRoleAsync(new[] { "cn=administrators,OU=Groups,DC=example,DC=com" }, null);
 
@@ -101,7 +119,7 @@ public class RoleMappingResolverTests
     {
         // "CN=Admins\, Tier 0,…" used to be read as a group called "Admins\" — a name that is not
         // the group's, and could be some other group's.
-        var resolver = ResolverOver(null, RoleMapping.SeedByGroupName(null, "Admins, Tier 0", UserRoles.Admin, 0));
+        var resolver = ResolverOver(null, allowMappingsByName: true, RoleMapping.SeedByGroupName(null, "Admins, Tier 0", UserRoles.Admin, 0));
 
         var roles = await resolver.ResolveRolesAsync(new[] { @"CN=Admins\, Tier 0,OU=Groups,DC=example,DC=com" }, null);
 

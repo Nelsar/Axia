@@ -325,7 +325,7 @@ export const ru: Record<MessageKey, string> = {
   "roleMappings.columnGroup": "Группа",
   "roleMappings.columnProvider": "Провайдер",
   "roleMappings.byNameBadge": "только по имени",
-  "roleMappings.byNameHint": "Маппинги с пометкой «только по имени» дают роль членам любой группы с таким именем в любом месте каталога. Замените имя на DN группы.",
+  "roleMappings.byNameHint": "Маппинги с пометкой «только по имени» задают группу одним CN. Сервер их игнорирует, если не включён RoleMappings:AllowMappingsByName, — а при включённом они дают роль любой группе с таким именем. Укажите вместо имени DN группы.",
   "roles.hint": "Что может каждая роль. Человек получает все права всех ролей, с которыми сопоставлены его группы. Изменения доходят до активных сессий в течение 30 секунд.",
   "roles.loadFailed": "Не удалось загрузить роли",
   "roles.permissionColumn": "Право",

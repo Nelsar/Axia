@@ -310,7 +310,7 @@ export const zh: Record<MessageKey, string> = {
   "roleMappings.columnGroup": "组",
   "roleMappings.columnProvider": "提供程序",
   "roleMappings.byNameBadge": "仅按名称",
-  "roleMappings.byNameHint": "标记为“仅按名称”的映射会将其角色授予目录中任何位置同名组的成员。请将其改为该组的 DN。",
+  "roleMappings.byNameHint": "标记为“仅按名称”的映射只用 CN 指定组。除非启用 RoleMappings:AllowMappingsByName，否则服务器会忽略它们；启用后，它们会把角色授予所有同名的组。请将其改为该组的 DN。",
   "roles.hint": "每个角色可以做什么。一个人拥有其组所映射的全部角色的全部权限。更改会在 30 秒内作用于已登录的会话。",
   "roles.loadFailed": "无法加载角色",
   "roles.permissionColumn": "权限",

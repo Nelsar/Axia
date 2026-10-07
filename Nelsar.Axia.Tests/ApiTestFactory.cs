@@ -116,13 +116,13 @@ internal sealed class GrantEverythingPermissionResolver : IPermissionResolver
         Task.FromResult<IReadOnlySet<string>>(
             Permissions.All.ToHashSet(StringComparer.OrdinalIgnoreCase));
 
-    // Everyone holds everything, so no target ever outranks the caller and PrivilegeGuard stays
-    // out of the way of tests that are about something else.
-    public async Task<IReadOnlySet<string>?> ResolveForEntryAsync(
+    // Everyone holds everything and nothing is privileged in the directory, so no target ever
+    // outranks the caller and PrivilegeGuard stays out of the way of tests about something else.
+    public async Task<EntryAssessment?> AssessEntryAsync(
         string distinguishedName,
         Guid? providerId,
         CancellationToken cancellationToken = default) =>
-        await ResolveAsync(distinguishedName, providerId, cancellationToken);
+        new(await ResolveAsync(distinguishedName, providerId, cancellationToken), IsProtected: false, IsServiceAccount: false);
 }
 
 /// <summary>
@@ -168,11 +168,12 @@ internal sealed class FixedPermissionResolver : IPermissionResolver
         Guid? providerId,
         CancellationToken cancellationToken = default) => Task.FromResult(_permissions);
 
-    // Every entry holds the same set, the caller included, so a target never outranks them.
-    public Task<IReadOnlySet<string>?> ResolveForEntryAsync(
+    // Every entry holds the same set, the caller included, and none is privileged in the
+    // directory, so a target never outranks them.
+    public Task<EntryAssessment?> AssessEntryAsync(
         string distinguishedName,
         Guid? providerId,
         CancellationToken cancellationToken = default) =>
-        Task.FromResult<IReadOnlySet<string>?>(_permissions);
+        Task.FromResult<EntryAssessment?>(new EntryAssessment(_permissions, IsProtected: false, IsServiceAccount: false));
 }
 

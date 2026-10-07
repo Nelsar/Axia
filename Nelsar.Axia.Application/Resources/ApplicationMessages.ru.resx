@@ -212,4 +212,19 @@
   <data name="CannotGrantUnheldPermission" xml:space="preserve">
     <value>Нельзя выдать право, которого нет у вас самих.</value>
   </data>
+  <data name="TargetIsProtected" xml:space="preserve">
+    <value>Эта учётная запись или группа привилегирована в каталоге (например, член Domain Admins). Изменить её может только администратор этого приложения.</value>
+  </data>
+  <data name="ServiceAccountNotManaged" xml:space="preserve">
+    <value>Это учётная запись, под которой само приложение подключается к каталогу. Изменять её через приложение нельзя.</value>
+  </data>
+  <data name="PasswordRejectedByDirectory" xml:space="preserve">
+    <value>Каталог отклонил новый пароль. Скорее всего, он не соответствует парольной политике (длина, сложность или история).</value>
+  </data>
+  <data name="PasswordChangeNeedsEncryption" xml:space="preserve">
+    <value>Active Directory принимает новый пароль только по зашифрованному соединению. Подключитесь к каталогу по LDAPS.</value>
+  </data>
+  <data name="PasswordChangeUnsupported" xml:space="preserve">
+    <value>Этот каталог не поддерживает безопасную установку пароля (ни Active Directory, ни операцию LDAP Password Modify), поэтому пароль не записан.</value>
+  </data>
 </root>

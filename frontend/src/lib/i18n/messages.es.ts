@@ -310,7 +310,7 @@ export const es: Record<MessageKey, string> = {
   "roleMappings.columnGroup": "Grupo",
   "roleMappings.columnProvider": "Proveedor",
   "roleMappings.byNameBadge": "solo por nombre",
-  "roleMappings.byNameHint": "Las asignaciones marcadas como «solo por nombre» conceden su rol a los miembros de cualquier grupo con ese nombre, en cualquier parte del directorio. Cámbielas al DN del grupo.",
+  "roleMappings.byNameHint": "Las asignaciones marcadas como «solo por nombre» identifican un grupo solo por su CN. El servidor las ignora salvo que RoleMappings:AllowMappingsByName esté activado y, si lo está, conceden su rol a todos los grupos con ese nombre. Cámbielas al DN del grupo.",
   "roles.hint": "Qué puede hacer cada rol. Una persona tiene todos los permisos de todos los roles a los que están asignados sus grupos. Los cambios llegan a las sesiones abiertas en 30 segundos.",
   "roles.loadFailed": "No se pudieron cargar los roles",
   "roles.permissionColumn": "Permiso",

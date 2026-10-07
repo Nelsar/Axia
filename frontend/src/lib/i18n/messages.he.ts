@@ -310,7 +310,7 @@ export const he: Record<MessageKey, string> = {
   "roleMappings.columnGroup": "קבוצה",
   "roleMappings.columnProvider": "ספק",
   "roleMappings.byNameBadge": "לפי שם בלבד",
-  "roleMappings.byNameHint": "מיפויים המסומנים „לפי שם בלבד“ מעניקים את התפקיד לחברים בכל קבוצה בשם זה, בכל מקום בספרייה. ערוך אותם ל-DN של הקבוצה.",
+  "roleMappings.byNameHint": "מיפויים המסומנים „לפי שם בלבד“ מציינים קבוצה לפי CN בלבד. השרת מתעלם מהם אלא אם RoleMappings:AllowMappingsByName מופעל – ואז הם מעניקים את התפקיד לכל קבוצה בשם זה. ערוך אותם ל-DN של הקבוצה.",
   "roles.hint": "מה כל תפקיד רשאי לעשות. אדם מקבל את כל ההרשאות של כל התפקידים שהקבוצות שלו ממופות אליהם. שינויים מגיעים להפעלות פעילות תוך 30 שניות.",
   "roles.loadFailed": "טעינת התפקידים נכשלה",
   "roles.permissionColumn": "הרשאה",

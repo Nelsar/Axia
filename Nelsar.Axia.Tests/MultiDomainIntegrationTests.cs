@@ -170,7 +170,11 @@ public class MultiDomainIntegrationTests
 
             services.RemoveAll(typeof(IRoleMappingRepository));
             services.AddSingleton(BuildRoleMappingRepoMock().Object);
-        });
+        },
+        // The mappings here are written by name — the legacy shape — and what this class checks,
+        // that a mapping scoped to one domain stays there, has to hold for them where they are
+        // still allowed.
+        new Dictionary<string, string?> { ["RoleMappings:AllowMappingsByName"] = "true" });
     }
 
     [Fact]

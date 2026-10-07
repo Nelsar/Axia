@@ -30,7 +30,7 @@ public static class DependencyInjection
     {
         services.AddPersistence(configuration);
         services.AddLdapIdentity(configuration);
-        services.AddApplicationServices();
+        services.AddApplicationServices(configuration);
         services.AddBackgroundJobs();
         services.AddAuthenticationScheme(configuration);
 
@@ -107,7 +107,7 @@ public static class DependencyInjection
     /// how the layer above it is built, and kept every one of those types public for no reason
     /// but this file. What remains is what Infrastructure genuinely owns — the adapters.
     /// </summary>
-    private static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    private static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddApplicationLayer();
 
@@ -115,6 +115,15 @@ public static class DependencyInjection
         services.AddScoped<IProviderRepository, ProviderRepository>();
         services.AddScoped<IAuditRepository, AuditRepository>();
         services.AddScoped<IRoleMappingRepository, RoleMappingRepository>();
+
+        // How role mappings start out and whether mappings by group name count; checked at start,
+        // see RoleMappingOptionsValidation. And which groups only an administrator may touch.
+        services.AddOptions<RoleMappingOptions>()
+            .Bind(configuration.GetSection(RoleMappingOptions.SectionName))
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<RoleMappingOptions>, RoleMappingOptionsValidation>();
+        services.AddOptions<DirectoryProtectionOptions>()
+            .Bind(configuration.GetSection(DirectoryProtectionOptions.SectionName));
         services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
         services.AddScoped<IRateLimitSettingsRepository, RateLimitSettingsRepository>();
         services.AddScoped<IRateLimitSettingsProvider, RateLimitSettingsProvider>();

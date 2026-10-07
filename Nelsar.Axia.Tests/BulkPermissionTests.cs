@@ -134,8 +134,8 @@ public class BulkPermissionTests
         var resolver = new Mock<IPermissionResolver>();
         resolver.Setup(x => x.ResolveAsync(editorDn, It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new HashSet<string> { Permissions.UsersBulk, Permissions.UsersUpdate });
-        resolver.Setup(x => x.ResolveForEntryAsync("uid=admin,dc=example,dc=com", It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Permissions.All.ToHashSet());
+        resolver.Setup(x => x.AssessEntryAsync("uid=admin,dc=example,dc=com", It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new EntryAssessment(Permissions.All.ToHashSet(), IsProtected: false, IsServiceAccount: false));
 
         var (sender, ldap, _) = Pipeline(
             new TestCurrentUser("editor@example.com", distinguishedName: editorDn),

@@ -310,7 +310,7 @@ export const ar: Record<MessageKey, string> = {
   "roleMappings.columnGroup": "المجموعة",
   "roleMappings.columnProvider": "الموفّر",
   "roleMappings.byNameBadge": "بالاسم فقط",
-  "roleMappings.byNameHint": "تمنح التعيينات الموسومة «بالاسم فقط» دورها لأعضاء أي مجموعة تحمل ذلك الاسم في أي مكان من الدليل. عدّلها إلى الاسم المميّز (DN) للمجموعة.",
+  "roleMappings.byNameHint": "التعيينات الموسومة «بالاسم فقط» تحدد المجموعة بالاسم (CN) وحده. يتجاهلها الخادم ما لم يُفعَّل RoleMappings:AllowMappingsByName، وعند تفعيله تمنح دورها لكل مجموعة تحمل ذلك الاسم. عدّلها إلى الاسم المميّز (DN) للمجموعة.",
   "roles.hint": "ما يمكن لكل دور فعله. يحصل الشخص على جميع صلاحيات كل الأدوار المرتبطة بمجموعاته. تصل التغييرات إلى الجلسات المفتوحة خلال 30 ثانية.",
   "roles.loadFailed": "تعذّر تحميل الأدوار",
   "roles.permissionColumn": "الصلاحية",

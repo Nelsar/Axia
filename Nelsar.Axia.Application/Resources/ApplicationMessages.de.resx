@@ -208,4 +208,19 @@
   <data name="CannotGrantUnheldPermission" xml:space="preserve">
     <value>Sie können keine Berechtigung erteilen, die Sie selbst nicht haben.</value>
   </data>
+  <data name="TargetIsProtected" xml:space="preserve">
+    <value>Dieses Konto bzw. diese Gruppe ist im Verzeichnis privilegiert (zum Beispiel Mitglied von Domain Admins). Nur ein Administrator dieser Anwendung kann es ändern.</value>
+  </data>
+  <data name="ServiceAccountNotManaged" xml:space="preserve">
+    <value>Dies ist das Konto, mit dem sich die Anwendung selbst beim Verzeichnis anmeldet. Es kann nicht über die Anwendung geändert werden.</value>
+  </data>
+  <data name="PasswordRejectedByDirectory" xml:space="preserve">
+    <value>Das Verzeichnis hat das neue Passwort abgelehnt. Wahrscheinlich erfüllt es die Kennwortrichtlinie nicht (Länge, Komplexität oder Verlauf).</value>
+  </data>
+  <data name="PasswordChangeNeedsEncryption" xml:space="preserve">
+    <value>Active Directory akzeptiert ein neues Passwort nur über eine verschlüsselte Verbindung. Verbinden Sie sich per LDAPS mit dem Verzeichnis.</value>
+  </data>
+  <data name="PasswordChangeUnsupported" xml:space="preserve">
+    <value>Dieses Verzeichnis bietet keine sichere Möglichkeit, ein Passwort zu setzen (weder Active Directory noch die LDAP-Operation Password Modify), daher wurde keines geschrieben.</value>
+  </data>
 </root>

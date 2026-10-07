@@ -54,8 +54,18 @@ Inside that, the following are meant to hold, and a case where they do not is wo
   DN, permissions are read from the entry at that DN, and writes to an account are addressed by
   its DN — never by searching for a login or address, which two entries can share. A token
   without the DN is refused.
-- **A role mapping names one group.** Mappings take the group's DN. Rows seeded or written by CN
-  alone, before that, still match any group of that name and are flagged until they are converted.
+- **A role mapping names one group.** Mappings take the group's DN. Rows written by CN alone, by
+  earlier builds, are ignored unless `RoleMappings:AllowMappingsByName` is set, and the API will not
+  start without an Admin mapping by DN.
+- **A target privileged in the directory is an administrator's to change.** Accounts and groups
+  with `adminCount` set, or in `DirectoryProtection:ProtectedGroups`, can only be changed by a
+  caller holding every permission; the bind account cannot be changed through the application.
+- **Passwords are never written in clear.** They are set with `unicodePwd` in Active Directory and
+  the Password Modify operation elsewhere, so the directory hashes and checks them; a directory
+  offering neither is refused a password rather than given one as a plain attribute.
+- **Computers and contacts are not users.** Entries of those classes are left out of every lookup,
+  listing and write made through the users endpoints, and attributes whose names mark them as
+  secrets — LAPS passwords among them — are withheld from the attributes view.
 - **A stored bind password is only sent where it was entered for.** Moving a directory to a new
   host, port or failover host requires the password again.
 - **An operation cannot cross into another directory.** The directory is bound to the session at

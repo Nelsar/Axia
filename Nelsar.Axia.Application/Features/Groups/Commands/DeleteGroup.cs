@@ -37,7 +37,7 @@ internal sealed class DeleteGroupCommandHandler : IRequestHandler<DeleteGroupCom
 
         // Deleting the group mapped to Admin takes the role from every administrator at once;
         // only a caller holding what it confers may. See PrivilegeGuard.
-        await _privilegeGuard.EnsureMayManageGroupAsync(group.Dn, null, cancellationToken);
+        await _privilegeGuard.EnsureMayManageGroupAsync(group, null, cancellationToken);
 
         return await _ldapService.DeleteGroupAsync(group.Dn);
     }

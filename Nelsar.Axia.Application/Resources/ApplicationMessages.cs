@@ -191,6 +191,18 @@ public static class ApplicationMessages
 
     public static string CannotGrantUnheldPermission() => Get(nameof(CannotGrantUnheldPermission));
 
+    /// <summary>Privileged by the directory's own reckoning; names the usual reason, not the attribute.</summary>
+    public static string TargetIsProtected() => Get(nameof(TargetIsProtected));
+
+    public static string ServiceAccountNotManaged() => Get(nameof(ServiceAccountNotManaged));
+
+    /// <summary>The directory's policy said no — the caller's to fix, so it reads as advice.</summary>
+    public static string PasswordRejectedByDirectory() => Get(nameof(PasswordRejectedByDirectory));
+
+    public static string PasswordChangeNeedsEncryption() => Get(nameof(PasswordChangeNeedsEncryption));
+
+    public static string PasswordChangeUnsupported() => Get(nameof(PasswordChangeUnsupported));
+
     private static string Get(string key) =>
         Manager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
 

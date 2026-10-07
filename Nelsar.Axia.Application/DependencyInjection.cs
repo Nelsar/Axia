@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Application.Common.Behaviours;
+using Nelsar.Axia.Application.Configuration;
 using Nelsar.Axia.Application.EventHandlers;
 using Nelsar.Axia.Application.Features.Computers;
 using Nelsar.Axia.Application.Features.Groups;
@@ -69,6 +70,11 @@ public static class DependencyInjection
         // The second half of authorisation: AuthorizationBehaviour asks whether the caller may
         // perform the operation at all, this asks whether they may perform it on that target.
         services.AddScoped<PrivilegeGuard>();
+
+        // Defaults for a host that binds nothing — no protected groups beyond what the directory
+        // marks itself, and no mappings by name. Infrastructure binds both from configuration.
+        services.AddOptions<DirectoryProtectionOptions>();
+        services.AddOptions<RoleMappingOptions>();
 
         // This layer's own collaborators. Ports they depend on (ILdapService, the repositories)
         // are still Infrastructure's to supply.
