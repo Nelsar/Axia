@@ -66,11 +66,15 @@ Inside that, the following are meant to hold, and a case where they do not is wo
 These are real, they are not in the issue tracker as vulnerabilities, and an operator should read
 them before deploying.
 
-- **The connection to the directory is plain LDAP.** There is no LDAPS and no StartTLS. Every
-  sign-in binds as the user, which means the user's password crosses the network to the directory
-  in the clear, and so does the bind credential on every connection. Until this is fixed, the API
-  and the directory must sit on a network where that is acceptable — the same host, or a link that
-  is itself encrypted. This is the project's largest security gap and the top item for it.
+- **Directories created before LDAPS existed still use plain LDAP.** The upgrade sets every stored
+  directory to `None` so that none of them stops answering, and on those the user's password
+  crosses the network to the directory in the clear on every sign-in, as does the bind credential
+  on every connection. The console marks them *not encrypted*; switch each to `Ldaps` or `StartTls`
+  once its server offers TLS.
+- **Directory certificates are not checked for revocation.** Chain and host name are verified;
+  revocation is not, matching the LDAP library's default — an internal CA's revocation endpoint is
+  often unreachable from where the API runs. A revoked certificate that still chains and names the
+  host is accepted.
 - **A token cannot be revoked.** Sessions are bearer JWTs valid until they expire, 60 minutes by
   default; there is no sign-out, no refresh and no deny list. Removing an account from a group
   takes effect on the next request, because permissions are resolved per request — but disabling
@@ -102,4 +106,7 @@ decision, and worth making deliberately — see [Security defaults](README.md#se
 - `ReverseProxy:KnownProxies` naming an address that is not actually the proxy — forwarded headers
   are then believed from somewhere they should not be, which lets a caller choose their own
   rate-limit bucket. Naming nothing is the default and is safe.
+- `Ldap:Security=None`, or a directory in the database set to `None` — passwords then cross the
+  network to the directory unencrypted. Acceptable only where the API and the directory share a
+  host or an otherwise encrypted link.
 - Giving the bind account more rights in the directory than the instance needs.
