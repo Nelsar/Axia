@@ -85,4 +85,7 @@
   <data name="PermissionUnknown" xml:space="preserve">
     <value>«{0}» — неизвестное разрешение.</value>
   </data>
+  <data name="LdapSecurityContradictsPort" xml:space="preserve">
+    <value>Режим защиты подключения {0} не может работать на порту {1}: используйте порт {2} или другой режим.</value>
+  </data>
 </root>

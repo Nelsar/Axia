@@ -1,4 +1,7 @@
+using System.Collections.Concurrent;
 using Novell.Directory.Ldap;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Nelsar.Axia.Application.Common;
 using Nelsar.Axia.Application.Configuration;
@@ -11,37 +14,121 @@ namespace Nelsar.Axia.Infrastructure.Identity;
 
 public class LdapConnectionFactory
 {
-    private readonly LdapSettings _settings;
+    /// <summary>Endpoints already warned about, so a plain-LDAP directory says so once per process
+    /// rather than once per request.</summary>
+    private static readonly ConcurrentDictionary<string, byte> PlaintextWarned = new(StringComparer.OrdinalIgnoreCase);
 
-    public LdapConnectionFactory(IOptions<LdapSettings> options)
+    private readonly LdapSettings _settings;
+    private readonly ILogger _logger;
+
+    public LdapConnectionFactory(IOptions<LdapSettings> options, ILogger<LdapConnectionFactory>? logger = null)
     {
         _settings = options.Value;
+        _logger = logger ?? (ILogger)NullLogger.Instance;
     }
 
     public LdapConnection CreateAdminConnection()
     {
-        var conn = Connect();
-        conn.Bind(_settings.AdminUsername, _settings.AdminPassword);
-        return conn;
+        var conn = Open();
+        try
+        {
+            conn.Bind(_settings.AdminUsername, _settings.AdminPassword);
+            return conn;
+        }
+        catch
+        {
+            conn.Dispose();
+            throw;
+        }
     }
 
     /// <summary>
-    /// Opens a connection to the configured server, or says plainly that there is none.
+    /// Opens a connection to the configured server, protected as <see cref="LdapSettings.Security"/>
+    /// says, and not yet bound. Every connection this application makes to a directory comes from
+    /// here, so that none of them can skip the TLS — the user's own bind when signing in included.
+    ///
+    /// StartTLS that does not take is a failure, not a reason to carry on in plain text: carrying
+    /// on is exactly the downgrade an attacker would arrange by stripping the server's answer.
     ///
     /// An empty server used to reach the socket layer as-is and come back as an ArgumentException
     /// from DnsEndPoint — a 500, "an unexpected error occurred", on every sign-in to a deployment
     /// that keeps its directories in the database and leaves Ldap:Server unset. It is a directory
-    /// that cannot be used, and is now reported as one.
+    /// that cannot be used, and is reported as one.
     /// </summary>
-    /// <exception cref="DirectoryUnavailableException">No server is configured.</exception>
-    private LdapConnection Connect()
+    /// <exception cref="DirectoryUnavailableException">
+    /// No server is configured, or the directory's certificate was refused.
+    /// </exception>
+    /// <exception cref="LdapException">The directory could not be reached or StartTLS failed.</exception>
+    public LdapConnection Open()
     {
         if (string.IsNullOrWhiteSpace(_settings.Server))
             throw new DirectoryUnavailableException(ApplicationMessages.DirectoryServerNotConfigured());
 
-        var conn = new LdapConnection();
-        conn.Connect(_settings.Server, _settings.Port);
-        return conn;
+        var port = _settings.ResolvedPort;
+        var endpoint = $"{_settings.Server}:{port}";
+        var validator = new DirectoryCertificateValidator(
+            TrustedCertificateAuthorities.Load(_settings.TrustedCaCertificatePath), endpoint, _logger);
+
+        var options = new LdapConnectionOptions()
+            .ConfigureRemoteCertificateValidationCallback(validator.Validate);
+        if (_settings.Security == LdapSecurity.Ldaps)
+            options.UseSsl();
+
+        var conn = new LdapConnection(options);
+        try
+        {
+            conn.Connect(_settings.Server, port);
+
+            switch (_settings.Security)
+            {
+                case LdapSecurity.StartTls:
+                    try
+                    {
+                        conn.StartTls();
+                    }
+                    catch (LdapException ex) when (!validator.Rejected)
+                    {
+                        // The directory's own answer — "unsupported extended operation" — says
+                        // nothing about TLS to whoever reads it in the log, so this line does.
+                        _logger.LogError(ex,
+                            "Directory {Endpoint} did not accept StartTLS, so the connection was closed before "
+                            + "anything was sent on it. Enable TLS on the directory, or use Ldaps.",
+                            endpoint);
+                        throw;
+                    }
+
+                    if (!conn.Tls)
+                        throw new LdapException("StartTLS did not take effect.", LdapException.ConnectError, endpoint);
+                    break;
+
+                case LdapSecurity.None:
+                    WarnPlaintextOnce(endpoint);
+                    break;
+            }
+
+            return conn;
+        }
+        catch (Exception ex) when (validator.Rejected)
+        {
+            conn.Dispose();
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryCertificateRejected(), ex);
+        }
+        catch
+        {
+            conn.Dispose();
+            throw;
+        }
+    }
+
+    private void WarnPlaintextOnce(string endpoint)
+    {
+        if (!PlaintextWarned.TryAdd(endpoint, 0))
+            return;
+
+        _logger.LogWarning(
+            "Directory {Endpoint} is reached over plain LDAP because its security is set to None. Every bind "
+            + "crosses the network unencrypted, the passwords of users signing in included. Use Ldaps or StartTls.",
+            endpoint);
     }
 
     /// <summary>
@@ -79,10 +166,18 @@ public class LdapConnectionFactory
 
     public LdapConnection CreateUserConnection(string username, string password)
     {
-        var conn = Connect();
-        var userDn = FindUserDn(conn, username);
-        conn.Bind(userDn, password);
-        return conn;
+        var conn = Open();
+        try
+        {
+            var userDn = FindUserDn(conn, username);
+            conn.Bind(userDn, password);
+            return conn;
+        }
+        catch
+        {
+            conn.Dispose();
+            throw;
+        }
     }
 
     /// <summary>

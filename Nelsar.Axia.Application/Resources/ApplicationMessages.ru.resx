@@ -194,4 +194,10 @@
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>Количество генерируемых элементов должно быть от {0} до {1}.</value>
   </data>
+  <data name="DirectoryCertificateRejected" xml:space="preserve">
+    <value>Не удалось проверить TLS-сертификат каталога, поэтому подключение не использовано. Попросите администратора проверить сертификат и доверенный центр сертификации.</value>
+  </data>
+  <data name="LdapSecurityUnknown" xml:space="preserve">
+    <value>'{0}' не является режимом защиты подключения. Используйте Ldaps, StartTls или None.</value>
+  </data>
 </root>

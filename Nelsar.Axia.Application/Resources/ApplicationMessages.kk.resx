@@ -190,4 +190,10 @@
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>Жасалатын элементтер саны {0} мен {1} аралығында болуы тиіс.</value>
   </data>
+  <data name="DirectoryCertificateRejected" xml:space="preserve">
+    <value>Каталогтың TLS сертификатын тексеру мүмкін болмады, сондықтан қосылым пайдаланылмады. Әкімшіден сертификатты және сенімді сертификаттау орталығын тексеруді сұраңыз.</value>
+  </data>
+  <data name="LdapSecurityUnknown" xml:space="preserve">
+    <value>'{0}' қосылымды қорғау режимі емес. Ldaps, StartTls немесе None қолданыңыз.</value>
+  </data>
 </root>

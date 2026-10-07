@@ -30,9 +30,33 @@ internal class ActiveDirectoryProvider : ILdapProvider
         _logger = logger;
     }
 
-    private PrincipalContext CreateContext() =>
-        new(ContextType.Domain, _settings.Server, _settings.BaseDn,
-            _settings.AdminUsername, _settings.AdminPassword);
+    /// <summary>
+    /// Ldaps adds SSL to the Negotiate bind, on the port in the settings. None keeps what this
+    /// provider always did: no TLS, but a Negotiate bind with signing and sealing, so unlike plain
+    /// LDAP on the standard provider the traffic is still encrypted by Kerberos or NTLM.
+    ///
+    /// StartTls has no counterpart in System.DirectoryServices.AccountManagement. The settings
+    /// check refuses it for this provider before a context is ever built, so arriving here with
+    /// it is a bug rather than a configuration to be handled.
+    /// </summary>
+    private PrincipalContext CreateContext() => _settings.Security == LdapSecurity.Ldaps
+        ? new(ContextType.Domain, $"{_settings.Server}:{_settings.ResolvedPort}", _settings.BaseDn,
+            BindOptions, _settings.AdminUsername, _settings.AdminPassword)
+        : new(ContextType.Domain, _settings.Server, _settings.BaseDn,
+            BindOptions, _settings.AdminUsername, _settings.AdminPassword);
+
+    /// <summary>
+    /// The options every bind uses, the user's own included. Passed to ValidateCredentials
+    /// explicitly as well as to the context: the overload without them is not the place to find
+    /// out which options a password was sent with.
+    /// </summary>
+    private ContextOptions BindOptions => _settings.Security switch
+    {
+        LdapSecurity.Ldaps => ContextOptions.Negotiate | ContextOptions.SecureSocketLayer,
+        LdapSecurity.None => ContextOptions.Negotiate | ContextOptions.Signing | ContextOptions.Sealing,
+        _ => throw new NotSupportedException(
+            $"ActiveDirectoryProvider cannot use Security={_settings.Security}; the settings check should have refused it.")
+    };
 
     public bool Authenticate(string username, string password)
     {
@@ -42,7 +66,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
             // could not ask — so, unlike the Novell client, the two cases arrive separately
             // here and the catch below is unambiguously an outage.
             using var context = CreateContext();
-            return context.ValidateCredentials(username, password);
+            return context.ValidateCredentials(username, password, BindOptions);
         }
         catch (Exception ex)
         {

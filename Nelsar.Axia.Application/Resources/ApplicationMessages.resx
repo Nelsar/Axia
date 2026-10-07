@@ -217,4 +217,11 @@
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>The number of items to generate must be between {0} and {1}.</value>
   </data>
+  <data name="DirectoryCertificateRejected" xml:space="preserve">
+    <value>The directory's TLS certificate could not be verified, so the connection was not used. Ask an administrator to check the certificate and the trusted certificate authority.</value>
+  </data>
+  <data name="LdapSecurityUnknown" xml:space="preserve">
+    <value>'{0}' is not a connection security mode. Use Ldaps, StartTls or None.</value>
+    <comment>{0} = the rejected value.</comment>
+  </data>
 </root>

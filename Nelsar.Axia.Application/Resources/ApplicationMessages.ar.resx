@@ -190,4 +190,10 @@
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>يجب أن يكون عدد العناصر المراد توليدها بين {0} و{1}.</value>
   </data>
+  <data name="DirectoryCertificateRejected" xml:space="preserve">
+    <value>تعذّر التحقق من شهادة TLS الخاصة بالدليل، لذلك لم يُستخدم الاتصال. اطلب من المسؤول التحقق من الشهادة ومن جهة إصدار الشهادات الموثوقة.</value>
+  </data>
+  <data name="LdapSecurityUnknown" xml:space="preserve">
+    <value>'{0}' ليس وضعًا لأمان الاتصال. استخدم Ldaps أو StartTls أو None.</value>
+  </data>
 </root>

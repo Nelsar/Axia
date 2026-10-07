@@ -85,4 +85,7 @@
   <data name="PermissionUnknown" xml:space="preserve">
     <value>«{0}» אינה הרשאה שהיישום הזה מגדיר.</value>
   </data>
+  <data name="LdapSecurityContradictsPort" xml:space="preserve">
+    <value>מצב אבטחת החיבור {0} לא יכול לעבוד בפורט {1}: השתמשו בפורט {2} או במצב אחר.</value>
+  </data>
 </root>

@@ -85,4 +85,7 @@
   <data name="PermissionUnknown" xml:space="preserve">
     <value>“{0}”不是本应用定义的权限。</value>
   </data>
+  <data name="LdapSecurityContradictsPort" xml:space="preserve">
+    <value>连接安全模式 {0} 无法在端口 {1} 上工作：请使用端口 {2}，或选择其他模式。</value>
+  </data>
 </root>

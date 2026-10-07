@@ -190,4 +190,10 @@
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>Le nombre d’éléments à générer doit être compris entre {0} et {1}.</value>
   </data>
+  <data name="DirectoryCertificateRejected" xml:space="preserve">
+    <value>Le certificat TLS de l'annuaire n'a pas pu être vérifié ; la connexion n'a donc pas été utilisée. Demandez à un administrateur de vérifier le certificat et l'autorité de certification de confiance.</value>
+  </data>
+  <data name="LdapSecurityUnknown" xml:space="preserve">
+    <value>'{0}' n'est pas un mode de sécurité de connexion. Utilisez Ldaps, StartTls ou None.</value>
+  </data>
 </root>

@@ -184,6 +184,11 @@ namespace Nelsar.Axia.Infrastructure.Persistence.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Security")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("UserSearchFilter")
                         .IsRequired()
                         .ValueGeneratedOnAdd()

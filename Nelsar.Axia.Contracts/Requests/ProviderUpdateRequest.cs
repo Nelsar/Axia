@@ -13,6 +13,13 @@ public class ProviderUpdateRequest
     [Required]
     public int Port { get; set; }
 
+    /// <summary>
+    /// How the connection is protected: <c>Ldaps</c>, <c>StartTls</c> or <c>None</c>. Omitted
+    /// means "keep the current mode", so a client that predates this field cannot switch a
+    /// directory's security by saving it.
+    /// </summary>
+    public string? Security { get; set; }
+
     [Required]
     public string ProviderType { get; set; } = string.Empty;
 
