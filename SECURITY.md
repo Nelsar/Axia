@@ -47,6 +47,17 @@ Inside that, the following are meant to hold, and a case where they do not is wo
   request from directory group membership and the role mappings, never from a claim the token
   carries. Every guarded use case has a test asserting the refusal. Signing in grants read access
   and nothing more; a bulk batch needs the single-account permission for each kind of row it holds.
+- **A permission does not reach targets that hold more than the caller.** Updating, resetting the
+  password of or deleting an account, and changing or deleting a group mapped to a role, are
+  refused when the target confers any permission the caller lacks.
+- **A session is the directory entry that proved the password.** The token carries that entry's
+  DN, permissions are read from the entry at that DN, and writes to an account are addressed by
+  its DN — never by searching for a login or address, which two entries can share. A token
+  without the DN is refused.
+- **A role mapping names one group.** Mappings take the group's DN. Rows seeded or written by CN
+  alone, before that, still match any group of that name and are flagged until they are converted.
+- **A stored bind password is only sent where it was entered for.** Moving a directory to a new
+  host, port or failover host requires the password again.
 - **An operation cannot cross into another directory.** The directory is bound to the session at
   sign-in and carried in the token; a request naming a different one in `X-LDAP-Provider-Id` is
   refused rather than silently served from the default.

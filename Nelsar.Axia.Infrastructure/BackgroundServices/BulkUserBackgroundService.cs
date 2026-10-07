@@ -53,7 +53,7 @@ internal class BulkUserBackgroundService : BackgroundService
                 // And as whom. The batch runs as the person who queued it, so its rows are
                 // authorised against what they hold now and audited under their name — rather
                 // than running as nobody, unchecked and unattributed.
-                scope.ServiceProvider.GetRequiredService<BackgroundPrincipal>().RunAs(job.RequestedBy, job.ProviderId);
+                scope.ServiceProvider.GetRequiredService<BackgroundPrincipal>().RunAs(job.RequestedBy, job.RequestedByDn, job.ProviderId);
 
                 // The same way in the HTTP API uses. This service used to build the command and
                 // send it through ISender itself, which made it the one caller outside Application

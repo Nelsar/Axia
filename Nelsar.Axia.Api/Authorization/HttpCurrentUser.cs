@@ -20,6 +20,8 @@ internal sealed class HttpCurrentUser : ICurrentUser
 
     public string? Subject => RequestPrincipal.Subject(_httpContextAccessor.HttpContext?.User);
 
+    public string? DistinguishedName => RequestPrincipal.DistinguishedName(_httpContextAccessor.HttpContext?.User);
+
     public Guid? ProviderId => RequestPrincipal.ProviderId(_httpContextAccessor.HttpContext);
 
     /// <summary>

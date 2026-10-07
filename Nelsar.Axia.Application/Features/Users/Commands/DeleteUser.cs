@@ -20,11 +20,13 @@ internal sealed class DeleteUserCommandHandler : IRequestHandler<DeleteUserComma
 {
     private readonly ILdapService _ldapService;
     private readonly UserDirectory _directory;
+    private readonly PrivilegeGuard _privilegeGuard;
 
-    public DeleteUserCommandHandler(ILdapService ldapService, UserDirectory directory)
+    public DeleteUserCommandHandler(ILdapService ldapService, UserDirectory directory, PrivilegeGuard privilegeGuard)
     {
         _ldapService = ldapService;
         _directory = directory;
+        _privilegeGuard = privilegeGuard;
     }
 
     public async Task<bool> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
@@ -33,7 +35,12 @@ internal sealed class DeleteUserCommandHandler : IRequestHandler<DeleteUserComma
         if (user == null)
             return false;
 
-        var deleted = await _ldapService.DeleteUserAsync(user.DirectoryAddress);
+        // A deleter may not remove an account that can do more than they can — every
+        // administrator, for a holder of users.delete alone. See PrivilegeGuard.
+        await _privilegeGuard.EnsureMayManageAccountAsync(user.Dn, cancellationToken);
+
+        // By DN, so the entry checked is the entry removed; see UpdateUserCommandHandler.
+        var deleted = await _ldapService.DeleteUserAsync(user.Dn);
         if (deleted)
             await _directory.ForgetAsync(request.Id);
 

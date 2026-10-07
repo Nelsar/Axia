@@ -85,4 +85,7 @@
   <data name="PermissionUnknown" xml:space="preserve">
     <value>«{0}» ليست صلاحية يعرّفها هذا التطبيق.</value>
   </data>
+  <data name="GroupMappingNeedsDistinguishedName" xml:space="preserve">
+    <value>'{0}' يسمّي مجموعة دون تحديد موقعها. أدخل الاسم المميّز الكامل للمجموعة، مثل CN=Administrators,OU=Groups,DC=example,DC=com: فالاسم وحده يطابق كل مجموعة تحمله.</value>
+  </data>
 </root>

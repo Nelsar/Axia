@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Nelsar.Axia.Contracts.Identity;
 
 namespace Nelsar.Axia.Api.Authorization;
 
@@ -15,7 +16,8 @@ namespace Nelsar.Axia.Api.Authorization;
 internal static class RequestPrincipal
 {
     /// <summary>
-    /// The login to look the principal up by.
+    /// The login the principal is known by, for the audit trail and the log. Permissions are not
+    /// resolved from it — see <see cref="DistinguishedName"/>.
     ///
     /// preferred_username first: the token states outright what the directory can be searched
     /// by. Email used to lead here, and worked only because it was quietly filled with the login
@@ -41,6 +43,20 @@ internal static class RequestPrincipal
         };
 
         return candidates.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
+    }
+
+    /// <summary>
+    /// The directory entry the principal authenticated as — what permissions are resolved from.
+    /// Null for an anonymous caller; a signed-in one always has it, because a token without it is
+    /// refused at authentication (see AxiaClaims.DistinguishedName).
+    /// </summary>
+    public static string? DistinguishedName(ClaimsPrincipal? user)
+    {
+        if (user?.Identity?.IsAuthenticated != true)
+            return null;
+
+        var value = user.FindFirstValue(AxiaClaims.DistinguishedName);
+        return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
     /// <summary>

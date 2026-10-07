@@ -88,12 +88,6 @@
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
     <value>L’annuaire n’a pas pu indiquer l’appartenance aux groupes de « {0} ».</value>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>L’annuaire n’a renvoyé aucune entrée pour « {0} » ; l’appartenance aux groupes est donc inconnue.</value>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>AD n’a renvoyé aucun principal pour « {0} » ; l’appartenance aux groupes est donc inconnue.</value>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>L’annuaire a refusé la création de « {0} ».</value>
   </data>
@@ -189,5 +183,17 @@
   </data>
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>Le nombre d’éléments à générer doit être compris entre {0} et {1}.</value>
+  </data>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>Vous ne pouvez pas modifier ce compte ou ce groupe : il dispose d'autorisations que vous n'avez pas vous-même.</value>
+  </data>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>Votre compte ne se trouve plus là où il était lors de votre connexion. Reconnectez-vous.</value>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>Un autre compte de l'annuaire utilise déjà cette adresse e-mail.</value>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>Saisissez de nouveau le mot de passe de liaison pour modifier l'hôte, le port ou les hôtes de basculement. Le mot de passe enregistré n'est envoyé qu'aux serveurs pour lesquels il a été saisi.</value>
   </data>
 </root>

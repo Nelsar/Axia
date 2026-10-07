@@ -88,12 +88,6 @@
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
     <value>הספרייה לא הצליחה לדווח על חברות בקבוצות עבור «{0}».</value>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>הספרייה לא החזירה רשומה עבור «{0}», ולכן החברות בקבוצות אינה ידועה.</value>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>AD לא החזיר אובייקט עבור «{0}», ולכן החברות בקבוצות אינה ידועה.</value>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>הספרייה דחתה את יצירת «{0}».</value>
   </data>
@@ -189,5 +183,17 @@
   </data>
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>מספר הפריטים ליצירה חייב להיות בין {0} ל-{1}.</value>
+  </data>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>אינך יכול לשנות חשבון או קבוצה זו: יש לה הרשאות שאין לך.</value>
+  </data>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>החשבון שלך כבר אינו במקום שבו היה בעת הכניסה. יש להתחבר מחדש.</value>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>חשבון אחר בספרייה כבר משתמש בכתובת הדוא״ל הזו.</value>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>יש להזין שוב את סיסמת הקישור כדי לשנות את המארח, הפורט או מארחי הגיבוי. הסיסמה השמורה נשלחת רק לשרתים שעבורם הוזנה.</value>
   </data>
 </root>

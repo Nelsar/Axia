@@ -28,8 +28,10 @@ internal sealed class PermissionAuthorizationHandler : AuthorizationHandler<Perm
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)
     {
-        var subject = RequestPrincipal.Subject(context.User);
-        if (subject is null)
+        // The entry the caller authenticated as, read by DN — never a search for their login,
+        // which another entry can answer to. See AxiaClaims.DistinguishedName.
+        var entry = RequestPrincipal.DistinguishedName(context.User);
+        if (entry is null)
         {
             // Not signed in, or signed in without anything we can look up. Leaving the
             // requirement unmet produces 401/403 rather than an exception.
@@ -37,7 +39,7 @@ internal sealed class PermissionAuthorizationHandler : AuthorizationHandler<Perm
         }
 
         var permissions = await _permissionResolver.ResolveAsync(
-            subject,
+            entry,
             RequestPrincipal.ProviderId(_httpContextAccessor.HttpContext));
 
         if (permissions.Contains(requirement.Permission))

@@ -88,12 +88,6 @@
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
     <value>目录无法报告“{0}”的组成员关系。</value>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>目录未返回“{0}”的条目，因此其组成员关系未知。</value>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>AD 未返回“{0}”的主体对象，因此其组成员关系未知。</value>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>目录拒绝创建“{0}”。</value>
   </data>
@@ -189,5 +183,17 @@
   </data>
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>要生成的条目数必须介于 {0} 和 {1} 之间。</value>
+  </data>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>您无法更改此帐户或组：它拥有您自己没有的权限。</value>
+  </data>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>您的帐户已不在登录时所在的位置。请重新登录。</value>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>目录中的另一个帐户已在使用此电子邮件地址。</value>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>要更改主机、端口或故障转移主机，请重新输入绑定密码。已保存的密码只会发送到输入时所针对的服务器。</value>
   </data>
 </root>

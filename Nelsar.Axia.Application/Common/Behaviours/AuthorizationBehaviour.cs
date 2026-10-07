@@ -51,8 +51,10 @@ internal sealed class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBeh
         if (_currentUser.IsSystem)
             return await next();
 
-        var subject = _currentUser.Subject;
-        if (string.IsNullOrWhiteSpace(subject))
+        // The entry, not the login: permissions belong to the entry the caller authenticated as,
+        // and a login can be shared by more than one. See AxiaClaims.DistinguishedName.
+        var entry = _currentUser.DistinguishedName;
+        if (string.IsNullOrWhiteSpace(entry))
         {
             _logger.LogWarning("{Request} refused: no authenticated principal.", typeof(TRequest).Name);
             throw new NotAuthenticatedException(ApplicationMessages.AuthenticationRequired());
@@ -61,7 +63,7 @@ internal sealed class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBeh
         // Throws if group membership cannot be established, and that is deliberate: "we could not
         // find out" must never be served as "holds nothing", which would silently strip an
         // administrator mid-session. See IPermissionResolver.
-        var held = await _permissionResolver.ResolveAsync(subject, _currentUser.ProviderId, cancellationToken);
+        var held = await _permissionResolver.ResolveAsync(entry, _currentUser.ProviderId, cancellationToken);
 
         // The request type's own permission first, then whatever its content adds — a bulk batch
         // needs users.create for its create rows and users.update for its update rows. All of

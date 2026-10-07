@@ -88,12 +88,6 @@
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
     <value>El directorio no pudo informar de la pertenencia a grupos de «{0}».</value>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>El directorio no devolvió ninguna entrada para «{0}», por lo que se desconoce su pertenencia a grupos.</value>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>AD no devolvió ningún principal para «{0}», por lo que se desconoce su pertenencia a grupos.</value>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>El directorio rechazó la creación de «{0}».</value>
   </data>
@@ -189,5 +183,17 @@
   </data>
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>El número de elementos a generar debe estar entre {0} y {1}.</value>
+  </data>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>No puede modificar esta cuenta o grupo: tiene permisos que usted no tiene.</value>
+  </data>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>Su cuenta ya no está donde estaba cuando inició sesión. Vuelva a iniciar sesión.</value>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>Otra cuenta del directorio ya usa esta dirección de correo electrónico.</value>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>Vuelva a introducir la contraseña de enlace para cambiar el host, el puerto o los hosts de conmutación por error. La contraseña guardada solo se envía a los servidores para los que se introdujo.</value>
   </data>
 </root>

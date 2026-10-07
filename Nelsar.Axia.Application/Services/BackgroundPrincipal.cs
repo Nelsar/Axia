@@ -19,8 +19,11 @@ namespace Nelsar.Axia.Application.Services;
 /// </summary>
 public sealed class BackgroundPrincipal
 {
-    /// <summary>The subject the work runs as — the login permissions are resolved for.</summary>
+    /// <summary>The subject the work runs as — the login it is audited under.</summary>
     public string? Subject { get; private set; }
+
+    /// <summary>The entry the work runs as — the one permissions are resolved for.</summary>
+    public string? DistinguishedName { get; private set; }
 
     /// <summary>The directory the work is for, or null for the configured default.</summary>
     public Guid? ProviderId { get; private set; }
@@ -31,11 +34,12 @@ public sealed class BackgroundPrincipal
     /// <summary>
     /// Called once, by whoever dispatches the work, before anything in the scope runs. A null
     /// subject is allowed and means the work was queued by nobody; guarded use cases then refuse
-    /// it, which is the answer such a job should get.
+    /// it, which is the answer such a job should get. So is a null DN, with the same result.
     /// </summary>
-    public void RunAs(string? subject, Guid? providerId)
+    public void RunAs(string? subject, string? distinguishedName, Guid? providerId)
     {
         Subject = subject;
+        DistinguishedName = distinguishedName;
         ProviderId = providerId;
         IsSet = true;
     }

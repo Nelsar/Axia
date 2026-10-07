@@ -95,9 +95,9 @@ public class MultiDomainIntegrationTests
         };
 
         var mock = new Mock<ILdapProvider>();
-        mock.Setup(x => x.Authenticate("jsmith@corp.example.com", "AdPassw0rd!")).Returns(true);
+        mock.Setup(x => x.Authenticate("jsmith@corp.example.com", "AdPassw0rd!")).Returns(jsmith.Dn);
         mock.Setup(x => x.FindUser("jsmith@corp.example.com")).Returns(jsmith);
-        mock.Setup(x => x.GetUserGroups("jsmith@corp.example.com")).Returns(jsmith.Groups);
+        mock.Setup(x => x.FindUserByDn(jsmith.Dn)).Returns(jsmith);
         mock.Setup(x => x.GetAllUsers()).Returns(DirectoryUserListing.Complete([jsmith]));
         return mock;
     }
@@ -114,15 +114,16 @@ public class MultiDomainIntegrationTests
         };
 
         var mock = new Mock<ILdapProvider>();
-        mock.Setup(x => x.Authenticate("jdoe@nelsar.com", "Test123!")).Returns(true);
+        mock.Setup(x => x.Authenticate("jdoe@nelsar.com", "Test123!")).Returns(jdoe.Dn);
         mock.Setup(x => x.FindUser("jdoe@nelsar.com")).Returns(jdoe);
-        mock.Setup(x => x.GetUserGroups("jdoe@nelsar.com")).Returns(jdoe.Groups);
+        mock.Setup(x => x.FindUserByDn(jdoe.Dn)).Returns(jdoe);
         mock.Setup(x => x.GetAllUsers()).Returns(DirectoryUserListing.Complete([jdoe]));
         return mock;
     }
 
     /// <summary>
-    /// Role mappings as an admin would configure them for two domains:
+    /// Role mappings as an admin would have configured them for two domains, by group name — the
+    /// rows a database upgraded from before DN mappings still carries:
     /// - "Administrators" → Admin globally (applies to every domain);
     /// - "Domain Admins" → Admin only for the AD domain (AD's built-in group name);
     /// - "UserCreators" → UserCreator globally.
@@ -131,10 +132,10 @@ public class MultiDomainIntegrationTests
     {
         var global = new List<RoleMapping>
         {
-            RoleMapping.Create(null, "Administrators", UserRoles.Admin, 0),
-            RoleMapping.Create(null, "UserCreators", UserRoles.UserCreator, 10)
+            RoleMapping.SeedByGroupName(null, "Administrators", UserRoles.Admin, 0),
+            RoleMapping.SeedByGroupName(null, "UserCreators", UserRoles.UserCreator, 10)
         };
-        var adScoped = RoleMapping.Create(AdProviderId, "Domain Admins", UserRoles.Admin, 0);
+        var adScoped = RoleMapping.SeedByGroupName(AdProviderId, "Domain Admins", UserRoles.Admin, 0);
 
         var mock = new Mock<IRoleMappingRepository>();
         mock.Setup(x => x.GetActiveForProviderAsync(AdProviderId))
@@ -228,9 +229,9 @@ public class MultiDomainIntegrationTests
             Email = "impostor@nelsar.com",
             Groups = ["cn=Domain Admins,ou=groups,dc=nelsar,dc=com"]
         };
-        openLdapMock.Setup(x => x.Authenticate("impostor@nelsar.com", "Test123!")).Returns(true);
+        openLdapMock.Setup(x => x.Authenticate("impostor@nelsar.com", "Test123!")).Returns(impostor.Dn);
         openLdapMock.Setup(x => x.FindUser("impostor@nelsar.com")).Returns(impostor);
-        openLdapMock.Setup(x => x.GetUserGroups("impostor@nelsar.com")).Returns(impostor.Groups);
+        openLdapMock.Setup(x => x.FindUserByDn(impostor.Dn)).Returns(impostor);
 
         using var factory = BuildTwoDomainFactory(openLdapMock: openLdapMock);
         var client = factory.CreateClient();

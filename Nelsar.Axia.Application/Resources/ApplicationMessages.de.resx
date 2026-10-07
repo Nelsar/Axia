@@ -88,12 +88,6 @@
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
     <value>Das Verzeichnis konnte die Gruppenmitgliedschaft für „{0}“ nicht melden.</value>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>Das Verzeichnis lieferte keinen Eintrag für „{0}“, die Gruppenmitgliedschaft ist daher unbekannt.</value>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>AD lieferte kein Principal-Objekt für „{0}“, die Gruppenmitgliedschaft ist daher unbekannt.</value>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>Das Verzeichnis hat das Anlegen von „{0}“ abgelehnt.</value>
   </data>
@@ -189,5 +183,17 @@
   </data>
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>Die Anzahl der zu erzeugenden Elemente muss zwischen {0} und {1} liegen.</value>
+  </data>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>Sie können dieses Konto bzw. diese Gruppe nicht ändern: Es verfügt über Berechtigungen, die Sie selbst nicht haben.</value>
+  </data>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>Ihr Konto befindet sich nicht mehr dort, wo es bei der Anmeldung war. Melden Sie sich erneut an.</value>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>Ein anderes Konto im Verzeichnis verwendet diese E-Mail-Adresse bereits.</value>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>Geben Sie das Bind-Passwort erneut ein, um Host, Port oder Failover-Hosts zu ändern. Das gespeicherte Passwort wird nur an die Server gesendet, für die es eingegeben wurde.</value>
   </data>
 </root>

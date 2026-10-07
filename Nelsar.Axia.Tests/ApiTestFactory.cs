@@ -110,11 +110,19 @@ public class ApiTestFactory : WebApplicationFactory<Program>
 internal sealed class GrantEverythingPermissionResolver : IPermissionResolver
 {
     public Task<IReadOnlySet<string>> ResolveAsync(
-        string subject,
+        string distinguishedName,
         Guid? providerId,
         CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlySet<string>>(
             Permissions.All.ToHashSet(StringComparer.OrdinalIgnoreCase));
+
+    // Everyone holds everything, so no target ever outranks the caller and PrivilegeGuard stays
+    // out of the way of tests that are about something else.
+    public async Task<IReadOnlySet<string>?> ResolveForEntryAsync(
+        string distinguishedName,
+        Guid? providerId,
+        CancellationToken cancellationToken = default) =>
+        await ResolveAsync(distinguishedName, providerId, cancellationToken);
 }
 
 /// <summary>
@@ -123,14 +131,24 @@ internal sealed class GrantEverythingPermissionResolver : IPermissionResolver
 /// </summary>
 internal sealed class TestCurrentUser : ICurrentUser
 {
-    public TestCurrentUser(string? subject = null, Guid? providerId = null, bool isSystem = false)
+    public TestCurrentUser(
+        string? subject = null,
+        Guid? providerId = null,
+        bool isSystem = false,
+        string? distinguishedName = null)
     {
         Subject = subject;
         ProviderId = providerId;
         IsSystem = isSystem;
+
+        // A signed-in caller always has an entry; derived from the subject unless a test names
+        // one, so the many tests that only care that somebody is signed in need not.
+        DistinguishedName = distinguishedName ?? (subject is null ? null : TestAuth.DistinguishedNameFor(subject));
     }
 
     public string? Subject { get; }
+
+    public string? DistinguishedName { get; }
 
     public Guid? ProviderId { get; }
 
@@ -146,8 +164,15 @@ internal sealed class FixedPermissionResolver : IPermissionResolver
         _permissions = permissions.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     public Task<IReadOnlySet<string>> ResolveAsync(
-        string subject,
+        string distinguishedName,
         Guid? providerId,
         CancellationToken cancellationToken = default) => Task.FromResult(_permissions);
+
+    // Every entry holds the same set, the caller included, so a target never outranks them.
+    public Task<IReadOnlySet<string>?> ResolveForEntryAsync(
+        string distinguishedName,
+        Guid? providerId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlySet<string>?>(_permissions);
 }
 

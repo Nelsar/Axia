@@ -54,8 +54,8 @@ internal sealed class AuthenticateCommandHandler : IRequestHandler<AuthenticateC
 
     public async Task<AuthenticateResponse?> Handle(AuthenticateCommand request, CancellationToken cancellationToken)
     {
-        var isAuthenticated = await _ldapService.AuthenticateAsync(request.Login, request.Password);
-        if (!isAuthenticated)
+        var boundDn = await _ldapService.AuthenticateAsync(request.Login, request.Password);
+        if (boundDn is null)
         {
             // Masked and structured. Interpolating the login put it in the message text, where it
             // is neither redactable nor searchable — and a failed-login line is precisely the one
@@ -68,7 +68,11 @@ internal sealed class AuthenticateCommandHandler : IRequestHandler<AuthenticateC
             return null;
         }
 
-        var details = await _ldapService.GetUserDetailsAsync(request.Login);
+        // Read at the DN the password was proven against, not looked up by the login again. A
+        // login can be shared by two entries, and a second search could return the other one —
+        // whose name, address and groups the session would then have carried. Everything below
+        // describes the entry that was bound to, and nothing else.
+        var details = await _ldapService.GetUserByDnAsync(boundDn);
         if (details == null)
         {
             _logger.LogWarning("Credentials accepted but no directory entry describes {Login}.",
@@ -76,7 +80,7 @@ internal sealed class AuthenticateCommandHandler : IRequestHandler<AuthenticateC
             return null;
         }
 
-        var role = await _ldapService.GetUserRoleAsync(request.Login);
+        var role = await _ldapService.GetUserRoleAsync(details);
         var dn = details.Dn;
 
         // Derived from the entry the directory returned, not from what was typed at the login

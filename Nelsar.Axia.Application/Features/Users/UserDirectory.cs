@@ -7,7 +7,9 @@ using Nelsar.Axia.Application.Resources;
 using Nelsar.Axia.Contracts.Common;
 using Nelsar.Axia.Contracts.Responses;
 using Nelsar.Axia.Domain.Entities;
+using Nelsar.Axia.Domain.Exceptions;
 using Nelsar.Axia.Domain.Repositories;
+using Nelsar.Axia.Domain.ValueObjects;
 
 namespace Nelsar.Axia.Application.Features.Users;
 
@@ -98,13 +100,42 @@ internal sealed class UserDirectory
 
     public async Task RememberAsync(UserDto user)
     {
-        _userCache.Set(user.Id, user, UserCacheEntryOptions);
+        // Only a DTO that knows its entry is worth serving from memory. Updates and deletes act
+        // on user.Dn now, so a cached one without it — what CreateUser has in hand before the
+        // directory has said where the entry landed — would be an account nothing can be done
+        // to for the next half hour. Without the cache the next lookup reads the entry instead.
+        if (!string.IsNullOrWhiteSpace(user.Dn))
+            _userCache.Set(user.Id, user, UserCacheEntryOptions);
 
         // Index only identities whose id genuinely derives from the address, so that every
         // lookup can be verified on the way back. Anything else (an entry with neither a mail
         // attribute nor a login) stays walk-only.
         if (DeterministicIdFactory.BuildUserId(user.DirectoryAddress) == user.Id)
             await _userLookup.RecordAsync(user.Id, user.DirectoryAddress);
+    }
+
+    /// <summary>
+    /// Refuses to give the entry at <paramref name="ownDn"/> an address another entry already
+    /// answers to.
+    ///
+    /// Nothing else stops it: the directory does not keep mail unique, and CreateUser checks for a
+    /// clash while an address change did not. A shared address is a login two entries answer to,
+    /// and a lookup by it returns whichever the directory lists first — the next update aimed at
+    /// one could land on the other, and a person could be told they signed in as somebody else.
+    /// </summary>
+    /// <exception cref="DomainConflictException">Another entry answers to the address.</exception>
+    public async Task EnsureAddressIsFreeAsync(string address, string ownDn)
+    {
+        var holder = await _ldapService.GetUserDetailsAsync(address);
+        if (holder is null)
+            return;
+
+        var sameEntry = DistinguishedName.TryCreate(holder.Dn, out var holderDn)
+                        && DistinguishedName.TryCreate(ownDn, out var own)
+                        && string.Equals(holderDn!.Normalized, own!.Normalized, StringComparison.OrdinalIgnoreCase);
+
+        if (!sameEntry)
+            throw new DomainConflictException(ApplicationMessages.EmailAlreadyInUse());
     }
 
     public async Task ForgetAsync(Guid id)

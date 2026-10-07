@@ -124,6 +124,35 @@ public class Provider
     }
 
     /// <summary>
+    /// Whether pointing the provider at these hosts and this port would have it connect somewhere
+    /// it does not connect today: a host, primary or failover, it has not used before, or a port
+    /// it has not used on a host it has. Dropping a failover host does not count; neither does
+    /// re-ordering them.
+    ///
+    /// The stored bind password goes wherever the provider connects, in a simple bind, on the
+    /// very next request. So an endpoint change that keeps the stored password is a way to make
+    /// this server hand the service account's password to a host of the caller's choosing — the
+    /// LDAP pass-back attack. Whoever moves a provider somewhere new has to supply the password
+    /// for it, which they can only do if they already know it.
+    /// </summary>
+    public bool WouldReachNewEndpoint(string? host, LdapPort port, string? failoverHosts)
+    {
+        ArgumentNullException.ThrowIfNull(port);
+
+        var current = Endpoints(Host, Port.Value, FailoverHosts);
+        return Endpoints(host, port.Value, failoverHosts).Any(endpoint => !current.Contains(endpoint));
+    }
+
+    /// <summary>Split the way DefaultLdapProviderFactory splits them when it connects.</summary>
+    private static HashSet<string> Endpoints(string? host, int port, string? failoverHosts) =>
+        new[] { host }
+            .Concat((failoverHosts ?? string.Empty).Split(',',
+                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .Where(candidate => !string.IsNullOrWhiteSpace(candidate))
+            .Select(candidate => $"{candidate!.Trim()}:{port}")
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
     /// Which dialect to speak. Not restricted to a known list on purpose: an unrecognised value
     /// already falls back to the standard LDAP provider, and rejecting one here would make rows
     /// written by an older version unreadable rather than merely unusual.

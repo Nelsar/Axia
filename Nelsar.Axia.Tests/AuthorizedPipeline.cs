@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Moq;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Domain.Authorization;
 using Nelsar.Axia.Domain.Entities;
@@ -37,6 +38,25 @@ internal static class AuthorizedPipeline
     public static IServiceCollection WithAuditTrail(this IServiceCollection services)
     {
         services.TryAddSingleton<IAuditRepository>(new RecordingAuditRepository());
+        return services.WithNoRoleMappings();
+    }
+
+    /// <summary>
+    /// Empty role tables, for PrivilegeGuard to read when a use case checks its target. No group
+    /// is mapped to anything, so it never refuses on a group's account; whether it refuses on a
+    /// user's is the permission resolver's answer. TryAdd, so a test that registers its own wins.
+    /// </summary>
+    public static IServiceCollection WithNoRoleMappings(this IServiceCollection services)
+    {
+        var mappings = new Mock<IRoleMappingRepository>();
+        mappings.Setup(x => x.GetActiveForProviderAsync(It.IsAny<Guid?>())).ReturnsAsync([]);
+        services.TryAddSingleton(mappings.Object);
+
+        var grants = new Mock<IRolePermissionRepository>();
+        grants.Setup(x => x.GetPermissionsForRolesAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new HashSet<string>());
+        services.TryAddSingleton(grants.Object);
+
         return services;
     }
 }

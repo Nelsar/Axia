@@ -258,6 +258,11 @@ export interface RoleMappingDto {
   groupName: string;
   roleName: UserRole;
   priority: number;
+  /**
+   * The mapping names its group by CN alone, from before mappings took a DN, and so matches every
+   * group with that name anywhere in the directory. It still works; saving it requires a DN.
+   */
+  identifiesGroupByNameOnly: boolean;
 }
 
 /** RoleMappingCreateRequest / RoleMappingUpdateRequest. */

@@ -85,4 +85,7 @@
   <data name="PermissionUnknown" xml:space="preserve">
     <value>«{0}» — бұл қолданба анықтайтын рұқсат емес.</value>
   </data>
+  <data name="GroupMappingNeedsDistinguishedName" xml:space="preserve">
+    <value>«{0}» топтың атын көрсетеді, бірақ оның қай жерде екенін көрсетпейді. Топтың толық ажыратушы атын (DN) көрсетіңіз, мысалы CN=Administrators,OU=Groups,DC=example,DC=com: тек атау сол атауы бар барлық топқа сәйкес келеді.</value>
+  </data>
 </root>

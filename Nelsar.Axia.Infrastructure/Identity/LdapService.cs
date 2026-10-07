@@ -23,7 +23,7 @@ internal class LdapService : ILdapService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public Task<bool> AuthenticateAsync(string username, string password)
+    public Task<string?> AuthenticateAsync(string username, string password)
     {
         var provider = _providerFactory.Resolve();
         return Task.FromResult(provider.Authenticate(username, password));
@@ -33,6 +33,12 @@ internal class LdapService : ILdapService
     {
         var provider = _providerFactory.Resolve();
         return Task.FromResult(provider.FindUser(username));
+    }
+
+    public Task<LdapUserInfo?> GetUserByDnAsync(string distinguishedName)
+    {
+        var provider = _providerFactory.Resolve();
+        return Task.FromResult(provider.FindUserByDn(distinguishedName));
     }
 
     public Task<DirectoryEntryAttributes?> GetUserAttributesAsync(string username)
@@ -74,15 +80,15 @@ internal class LdapService : ILdapService
         return Task.CompletedTask;
     }
 
-    public Task UpdateUserAsync(string username, string? newName, string? newEmail, string? newPassword)
+    public Task UpdateUserAsync(string distinguishedName, string? newName, string? newEmail, string? newPassword)
     {
         var provider = _providerFactory.Resolve();
-        provider.UpdateUser(username, newName, newEmail, newPassword);
+        provider.UpdateUser(distinguishedName, newName, newEmail, newPassword);
         return Task.CompletedTask;
     }
 
-    public Task<bool> DeleteUserAsync(string username) =>
-        Task.FromResult(_providerFactory.Resolve().DeleteUser(username));
+    public Task<bool> DeleteUserAsync(string distinguishedName) =>
+        Task.FromResult(_providerFactory.Resolve().DeleteUser(distinguishedName));
 
     public Task<DirectoryOrganizationalUnitListing> GetOrganizationalUnitsAsync() =>
         Task.FromResult(_providerFactory.Resolve().GetAllOrganizationalUnits());
@@ -122,16 +128,10 @@ internal class LdapService : ILdapService
     public Task<bool> DeleteComputerAsync(string dn) =>
         Task.FromResult(_providerFactory.Resolve().DeleteComputer(dn));
 
-    public Task<IReadOnlyList<string>> GetUserGroupsAsync(string username)
+    public Task<string> GetUserRoleAsync(LdapUserInfo entry)
     {
-        var groups = _providerFactory.Resolve().GetUserGroups(username);
-        return Task.FromResult<IReadOnlyList<string>>(groups);
-    }
-
-    public async Task<string> GetUserRoleAsync(string username)
-    {
-        var groups = await GetUserGroupsAsync(username);
-        return await _roleMappingResolver.ResolvePrimaryRoleAsync(groups, TryGetCurrentProviderId());
+        ArgumentNullException.ThrowIfNull(entry);
+        return _roleMappingResolver.ResolvePrimaryRoleAsync(entry.Groups, TryGetCurrentProviderId());
     }
 
     private Guid? TryGetCurrentProviderId()

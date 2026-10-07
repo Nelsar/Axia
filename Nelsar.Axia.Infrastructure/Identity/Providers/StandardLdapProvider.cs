@@ -17,7 +17,7 @@ namespace Nelsar.Axia.Infrastructure.Identity.Providers;
 /// <summary>
 /// The cross-platform LDAP provider, speaking the standard protocol (RFC 4511).
 /// Built on Novell.Directory.Ldap.NETStandard. Selected with ProviderType = "StandardLdap".
-/// Read/auth operations (Authenticate, FindUser, GetAllUsers, GetUserGroups) work against
+/// Read/auth operations (Authenticate, FindUser, FindUserByDn, GetAllUsers) work against
 /// any RFC-compliant directory — Active Directory, OpenLDAP, or Novell eDirectory — since
 /// filters and attribute lookups try both AD-style (sAMAccountName/userPrincipalName) and
 /// generic-style (uid) names. CreateUser is the exception: it writes an inetOrgPerson entry
@@ -100,7 +100,7 @@ internal class StandardLdapProvider : ILdapProvider
         _logger = logger;
     }
 
-    public bool Authenticate(string username, string password)
+    public string? Authenticate(string username, string password)
     {
         // Two phases with different meanings. Looking the account up is our operation — if it
         // fails, we learned nothing about the credentials. Only the bind is the question we
@@ -129,7 +129,7 @@ internal class StandardLdapProvider : ILdapProvider
         if (entry == null)
         {
             _logger.LogWarning("LDAP authentication failed for {Login}: no such entry.", LogMask.Login(username));
-            return false;
+            return null;
         }
 
         try
@@ -137,12 +137,15 @@ internal class StandardLdapProvider : ILdapProvider
             using var bindConn = new LdapConnection();
             bindConn.Connect(_settings.Server, _settings.Port);
             bindConn.Bind(entry.Dn, password);
-            return bindConn.Bound;
+
+            // The DN that was bound to, not just whether the bind held: it is the only thing that
+            // says which entry the password belonged to, and the session belongs to that entry.
+            return bindConn.Bound ? entry.Dn : null;
         }
         catch (LdapException ex) when (IsCredentialRejection(ex))
         {
             _logger.LogWarning("LDAP authentication failed for {Login}: {Reason}", LogMask.Login(username), ex.Message);
-            return false;
+            return null;
         }
         catch (LdapException ex)
         {
@@ -190,6 +193,36 @@ internal class StandardLdapProvider : ILdapProvider
             _logger.LogError(ex, "Error finding LDAP user {Login}.", LogMask.Login(username));
             throw new DirectoryUnavailableException(
                 ApplicationMessages.DirectorySearchFailed(username), ex);
+        }
+    }
+
+    public LdapUserInfo? FindUserByDn(string distinguishedName)
+    {
+        if (string.IsNullOrWhiteSpace(distinguishedName))
+            return null;
+
+        var target = DistinguishedName.Create(distinguishedName);
+        using var conn = ConnectOrThrow();
+
+        try
+        {
+            // A base-object read of exactly this entry. memberOf is among RequestedUserAttributes,
+            // so the groups that decide the session's permissions come back with it.
+            return MapEntry(conn.Read(target.Value, RequestedUserAttributes));
+        }
+        catch (LdapException ex) when (ex.ResultCode == LdapException.NoSuchObject)
+        {
+            // Moved, renamed or deleted since the DN was handed out. Null, so the caller can tell
+            // "this entry is gone" from "we could not ask".
+            return null;
+        }
+        catch (LdapException ex)
+        {
+            // Not null: membership is what authorisation is decided on, and a failed read answered
+            // as "in no groups" would quietly demote an administrator mid-session.
+            _logger.LogError(ex, "Error reading LDAP entry {Dn}.", LogMask.DistinguishedName(target.Value));
+            throw new DirectoryUnavailableException(
+                ApplicationMessages.DirectoryGroupMembershipFailed(target.Value), ex);
         }
     }
 
@@ -295,13 +328,12 @@ internal class StandardLdapProvider : ILdapProvider
         _logger.LogInformation("LDAP user created: {Dn}", LogMask.DistinguishedName(dn));
     }
 
-    public void UpdateUser(string username, string? newName, string? newEmail, string? newPassword)
+    public void UpdateUser(string distinguishedName, string? newName, string? newEmail, string? newPassword)
     {
         EnsureWriteOperationsSupported();
 
+        var target = DistinguishedName.Create(distinguishedName);
         using var conn = ConnectOrThrow();
-        var entry = SearchOne(conn, username)
-            ?? throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInLdap(username));
 
         var mods = new List<LdapModification>();
         if (!string.IsNullOrWhiteSpace(newName))
@@ -320,72 +352,47 @@ internal class StandardLdapProvider : ILdapProvider
         {
             try
             {
-                conn.Modify(entry.Dn, [.. mods]);
+                conn.Modify(target.Value, [.. mods]);
+            }
+            catch (LdapException ex) when (ex.ResultCode == LdapException.NoSuchObject)
+            {
+                throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInLdap(target.Value));
             }
             catch (LdapException ex)
             {
-                throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(entry.Dn), ex);
+                throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(target.Value), ex);
             }
 
-            _logger.LogInformation("LDAP user updated: {Dn}", LogMask.DistinguishedName(entry.Dn));
+            _logger.LogInformation("LDAP user updated: {Dn}", LogMask.DistinguishedName(target.Value));
         }
     }
 
-    public bool DeleteUser(string username)
+    public bool DeleteUser(string distinguishedName)
     {
-        try
-        {
-            EnsureWriteOperationsSupported();
-            using var conn = _connectionFactory.CreateAdminConnection();
-            var entry = SearchOne(conn, username);
-            if (entry == null) return false;
-            conn.Delete(entry.Dn);
-            _logger.LogInformation("LDAP user deleted: {Dn}", LogMask.DistinguishedName(entry.Dn));
-            return true;
-        }
-        catch (LdapException ex)
-        {
-            // Previously this returned false, which the controller reported as 404 — an outage
-            // was indistinguishable from "no such user", and the caller was told the account
-            // did not exist while it sat there untouched. Only a genuinely absent entry
-            // (SearchOne == null above) returns false now.
-            _logger.LogError(ex, "Error deleting LDAP user {Login}.", LogMask.Login(username));
-            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(username), ex);
-        }
-    }
+        EnsureWriteOperationsSupported();
 
-    public string[] GetUserGroups(string username)
-    {
+        var target = DistinguishedName.Create(distinguishedName);
         using var conn = ConnectOrThrow();
 
         try
         {
-            var entry = SearchOne(conn, username);
-            if (entry == null)
-            {
-                // The caller has just authenticated this account, so a missing entry means the
-                // directory is telling us something inconsistent — not that the user belongs to
-                // nothing. Group membership decides authorisation, and an empty array resolves
-                // to the plain User role, so guessing here silently demotes an administrator.
-                throw new DirectoryUnavailableException(
-                    ApplicationMessages.DirectoryEntryMissingForMembership(username));
-            }
-
-            // A genuine empty result is different and still allowed: the entry exists and simply
-            // carries no memberOf values.
-            var attrs = entry.GetAttributeSet();
-            return attrs.TryGetValue("memberOf", out var mo)
-                ? mo.StringValueArray ?? []
-                : [];
+            conn.Delete(target.Value);
+        }
+        catch (LdapException ex) when (ex.ResultCode == LdapException.NoSuchObject)
+        {
+            // The one case that is genuinely "no such user", and the only one allowed to be false.
+            return false;
         }
         catch (LdapException ex)
         {
-            // Was a bare `catch { return []; }`: every failure, including a bug in this method,
-            // came back as "no groups" and was handed straight to the role resolver.
-            _logger.LogError(ex, "Error getting LDAP groups for {Login}.", LogMask.Login(username));
-            throw new DirectoryUnavailableException(
-                ApplicationMessages.DirectoryGroupMembershipFailed(username), ex);
+            // Not false: that used to be reported as 404, telling the caller the account did not
+            // exist while it sat there untouched.
+            _logger.LogError(ex, "Error deleting LDAP user {Dn}.", LogMask.DistinguishedName(target.Value));
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(target.Value), ex);
         }
+
+        _logger.LogInformation("LDAP user deleted: {Dn}", LogMask.DistinguishedName(target.Value));
+        return true;
     }
 
     // --- Organizational units ---

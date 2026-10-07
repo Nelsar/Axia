@@ -167,6 +167,25 @@ never a way to do more.
 An account in none of the groups signs in as `User`. Mappings are editable in the console under
 **Role mappings**.
 
+The seeded mappings name their groups by CN alone, because the seeder cannot know where in your
+directory those groups live — and a mapping by name grants its role to members of *every* group
+with that name, wherever it is, so anyone able to create a group can create an `Administrators`
+of their own. Edit each one to the group's full distinguished name
+(`CN=Administrators,OU=Groups,DC=example,DC=com`) as soon as you can. The console marks the ones
+still by name, and the API logs a warning for each on every start. New and edited mappings must
+be given a DN.
+
+Whatever a role allows, nobody may act on an account or group that can do more than they can: an
+editor can reset a colleague's password but not an administrator's, and holding `groups.manage`
+does not let anyone into a group mapped to a role they do not hold.
+
+Changing a directory's host, port or failover hosts requires entering its bind password again —
+otherwise the stored one would be sent to whatever server the new address points at.
+
+> **Upgrading from a build before DN role mappings:** every session is signed out once, because
+> tokens issued before now do not say which directory entry they belong to and are refused. Signing
+> in again issues one that does.
+
 > **Upgrading from an earlier build:** its first run gave every signed-in account the right to
 > manage groups, organizational units and computers, and to run bulk batches — enough to make
 > oneself an administrator or reset anyone's password. The `RevokeAccidentalDefaultGrants`

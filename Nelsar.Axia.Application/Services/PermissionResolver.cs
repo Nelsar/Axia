@@ -36,30 +36,36 @@ internal class PermissionResolver : IPermissionResolver
     }
 
     public async Task<IReadOnlySet<string>> ResolveAsync(
-        string subject,
+        string distinguishedName,
+        Guid? providerId,
+        CancellationToken cancellationToken = default) =>
+        await ResolveForEntryAsync(distinguishedName, providerId, cancellationToken)
+        // The session names an entry that is not there any more. Nothing it could be granted is
+        // safe to guess at, and a fresh sign-in is what would find the account under its new DN.
+        ?? throw new NotAuthenticatedException(ApplicationMessages.SessionEntryGone());
+
+    public async Task<IReadOnlySet<string>?> ResolveForEntryAsync(
+        string distinguishedName,
         Guid? providerId,
         CancellationToken cancellationToken = default)
     {
         // Keyed by provider too: the same group name can mean different things in different
         // domains, so a cached answer from one must never be served for another.
-        var cacheKey = $"permissions:{providerId}:{subject.ToLowerInvariant()}";
+        var cacheKey = $"permissions:{providerId}:{distinguishedName.ToLowerInvariant()}";
 
         if (_cache.TryGetValue(cacheKey, out IReadOnlySet<string>? cached) && cached is not null)
             return cached;
 
-        // Throws if membership cannot be determined. Not caught here on purpose — see the
-        // remarks on IPermissionResolver.
-        var groups = await _ldapService.GetUserGroupsAsync(subject);
+        // Read at the DN rather than searched for by login. A search returns whichever entry the
+        // directory lists first among those sharing the login, and "first" is not an identity.
+        // Throws if the directory cannot be asked — not caught here on purpose, see the remarks
+        // on IPermissionResolver. Absence is not cached: an entry restored a moment later should
+        // not stay missing for the length of the TTL.
+        var entry = await _ldapService.GetUserByDnAsync(distinguishedName);
+        if (entry is null)
+            return null;
 
-        // The port promises a list; null would mean a provider silently answered "unknown", and
-        // treating that as "in no groups" is the exact failure this design refuses to make.
-        if (groups is null)
-        {
-            throw new DirectoryUnavailableException(
-                ApplicationMessages.DirectoryGroupMembershipFailed(subject));
-        }
-
-        var roles = await _roleMappingResolver.ResolveRolesAsync(groups, providerId);
+        var roles = await _roleMappingResolver.ResolveRolesAsync(entry.Groups, providerId);
         var permissions = await _rolePermissions.GetPermissionsForRolesAsync(roles, cancellationToken);
 
         _cache.Set(cacheKey, permissions, CacheTtl);

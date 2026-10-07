@@ -50,6 +50,10 @@ public static class DomainMessages
     public static string PriorityNegative(int value) =>
         Format(nameof(PriorityNegative), value);
 
+    /// <param name="value">The group as it was given — a bare name, in practice.</param>
+    public static string GroupMappingNeedsDistinguishedName(string value) =>
+        Format(nameof(GroupMappingNeedsDistinguishedName), value);
+
     public static string RateLimitPermitLimitInvalid(int value) =>
         Format(nameof(RateLimitPermitLimitInvalid), value);
 

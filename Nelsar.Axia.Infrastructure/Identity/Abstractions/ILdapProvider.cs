@@ -9,8 +9,20 @@ namespace Nelsar.Axia.Infrastructure.Identity.Abstractions;
 /// </summary>
 internal interface ILdapProvider
 {
-    bool Authenticate(string username, string password);
+    /// <summary>
+    /// The DN of the entry the password was proven against, or null when it was rejected or the
+    /// login named nobody. Outages are exceptions, never null.
+    /// </summary>
+    string? Authenticate(string username, string password);
+
     LdapUserInfo? FindUser(string username);
+
+    /// <summary>
+    /// The entry at exactly <paramref name="distinguishedName"/>, its group DNs included, or null
+    /// when there is no such entry. Read, not searched for, so it cannot be another entry.
+    /// </summary>
+    LdapUserInfo? FindUserByDn(string distinguishedName);
+
     DirectoryUserListing GetAllUsers();
 
     /// <summary>
@@ -21,9 +33,15 @@ internal interface ILdapProvider
     DirectoryEntryAttributes? GetUserAttributes(string username);
 
     void CreateUser(string name, string email, string password);
-    void UpdateUser(string username, string? newName, string? newEmail, string? newPassword);
-    bool DeleteUser(string username);
-    string[] GetUserGroups(string username);
+
+    // An account is changed and deleted by DN, like every other entry here: whoever calls has
+    // already decided which entry it is, and a login looked up again can match a different one.
+
+    /// <exception cref="Nelsar.Axia.Domain.Exceptions.DomainNotFoundException">No entry has that DN.</exception>
+    void UpdateUser(string distinguishedName, string? newName, string? newEmail, string? newPassword);
+
+    /// <summary>False when there was no such entry; refusals are exceptions, never false.</summary>
+    bool DeleteUser(string distinguishedName);
 
     // Organizational units. Addressed by DN rather than by name: an OU name is unique only
     // among its siblings, so "Finance" identifies an entry no better than a bare file name

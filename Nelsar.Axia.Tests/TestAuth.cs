@@ -31,13 +31,18 @@ public static class TestAuth
     /// what most tests want, and which ProviderHeaderMiddleware will refuse to let carry an
     /// X-LDAP-Provider-Id header naming anything else.
     /// </param>
+    /// <summary>The entry a test principal is taken to be, when a test does not name one.</summary>
+    public static string DistinguishedNameFor(string login) => $"CN={login},OU=Users,DC=example,DC=com";
+
     public static string GenerateToken(
         string role,
         string email = "test@example.com",
         string name = "Test User",
         Guid? userId = null,
         string? preferredUsername = null,
-        Guid? providerId = null)
+        Guid? providerId = null,
+        string? distinguishedName = null,
+        bool includeDistinguishedName = true)
     {
         var claims = new List<Claim>
         {
@@ -47,6 +52,14 @@ public static class TestAuth
             new(ClaimTypes.Name, name),
             new(ClaimTypes.Role, role)
         };
+
+        // What every token the service mints carries; leaving it out builds the kind of token
+        // issued before the claim existed, which the API now refuses.
+        if (includeDistinguishedName)
+        {
+            claims.Add(new Claim(AxiaClaims.DistinguishedName,
+                distinguishedName ?? DistinguishedNameFor(preferredUsername ?? email)));
+        }
 
         if (providerId is not null)
         {

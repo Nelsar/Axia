@@ -4,8 +4,27 @@ namespace Nelsar.Axia.Application.Interfaces;
 
 public interface ILdapService
 {
-    Task<bool> AuthenticateAsync(string username, string password);
+    /// <summary>
+    /// Checks the password and returns the DN of the entry it was checked against — null when
+    /// the directory rejected it, or found nobody for the login.
+    ///
+    /// The DN rather than a yes or no, because everything the session does afterwards has to be
+    /// about that entry. A login is a value of mail, uid, sAMAccountName or userPrincipalName,
+    /// which two entries can share; looking it up again after the bind could find the other one.
+    /// </summary>
+    Task<string?> AuthenticateAsync(string username, string password);
+
+    /// <summary>
+    /// The first entry the login matches. For lookups by what a person types or an address a
+    /// caller holds — not for deciding who somebody is; see <see cref="GetUserByDnAsync"/>.
+    /// </summary>
     Task<LdapUserInfo?> GetUserDetailsAsync(string username);
+
+    /// <summary>
+    /// The entry at exactly this DN, group memberships included, or null when there is none. Read
+    /// rather than searched for, so it cannot be any other entry.
+    /// </summary>
+    Task<LdapUserInfo?> GetUserByDnAsync(string distinguishedName);
 
     /// <summary>Every attribute of one account's entry, or null when nothing matched. Values of
     /// credential attributes are never read; the attribute names still are.</summary>
@@ -13,14 +32,22 @@ public interface ILdapService
     Task<DirectoryUserListing> GetAllUsersAsync();
     Task<DirectoryUserListing> SearchUsersAsync(string ldapFilter);
     Task CreateUserAsync(string name, string email, string password);
-    Task UpdateUserAsync(string username, string? newName, string? newEmail, string? newPassword);
-    Task<bool> DeleteUserAsync(string username);
-    /// <summary>Raw group DNs from the directory. Throws when membership cannot be determined —
-    /// an empty list means "in no groups", never "we could not find out".</summary>
-    Task<IReadOnlyList<string>> GetUserGroupsAsync(string username);
 
-    /// <summary>The single role reported as UserDto.Role. Authorisation uses permissions.</summary>
-    Task<string> GetUserRoleAsync(string username);
+    /// <summary>
+    /// Changes the entry at exactly this DN. Addressed by DN, not by login, for the same reason
+    /// as <see cref="GetUserByDnAsync"/>: the caller has already decided which account this is —
+    /// and checked that they may change it — and a second lookup by address could land on
+    /// another entry that shares the address.
+    /// </summary>
+    /// <exception cref="Nelsar.Axia.Domain.Exceptions.DomainNotFoundException">No entry has that DN.</exception>
+    Task UpdateUserAsync(string distinguishedName, string? newName, string? newEmail, string? newPassword);
+
+    /// <summary>Deletes the entry at exactly this DN; false when there is none.</summary>
+    Task<bool> DeleteUserAsync(string distinguishedName);
+
+    /// <summary>The single role reported as UserDto.Role, from the entry's own group DNs.
+    /// Authorisation uses permissions.</summary>
+    Task<string> GetUserRoleAsync(LdapUserInfo entry);
 
     /// <summary>Every organizational unit under the configured base DN, carrying whether the
     /// enumeration finished — absence from a truncated listing proves nothing.</summary>
@@ -37,8 +64,8 @@ public interface ILdapService
     Task<bool> DeleteOrganizationalUnitAsync(string dn);
 
     /// <summary>Every group under the configured base DN, carrying whether the enumeration
-    /// finished — absence from a truncated listing proves nothing. Distinct from
-    /// <see cref="GetUserGroupsAsync"/>, which reads one account's membership.</summary>
+    /// finished — absence from a truncated listing proves nothing. One account's membership is
+    /// on its entry instead; see <see cref="GetUserByDnAsync"/>.</summary>
     Task<DirectoryGroupListing> GetGroupsAsync();
 
     /// <summary>Returns the DN of the entry that was written. <paramref name="memberDns"/> must

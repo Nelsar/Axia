@@ -64,17 +64,23 @@ internal sealed class ProcessBulkUsersCommandHandler
     private readonly ILdapService _ldapService;
     private readonly IAuditService _audit;
     private readonly ActingUser _actingUser;
+    private readonly PrivilegeGuard _privilegeGuard;
+    private readonly UserDirectory _directory;
     private readonly ILogger<ProcessBulkUsersCommandHandler> _logger;
 
     public ProcessBulkUsersCommandHandler(
         ILdapService ldapService,
         IAuditService audit,
         ActingUser actingUser,
+        PrivilegeGuard privilegeGuard,
+        UserDirectory directory,
         ILogger<ProcessBulkUsersCommandHandler> logger)
     {
         _ldapService = ldapService;
         _audit = audit;
         _actingUser = actingUser;
+        _privilegeGuard = privilegeGuard;
+        _directory = directory;
         _logger = logger;
     }
 
@@ -109,13 +115,22 @@ internal sealed class ProcessBulkUsersCommandHandler
 
                     dn = existing.Dn;
 
+                    // The same check a single update makes, row by row: an update row can set a
+                    // password, and holding users.update must not make every administrator's
+                    // password one of them. A refusal fails this row, like any other bad row.
+                    await _privilegeGuard.EnsureMayManageAccountAsync(existing.Dn, cancellationToken);
+
                     // NewEmail was declared on the request but never wired up, so a bulk sheet
                     // asking for an address change silently changed nothing.
                     var newEmail = string.IsNullOrWhiteSpace(request.NewEmail)
                         ? null
                         : Email.Create(request.NewEmail).Value;
 
-                    await _ldapService.UpdateUserAsync(email.Value, request.Name, newEmail, request.Password);
+                    if (newEmail != null && !string.Equals(newEmail, email.Value, StringComparison.OrdinalIgnoreCase))
+                        await _directory.EnsureAddressIsFreeAsync(newEmail, existing.Dn);
+
+                    // By the DN just checked, not the address it was found by.
+                    await _ldapService.UpdateUserAsync(existing.Dn, request.Name, newEmail, request.Password);
                     var resultingEmail = newEmail ?? email.Value;
 
                     item.Status = BulkOperationStatus.Completed;

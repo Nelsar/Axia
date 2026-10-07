@@ -6,5 +6,5 @@ namespace Nelsar.Axia.Application.Features.RoleMappings;
 internal static class RoleMappingMapping
 {
     public static RoleMappingDto ToDto(RoleMapping m) =>
-        new(m.Id, m.ProviderId, m.GroupName, m.RoleName, m.Priority);
+        new(m.Id, m.ProviderId, m.GroupName, m.RoleName, m.Priority, m.IdentifiesGroupByNameOnly);
 }

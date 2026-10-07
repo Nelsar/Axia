@@ -95,4 +95,8 @@
     <value>'{0}' is not a permission this application defines.</value>
     <comment>{0} = the rejected permission.</comment>
   </data>
+  <data name="GroupMappingNeedsDistinguishedName" xml:space="preserve">
+    <value>'{0}' names a group but not where it is. Give the group's full distinguished name, as in CN=Administrators,OU=Groups,DC=example,DC=com: a name alone matches every group that shares it.</value>
+    <comment>{0} = the group as it was given, usually a bare name.</comment>
+  </data>
 </root>

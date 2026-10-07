@@ -37,7 +37,7 @@ export function RoleMappingFormDialog({
           <input
             type="text"
             value={values.groupName}
-            placeholder="Administrators"
+            placeholder="CN=Administrators,OU=Groups,DC=example,DC=com"
             autoFocus
             onChange={(event: ChangeEvent<HTMLInputElement>) => onFieldChange("groupName", event.target.value)}
           />

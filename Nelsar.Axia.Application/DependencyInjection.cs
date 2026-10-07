@@ -66,6 +66,10 @@ public static class DependencyInjection
         services.AddScoped<BackgroundPrincipal>();
         services.AddScoped<ActingUser>();
 
+        // The second half of authorisation: AuthorizationBehaviour asks whether the caller may
+        // perform the operation at all, this asks whether they may perform it on that target.
+        services.AddScoped<PrivilegeGuard>();
+
         // This layer's own collaborators. Ports they depend on (ILdapService, the repositories)
         // are still Infrastructure's to supply.
         services.AddScoped<UserDirectory>();

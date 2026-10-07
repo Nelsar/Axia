@@ -52,10 +52,20 @@ export function RoleMappingsPage(): JSX.Element {
     [mappings.items]
   );
 
+  const anyByName = mappings.items.some((mapping) => mapping.identifiesGroupByNameOnly);
+
   return (
     <CollectionView
       title={t("nav.roleMappings")}
-      hint={t("roleMappings.hint")}
+      hint={
+        anyByName ? (
+          <>
+            {t("roleMappings.hint")} <strong>{t("roleMappings.byNameHint")}</strong>
+          </>
+        ) : (
+          t("roleMappings.hint")
+        )
+      }
       createLabel={t("roleMappings.create")}
       onCreate={() => open("form")}
       status={mappings.status}

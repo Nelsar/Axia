@@ -88,12 +88,6 @@
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
     <value>تعذّر على الدليل الإبلاغ عن عضوية المجموعات لـ «{0}».</value>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>لم يُرجع الدليل أي سجل لـ «{0}»، لذا فعضوية المجموعات غير معروفة.</value>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>لم يُرجع AD أي كائن لـ «{0}»، لذا فعضوية المجموعات غير معروفة.</value>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>رفض الدليل إنشاء «{0}».</value>
   </data>
@@ -189,5 +183,17 @@
   </data>
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>يجب أن يكون عدد العناصر المراد توليدها بين {0} و{1}.</value>
+  </data>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>لا يمكنك تعديل هذا الحساب أو هذه المجموعة: فهي تملك صلاحيات لا تملكها أنت.</value>
+  </data>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>لم يعد حسابك في المكان الذي كان فيه عند تسجيل دخولك. سجّل الدخول مرة أخرى.</value>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>يستخدم حساب آخر في الدليل عنوان البريد الإلكتروني هذا بالفعل.</value>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>أدخل كلمة مرور الربط مرة أخرى لتغيير المضيف أو المنفذ أو المضيفين الاحتياطيين. لا تُرسَل كلمة المرور المحفوظة إلا إلى الخوادم التي أُدخلت لها.</value>
   </data>
 </root>

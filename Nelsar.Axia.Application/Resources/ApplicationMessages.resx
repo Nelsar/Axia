@@ -96,14 +96,6 @@
     <value>The directory could not report group membership for '{0}'.</value>
     <comment>{0} = login.</comment>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>The directory returned no entry for '{0}', so group membership is unknown.</value>
-    <comment>{0} = login.</comment>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>AD returned no principal for '{0}', so group membership is unknown.</value>
-    <comment>{0} = login.</comment>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>The directory rejected creation of '{0}'.</value>
     <comment>{0} = distinguished name.</comment>
@@ -216,5 +208,21 @@
   </data>
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>The number of items to generate must be between {0} and {1}.</value>
+  </data>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>You cannot change this account or group: it holds permissions you do not have yourself.</value>
+    <comment>Refusal to act on an account or group that grants permissions the caller does not hold.</comment>
+  </data>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>Your account is no longer where it was when you signed in. Sign in again.</value>
+    <comment>The directory entry the session was opened for has been moved, renamed or deleted.</comment>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>Another account in the directory already uses this email address.</value>
+    <comment>An address change would give an account an address another account already answers to.</comment>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>Enter the bind password again to change the host, port or failover hosts. The saved password is only ever sent to the servers it was entered for.</value>
+    <comment>Changing a provider's host, port or failover hosts without re-entering its bind password.</comment>
   </data>
 </root>

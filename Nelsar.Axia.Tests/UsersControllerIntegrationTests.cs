@@ -42,7 +42,7 @@ public class UsersControllerIntegrationTests
                     DisplayName = "Bob"
                 }
             }));
-        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<string>())).ReturnsAsync(UserRoles.User);
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>())).ReturnsAsync(UserRoles.User);
 
         using var factory = new ApiTestFactory(services =>
         {
@@ -281,7 +281,7 @@ public class UsersControllerIntegrationTests
             .ReturnsAsync((LdapUserInfo?)null);
         ldapServiceMock.Setup(x => x.CreateUserAsync("New User", "newuser@example.com", "Password123!"))
             .Returns(Task.CompletedTask);
-        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<string>())).ReturnsAsync(UserRoles.User);
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>())).ReturnsAsync(UserRoles.User);
 
         using var factory = new ApiTestFactory(services =>
         {
@@ -316,7 +316,7 @@ public class UsersControllerIntegrationTests
             .ReturnsAsync((AuthenticateResponse?)null);
 
         var ldapServiceMock = new Mock<ILdapService>();
-        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<string>()))
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>()))
             .ReturnsAsync(UserRoles.User);
 
         using var factory = new ApiTestFactory(services =>
@@ -354,7 +354,7 @@ public class UsersControllerIntegrationTests
                     DisplayName = "Alice"
                 }
             }));
-        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<string>())).ReturnsAsync(UserRoles.User);
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>())).ReturnsAsync(UserRoles.User);
 
         using var factory = new ApiTestFactory(services =>
         {
@@ -386,7 +386,7 @@ public class UsersControllerIntegrationTests
         var ldapServiceMock = new Mock<ILdapService>();
         ldapServiceMock.Setup(x => x.GetAllUsersAsync())
             .ReturnsAsync(DirectoryUserListing.Complete(Array.Empty<LdapUserInfo>()));
-        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<string>())).ReturnsAsync(UserRoles.User);
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>())).ReturnsAsync(UserRoles.User);
 
         using var factory = new ApiTestFactory(services =>
         {
@@ -417,7 +417,7 @@ public class UsersControllerIntegrationTests
                     DisplayName = "Alice"
                 }
             }));
-        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<string>())).ReturnsAsync(UserRoles.User);
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>())).ReturnsAsync(UserRoles.User);
         ldapServiceMock.Setup(x => x.UpdateUserAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string>()))
             .Returns(Task.CompletedTask);
 
@@ -466,7 +466,7 @@ public class UsersControllerIntegrationTests
                     DisplayName = "Bob"
                 }
             }));
-        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<string>())).ReturnsAsync(UserRoles.User);
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>())).ReturnsAsync(UserRoles.User);
         ldapServiceMock.Setup(x => x.DeleteUserAsync(It.IsAny<string>()))
             .ReturnsAsync(true);
 
@@ -497,7 +497,7 @@ public class UsersControllerIntegrationTests
         var ldapServiceMock = new Mock<ILdapService>();
         ldapServiceMock.Setup(x => x.GetAllUsersAsync())
             .ReturnsAsync(DirectoryUserListing.Complete(Array.Empty<LdapUserInfo>()));
-        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<string>())).ReturnsAsync(UserRoles.User);
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>())).ReturnsAsync(UserRoles.User);
 
         using var factory = new ApiTestFactory(services =>
         {
@@ -552,7 +552,7 @@ public class UsersControllerIntegrationTests
             .ReturnsAsync((LdapUserInfo?)null);
         ldapServiceMock.Setup(x => x.CreateUserAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
             .Returns(Task.CompletedTask);
-        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<string>())).ReturnsAsync(UserRoles.User);
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>())).ReturnsAsync(UserRoles.User);
 
         // Self-registration is off unless a deployment asks for it, so this test has to ask.
         using var factory = new ApiTestFactory(
@@ -599,7 +599,7 @@ public class UsersControllerIntegrationTests
             .ReturnsAsync(authResponse);
 
         var ldapServiceMock = new Mock<ILdapService>();
-        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<string>()))
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>()))
             .ReturnsAsync(UserRoles.User);
 
         using var factory = new ApiTestFactory(services =>

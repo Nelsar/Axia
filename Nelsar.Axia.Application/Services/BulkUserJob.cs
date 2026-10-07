@@ -33,6 +33,12 @@ public class BulkUserJob
     /// </summary>
     public string? RequestedBy { get; set; }
 
+    /// <summary>
+    /// The entry of whoever queued the batch — what the worker resolves their permissions from,
+    /// alongside <see cref="RequestedBy"/>, which is what it audits them as.
+    /// </summary>
+    public string? RequestedByDn { get; set; }
+
     public List<BulkUserResult> Results { get; set; } = new();
     public BulkJobState State { get; set; } = BulkJobState.Pending;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

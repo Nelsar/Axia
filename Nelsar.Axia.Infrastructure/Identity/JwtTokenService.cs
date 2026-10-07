@@ -24,6 +24,12 @@ internal sealed class JwtTokenService : ITokenService
 
     public string GenerateToken(UserDto user)
     {
+        // Every session is about one entry, and a token that does not say which is refused on
+        // arrival (see AddAuthenticationScheme). Minting one would hand the caller a session that
+        // fails on its first request, so it is a bug here rather than a token.
+        if (string.IsNullOrWhiteSpace(user.Dn))
+            throw new InvalidOperationException("A token cannot be issued for a user without a directory entry.");
+
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
@@ -36,7 +42,11 @@ internal sealed class JwtTokenService : ITokenService
 
             new(JwtRegisteredClaimNames.Email, user.Email),
             new(ClaimTypes.Name, user.Name),
-            new(ClaimTypes.Role, user.Role)
+            new(ClaimTypes.Role, user.Role),
+
+            // The entry the password was proven against. Permissions are resolved from this, read
+            // by DN, rather than by searching for preferred_username — see AxiaClaims.
+            new(AxiaClaims.DistinguishedName, user.Dn)
         };
 
         // Which directory this session belongs to, taken from the request that is signing in.

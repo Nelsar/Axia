@@ -56,6 +56,7 @@ public class BulkPermissionTests
         services.AddSingleton(ldap.Object);
         services.AddSingleton(queue.Object);
         services.AddSingleton(new Mock<IBulkJobStore>().Object);
+        services.AddSingleton(new Mock<Nelsar.Axia.Domain.Repositories.IUserLookupRepository>().Object);
         services.AddSingleton(currentUser);
         services.AddSingleton(permissions);
         services.WithAuditTrail();
@@ -119,7 +120,32 @@ public class BulkPermissionTests
         var result = await sender.Send(new ProcessBulkUsersCommand([ResetAdminPassword]));
 
         Assert.Equal(BulkOperationStatus.Completed, Assert.Single(result.Items).Status);
-        ldap.Verify(x => x.UpdateUserAsync("admin@example.com", "Admin", null, "taken-over"), Times.Once);
+
+        // Addressed by the DN the row resolved to, not the address it was looked up by.
+        ldap.Verify(x => x.UpdateUserAsync("uid=admin,dc=example,dc=com", "Admin", null, "taken-over"), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateRows_AreRefused_ForAnAccountThatCanDoMoreThanTheCaller()
+    {
+        // Holding users.update used to make every administrator's password one row away. The row
+        // naming an account that holds more than the editor fails; the account is not touched.
+        const string editorDn = "uid=editor,dc=example,dc=com";
+        var resolver = new Mock<IPermissionResolver>();
+        resolver.Setup(x => x.ResolveAsync(editorDn, It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new HashSet<string> { Permissions.UsersBulk, Permissions.UsersUpdate });
+        resolver.Setup(x => x.ResolveForEntryAsync("uid=admin,dc=example,dc=com", It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Permissions.All.ToHashSet());
+
+        var (sender, ldap, _) = Pipeline(
+            new TestCurrentUser("editor@example.com", distinguishedName: editorDn),
+            resolver.Object);
+
+        var result = await sender.Send(new ProcessBulkUsersCommand([ResetAdminPassword]));
+
+        Assert.Equal(BulkOperationStatus.Failed, Assert.Single(result.Items).Status);
+        ldap.Verify(x => x.UpdateUserAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()),
+            Times.Never);
     }
 
     [Fact]
@@ -161,18 +187,20 @@ public class BulkPermissionTests
         var asked = new List<string>();
         var resolver = new Mock<IPermissionResolver>();
         resolver.Setup(x => x.ResolveAsync(It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
-            .Callback<string, Guid?, CancellationToken>((subject, _, _) => asked.Add(subject))
+            .Callback<string, Guid?, CancellationToken>((entry, _, _) => asked.Add(entry))
             .ReturnsAsync(new HashSet<string> { Permissions.UsersBulk });
 
+        const string employeeDn = "uid=employee,dc=example,dc=com";
         var (sender, ldap, _) = Pipeline(
             new TestCurrentUser(subject: null),
             resolver.Object,
-            sp => sp.GetRequiredService<BackgroundPrincipal>().RunAs("employee@example.com", null));
+            sp => sp.GetRequiredService<BackgroundPrincipal>().RunAs("employee@example.com", employeeDn, null));
 
         await Assert.ThrowsAsync<PermissionDeniedException>(
             () => sender.Send(new ProcessBulkUsersCommand([ResetAdminPassword])));
 
-        Assert.Equal("employee@example.com", Assert.Single(asked));
+        // Resolved from the entry recorded on the job, not by searching for the login.
+        Assert.Equal(employeeDn, Assert.Single(asked));
         ldap.Verify(x => x.UpdateUserAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()),
             Times.Never);
     }
@@ -183,7 +211,7 @@ public class BulkPermissionTests
         var (sender, _, _) = Pipeline(
             new TestCurrentUser(subject: null),
             new FixedPermissionResolver([.. Permissions.All]),
-            sp => sp.GetRequiredService<BackgroundPrincipal>().RunAs(null, null));
+            sp => sp.GetRequiredService<BackgroundPrincipal>().RunAs(null, null, null));
 
         await Assert.ThrowsAsync<NotAuthenticatedException>(
             () => sender.Send(new ProcessBulkUsersCommand([CreateAccount])));

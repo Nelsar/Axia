@@ -85,4 +85,7 @@
   <data name="PermissionUnknown" xml:space="preserve">
     <value>«{0}» no es un permiso definido por esta aplicación.</value>
   </data>
+  <data name="GroupMappingNeedsDistinguishedName" xml:space="preserve">
+    <value>«{0}» nombra un grupo pero no indica dónde está. Indique el nombre distintivo completo del grupo, como CN=Administrators,OU=Groups,DC=example,DC=com: un nombre por sí solo coincide con todos los grupos que lo comparten.</value>
+  </data>
 </root>

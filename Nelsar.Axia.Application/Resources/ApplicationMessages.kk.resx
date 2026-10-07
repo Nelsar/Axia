@@ -88,12 +88,6 @@
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
     <value>Каталог «{0}» пайдаланушысының топтардағы мүшелігін хабарлай алмады.</value>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>Каталог «{0}» үшін жазба қайтармады, сондықтан топтардағы мүшелігі белгісіз.</value>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>AD «{0}» үшін объект қайтармады, сондықтан топтардағы мүшелігі белгісіз.</value>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>Каталог «{0}» жасауды қабылдамады.</value>
   </data>
@@ -189,5 +183,17 @@
   </data>
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>Жасалатын элементтер саны {0} мен {1} аралығында болуы тиіс.</value>
+  </data>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>Бұл тіркелгіні немесе топты өзгерте алмайсыз: оның сізде жоқ рұқсаттары бар.</value>
+  </data>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>Тіркелгіңіз жүйеге кірген кездегі орнында енді жоқ. Қайта кіріңіз.</value>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>Каталогтағы басқа тіркелгі бұл электрондық пошта мекенжайын пайдаланып отыр.</value>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>Хостты, портты немесе резервтік хосттарды өзгерту үшін байланыс құпиясөзін қайта енгізіңіз. Сақталған құпиясөз тек ол енгізілген серверлерге ғана жіберіледі.</value>
   </data>
 </root>

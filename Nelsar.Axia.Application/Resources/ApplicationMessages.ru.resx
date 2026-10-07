@@ -88,12 +88,6 @@
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
     <value>Каталог не смог сообщить о членстве «{0}» в группах.</value>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>Каталог не вернул запись для «{0}», поэтому членство в группах неизвестно.</value>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>AD не вернул объект для «{0}», поэтому членство в группах неизвестно.</value>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>Каталог отклонил создание «{0}».</value>
   </data>
@@ -193,5 +187,17 @@
   </data>
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>Количество генерируемых элементов должно быть от {0} до {1}.</value>
+  </data>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>Вы не можете изменить эту учётную запись или группу: у неё есть права, которых нет у вас.</value>
+  </data>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>Ваша учётная запись больше не находится там, где была при входе. Войдите снова.</value>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>Этот адрес электронной почты уже использует другая учётная запись в каталоге.</value>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>Чтобы изменить хост, порт или резервные хосты, введите пароль привязки заново. Сохранённый пароль отправляется только на те серверы, для которых он был введён.</value>
   </data>
 </root>

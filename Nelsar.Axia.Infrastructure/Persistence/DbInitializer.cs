@@ -30,6 +30,7 @@ public static class DbInitializer
         await SeedRoleMappingsAsync(db, logger);
         await SeedRateLimitSettingsAsync(db, logger);
         await SeedRolePermissionsAsync(db, logger);
+        await WarnAboutMappingsByNameAsync(db, logger);
     }
 
     /// <summary>
@@ -157,15 +158,42 @@ public static class DbInitializer
 
         // Global (ProviderId = null) defaults matching the historical hardcoded mapping.
         // Editable afterwards via /api/v1/role-mappings without a redeploy.
+        //
+        // By group name, which nothing else may write any more: a fresh database has to grant the
+        // Admin role to somebody before anyone can sign in to configure it, and where those groups
+        // live in a directory this instance has never seen is not something to guess. Each row
+        // matches any group with that CN until an administrator gives it a DN — which is what the
+        // warning below, logged on every start, is for.
         db.RoleMappings.AddRange(
-            Nelsar.Axia.Domain.Entities.RoleMapping.Create(null, "Administrators", UserRoles.Admin, 0),
-            Nelsar.Axia.Domain.Entities.RoleMapping.Create(null, "UserCreators", UserRoles.UserCreator, 10),
-            Nelsar.Axia.Domain.Entities.RoleMapping.Create(null, "UserEditors", UserRoles.UserEditor, 10),
-            Nelsar.Axia.Domain.Entities.RoleMapping.Create(null, "UserDeleters", UserRoles.UserDeleter, 10)
+            Nelsar.Axia.Domain.Entities.RoleMapping.SeedByGroupName(null, "Administrators", UserRoles.Admin, 0),
+            Nelsar.Axia.Domain.Entities.RoleMapping.SeedByGroupName(null, "UserCreators", UserRoles.UserCreator, 10),
+            Nelsar.Axia.Domain.Entities.RoleMapping.SeedByGroupName(null, "UserEditors", UserRoles.UserEditor, 10),
+            Nelsar.Axia.Domain.Entities.RoleMapping.SeedByGroupName(null, "UserDeleters", UserRoles.UserDeleter, 10)
         );
 
         await db.SaveChangesAsync();
         logger.LogInformation("Seeded default role mappings.");
+    }
+
+    /// <summary>
+    /// Names every role mapping that still identifies its group by CN alone. Such a row grants its
+    /// role to members of any group with that name, anywhere in the directory, so whoever can
+    /// create a group can grant themselves the role. The rows keep working, to keep administrators
+    /// from being locked out on upgrade, and this is how somebody finds out they need a DN.
+    /// </summary>
+    private static async Task WarnAboutMappingsByNameAsync(IAppDbContext db, ILogger logger)
+    {
+        var byName = (await db.RoleMappings.AsNoTracking().ToListAsync())
+            .Where(mapping => mapping.IdentifiesGroupByNameOnly)
+            .ToList();
+
+        foreach (var mapping in byName)
+        {
+            logger.LogWarning(
+                "Role mapping {MappingId} grants {Role} to members of any group named {Group}, wherever it is. "
+                + "Edit it to the group's distinguished name through /api/v1/role-mappings.",
+                mapping.Id, mapping.RoleName, mapping.GroupName);
+        }
     }
 
     private static async Task SeedLdapConfigurationAsync(IAppDbContext db, ILogger logger, IServiceProvider services)
