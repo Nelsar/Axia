@@ -196,4 +196,16 @@
   <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
     <value>Geben Sie das Bind-Passwort erneut ein, um Host, Port oder Failover-Hosts zu ändern. Das gespeicherte Passwort wird nur an die Server gesendet, für die es eingegeben wurde.</value>
   </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>Es gibt keine Rolle namens „{0}“.</value>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>Die Rolle {0} hat immer alle Berechtigungen und kann nicht bearbeitet werden. Um jemandem weniger Rechte zu geben, ordnen Sie seine Gruppe einer anderen Rolle zu.</value>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>{0} kann dieser Rolle nicht erteilt werden: Wer sie hat, kann sich selbst zum Administrator machen. Ordnen Sie die Gruppe stattdessen der Rolle Admin zu.</value>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>Sie können keine Berechtigung erteilen, die Sie selbst nicht haben.</value>
+  </data>
 </root>

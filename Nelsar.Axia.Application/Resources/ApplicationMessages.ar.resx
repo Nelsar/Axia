@@ -196,4 +196,16 @@
   <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
     <value>أدخل كلمة مرور الربط مرة أخرى لتغيير المضيف أو المنفذ أو المضيفين الاحتياطيين. لا تُرسَل كلمة المرور المحفوظة إلا إلى الخوادم التي أُدخلت لها.</value>
   </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>لا يوجد دور باسم '{0}'.</value>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>يمتلك الدور {0} جميع الصلاحيات دائمًا ولا يمكن تعديله. لمنح شخص صلاحيات أقل، اربط مجموعته بدور آخر.</value>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>لا يمكن منح {0} لهذا الدور: فمن يملكه يستطيع أن يجعل نفسه مسؤولاً. اربط المجموعة بدور Admin بدلاً من ذلك.</value>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>لا يمكنك منح صلاحية لا تملكها أنت.</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-import type { UserRole } from "../api/dto";
+import type { Permission } from "../api/dto";
 import type { MessageKey } from "./i18n";
 
 export interface NavItem {
@@ -6,8 +6,12 @@ export interface NavItem {
   /** A dictionary key rather than a finished label: a section is called different things and stays the same section. */
   readonly label: MessageKey;
   readonly icon: string;
-  /** The item is hidden without the role. The real permission check belongs to the backend. */
-  readonly roles?: readonly UserRole[];
+  /**
+   * The item is hidden without this permission — the one the page's own listing needs. It used
+   * to be a role, which cannot express "anyone whose roles add up to this". The real check
+   * belongs to the backend.
+   */
+  readonly permission?: Permission;
 }
 
 export interface NavGroup {
@@ -27,8 +31,8 @@ export interface NavGroup {
 }
 
 /**
- * The map of console sections is data rather than markup: the hook reads it to filter by role
- * and the tests read it to check that audit stays invisible to an operator.
+ * The map of console sections is data rather than markup: the hook reads it to filter by
+ * permission, and main.tsx guards each route with the same permission.
  */
 export const NAV_GROUPS: readonly NavGroup[] = [
   { id: "root", title: null, items: [{ path: "/", label: "nav.dashboard", icon: "▣" }] },
@@ -36,24 +40,25 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     id: "directory",
     title: "nav.section.directory",
     items: [
-      { path: "/users", label: "nav.users", icon: "◉" },
-      { path: "/groups", label: "nav.groups", icon: "◎" },
-      { path: "/org-units", label: "nav.orgUnits", icon: "▤" },
-      { path: "/computers", label: "nav.computers", icon: "▢" },
+      { path: "/users", label: "nav.users", icon: "◉", permission: "users.read" },
+      { path: "/groups", label: "nav.groups", icon: "◎", permission: "groups.read" },
+      { path: "/org-units", label: "nav.orgUnits", icon: "▤", permission: "orgunits.read" },
+      { path: "/computers", label: "nav.computers", icon: "▢", permission: "computers.read" },
     ],
   },
   {
     id: "management",
     title: "nav.section.management",
     items: [
-      { path: "/providers", label: "nav.providers", icon: "▧", roles: ["Admin"] },
-      { path: "/role-mappings", label: "nav.roleMappings", icon: "◇", roles: ["Admin"] },
-      { path: "/rate-limits", label: "nav.rateLimits", icon: "◆", roles: ["Admin"] },
+      { path: "/providers", label: "nav.providers", icon: "▧", permission: "providers.manage" },
+      { path: "/role-mappings", label: "nav.roleMappings", icon: "◇", permission: "roles.manage" },
+      { path: "/roles", label: "nav.roles", icon: "◈", permission: "roles.manage" },
+      { path: "/rate-limits", label: "nav.rateLimits", icon: "◆", permission: "ratelimits.manage" },
     ],
   },
   {
     id: "system",
     title: "nav.section.system",
-    items: [{ path: "/audit", label: "nav.audit", icon: "▥", roles: ["Admin"] }],
+    items: [{ path: "/audit", label: "nav.audit", icon: "▥", permission: "audit.read" }],
   },
 ];

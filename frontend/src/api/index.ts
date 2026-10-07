@@ -21,6 +21,8 @@ import type {
   RateLimitUpsertRequest,
   RoleMappingDto,
   RoleMappingWriteRequest,
+  RolePermissionsDto,
+  RolesOverviewDto,
   SelectableProviderDto,
   UserAttributesDto,
   UserCreateRequest,
@@ -156,6 +158,21 @@ export const api = {
       request<ProviderDto>(`/api/v1/providers/${id}`, { method: "PUT", body: payload }),
     remove: (id: Uuid): Promise<void> =>
       requestNoContent(`/api/v1/providers/${id}`, { method: "DELETE" }),
+  },
+
+  me: {
+    /** What the API will allow this session now. Not rate-limited like sign-in, so it can be asked often. */
+    permissions: (): Promise<string[]> => request<string[]>("/api/v1/me/permissions"),
+  },
+
+  roles: {
+    getAll: (): Promise<RolesOverviewDto> => request<RolesOverviewDto>("/api/v1/roles"),
+    /** Replaces what the role holds: a permission left out is revoked. */
+    updatePermissions: (roleName: string, permissions: readonly string[]): Promise<RolePermissionsDto> =>
+      request<RolePermissionsDto>(`/api/v1/roles/${encodeURIComponent(roleName)}/permissions`, {
+        method: "PUT",
+        body: { permissions },
+      }),
   },
 
   roleMappings: {

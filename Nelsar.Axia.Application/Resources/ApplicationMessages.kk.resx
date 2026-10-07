@@ -196,4 +196,16 @@
   <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
     <value>Хостты, портты немесе резервтік хосттарды өзгерту үшін байланыс құпиясөзін қайта енгізіңіз. Сақталған құпиясөз тек ол енгізілген серверлерге ғана жіберіледі.</value>
   </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>«{0}» деп аталатын рөл жоқ.</value>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>{0} рөлінде әрқашан барлық рұқсаттар бар және оны өңдеуге болмайды. Біреуге аз құқық беру үшін оның тобын басқа рөлге сәйкестендіріңіз.</value>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>{0} бұл рөлге берілмейді: оны иеленген адам өзін әкімші ете алады. Оның орнына топты Admin рөліне сәйкестендіріңіз.</value>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>Өзіңізде жоқ рұқсатты бере алмайсыз.</value>
+  </data>
 </root>

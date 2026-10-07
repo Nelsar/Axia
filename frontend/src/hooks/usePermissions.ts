@@ -1,26 +1,35 @@
-import { useMemo } from "react";
-import { hasRole } from "../lib/auth";
+import { useSyncExternalStore } from "react";
+import type { Permission } from "../api/dto";
+import { getPermissions, subscribeToPermissions } from "../lib/permissions";
 
-/** What the users screen is allowed to do. */
+/**
+ * What the session may do, as the API last said — re-rendering whenever the shell refreshes it.
+ * See lib/permissions for why this, and not the role, is what the console asks.
+ */
+export function usePermissionSet(): ReadonlySet<Permission> {
+  return useSyncExternalStore(subscribeToPermissions, getPermissions);
+}
+
+export function useCan(permission: Permission): boolean {
+  return usePermissionSet().has(permission);
+}
+
 export interface UserPermissions {
   readonly canCreate: boolean;
   readonly canEdit: boolean;
   readonly canDelete: boolean;
+  readonly canBulk: boolean;
+  readonly canGenerate: boolean;
 }
 
-// Roles hide buttons that would not work, nothing more: the real permission check is on the
-// backend ([Authorize(Roles=…)]), and the frontend is not the source of truth for authorisation.
+/** One flag per kind of thing the users screen offers, each the permission its endpoint checks. */
 export function useUserPermissions(): UserPermissions {
-  return useMemo<UserPermissions>(
-    () => ({
-      canCreate: hasRole("Admin", "UserCreator"),
-      canEdit: hasRole("Admin", "UserEditor"),
-      canDelete: hasRole("Admin", "UserDeleter"),
-    }),
-    []
-  );
-}
-
-export function useIsAdmin(): boolean {
-  return useMemo<boolean>(() => hasRole("Admin"), []);
+  const held = usePermissionSet();
+  return {
+    canCreate: held.has("users.create"),
+    canEdit: held.has("users.update"),
+    canDelete: held.has("users.delete"),
+    canBulk: held.has("users.bulk"),
+    canGenerate: held.has("users.generate"),
+  };
 }

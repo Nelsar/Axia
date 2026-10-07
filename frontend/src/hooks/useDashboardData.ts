@@ -9,7 +9,7 @@ import type {
   RoleMappingDto,
   UserListingResponse,
 } from "../api/dto";
-import { hasRole } from "../lib/auth";
+import { can } from "../lib/permissions";
 import type { PageRequest } from "./usePagedList";
 
 // Neither /api/v1/groups nor /api/v1/organizational-units returns a total — the response carries a page
@@ -35,7 +35,9 @@ export interface DashboardData {
   readonly groups: DirectoryCount;
   readonly orgUnits: DirectoryCount;
   readonly canListUsers: boolean;
-  readonly isAdmin: boolean;
+  readonly canSeeProviders: boolean;
+  readonly canSeeRoleMappings: boolean;
+  readonly canReadAudit: boolean;
 }
 
 export interface DashboardState {
@@ -65,21 +67,36 @@ export function useDashboardData(): DashboardState {
 
   useEffect(() => {
     isMounted.current = true;
-    const canListUsers = hasRole("Admin", "UserCreator");
-    const isAdmin = hasRole("Admin");
+    // Each tile asks for exactly the permission its endpoint checks — not for a role, which said
+    // nothing about anyone whose roles only add up to it.
+    const canListUsers = can("users.list");
+    const canSeeProviders = can("providers.manage");
+    const canSeeRoleMappings = can("roles.manage");
+    const canReadAudit = can("audit.read");
 
-    // groups.read and orgunits.read are held by every authenticated role (see DbInitializer), so
-    // these two counters are not behind a role check, unlike the rest.
+    // groups.read and orgunits.read are held by every role on a fresh database (see DbInitializer),
+    // so these two counters are asked regardless; a refusal shows as the tile's note.
     void Promise.all([
       canListUsers ? api.users.getAll().catch((): null => null) : Promise.resolve(null),
-      isAdmin ? api.providers.getAll().catch((): null => null) : Promise.resolve(null),
-      isAdmin ? api.roleMappings.getAll().catch((): null => null) : Promise.resolve(null),
-      isAdmin ? api.audit.getRecent(5).catch((): null => null) : Promise.resolve(null),
+      canSeeProviders ? api.providers.getAll().catch((): null => null) : Promise.resolve(null),
+      canSeeRoleMappings ? api.roleMappings.getAll().catch((): null => null) : Promise.resolve(null),
+      canReadAudit ? api.audit.getRecent(5).catch((): null => null) : Promise.resolve(null),
       countDirectoryEntries<GroupDto>((request) => api.groups.search(request)),
       countDirectoryEntries<OrganizationalUnitDto>((request) => api.orgUnits.search(request)),
     ]).then(([users, providers, roleMappings, audit, groups, orgUnits]) => {
       if (!isMounted.current) return;
-      setData({ users, providers, roleMappings, audit, groups, orgUnits, canListUsers, isAdmin });
+      setData({
+        users,
+        providers,
+        roleMappings,
+        audit,
+        groups,
+        orgUnits,
+        canListUsers,
+        canSeeProviders,
+        canSeeRoleMappings,
+        canReadAudit,
+      });
       setStatus("ready");
     });
 

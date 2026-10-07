@@ -196,4 +196,16 @@
   <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
     <value>要更改主机、端口或故障转移主机，请重新输入绑定密码。已保存的密码只会发送到输入时所针对的服务器。</value>
   </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>不存在名为“{0}”的角色。</value>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>{0} 角色始终拥有全部权限，无法编辑。若要给某人较少的权限，请将其组映射到其他角色。</value>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>无法将 {0} 授予此角色：持有它的人可以让自己成为管理员。请改为将该组映射到 Admin 角色。</value>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>您不能授予自己没有的权限。</value>
+  </data>
 </root>

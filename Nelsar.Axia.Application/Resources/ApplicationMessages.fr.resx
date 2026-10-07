@@ -196,4 +196,16 @@
   <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
     <value>Saisissez de nouveau le mot de passe de liaison pour modifier l'hôte, le port ou les hôtes de basculement. Le mot de passe enregistré n'est envoyé qu'aux serveurs pour lesquels il a été saisi.</value>
   </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>Aucun rôle ne s'appelle « {0} ».</value>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>Le rôle {0} détient toujours toutes les autorisations et ne peut pas être modifié. Pour donner moins de droits à quelqu'un, associez son groupe à un autre rôle.</value>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>{0} ne peut pas être accordé à ce rôle : qui le détient peut se faire administrateur. Associez plutôt le groupe au rôle Admin.</value>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>Vous ne pouvez pas accorder une autorisation que vous ne détenez pas vous-même.</value>
+  </data>
 </root>

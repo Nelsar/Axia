@@ -103,6 +103,9 @@ public class UserServiceTests
         Assert.NotEmpty(response.Token);
         Assert.Equal("user@example.com", response.User.Email);
         Assert.Equal(UserRoles.Admin, response.User.Role);
+
+        // What the console decides from — the resolver's answer, here everything, in catalogue order.
+        Assert.Equal(Nelsar.Axia.Domain.Authorization.Permissions.All, response.Permissions);
     }
 
     [Fact]

@@ -55,7 +55,7 @@ export function LoginPage(): JSX.Element {
   const onLoginSubmit = useCallback(
     async (values: LoginFormValues): Promise<void> => {
       const result = await api.auth.login(values.email.trim(), values.password, directoryId);
-      setSession(result.token, result.user, directory);
+      setSession(result.token, result.user, directory, result.permissions);
       toast(t("login.welcome", { name: result.user.name }), { type: "success" });
       navigate("/");
     },

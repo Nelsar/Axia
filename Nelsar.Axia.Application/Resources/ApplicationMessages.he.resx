@@ -196,4 +196,16 @@
   <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
     <value>יש להזין שוב את סיסמת הקישור כדי לשנות את המארח, הפורט או מארחי הגיבוי. הסיסמה השמורה נשלחת רק לשרתים שעבורם הוזנה.</value>
   </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>אין תפקיד בשם '{0}'.</value>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>לתפקיד {0} יש תמיד את כל ההרשאות ולא ניתן לערוך אותו. כדי לתת למישהו פחות זכויות, מפה את הקבוצה שלו לתפקיד אחר.</value>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>לא ניתן להעניק את {0} לתפקיד זה: מי שמחזיק בו יכול להפוך את עצמו למנהל. מפה את הקבוצה לתפקיד Admin במקום זאת.</value>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>אינך יכול להעניק הרשאה שאין לך בעצמך.</value>
+  </data>
 </root>

@@ -15,4 +15,7 @@ public interface IAuthModule : IOpencoreModule
 
     /// <summary>Null means the credentials were refused — not that anything failed.</summary>
     Task<AuthenticateResponse?> LoginAsync(AuthenticateRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>What the signed-in caller may do now, in catalogue order.</summary>
+    Task<IReadOnlyList<string>> GetMyPermissionsAsync(CancellationToken cancellationToken = default);
 }

@@ -92,6 +92,7 @@ public static class DependencyInjection
         services.AddScoped<IComputersModule, ComputersModule>();
         services.AddScoped<IProvidersModule, ProvidersModule>();
         services.AddScoped<IRoleMappingsModule, RoleMappingsModule>();
+        services.AddScoped<IRolesModule, RolesModule>();
         services.AddScoped<IRateLimitSettingsModule, RateLimitSettingsModule>();
         services.AddScoped<IAuditModule, AuditModule>();
 

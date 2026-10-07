@@ -200,4 +200,16 @@
   <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
     <value>Чтобы изменить хост, порт или резервные хосты, введите пароль привязки заново. Сохранённый пароль отправляется только на те серверы, для которых он был введён.</value>
   </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>Роли «{0}» не существует.</value>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>Роль {0} всегда имеет все права и не редактируется. Чтобы дать кому-то меньше прав, сопоставьте его группу с другой ролью.</value>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>Право {0} нельзя выдать этой роли: его владелец может сделать себя администратором. Вместо этого сопоставьте группу с ролью Admin.</value>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>Нельзя выдать право, которого нет у вас самих.</value>
+  </data>
 </root>

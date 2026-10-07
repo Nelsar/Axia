@@ -225,4 +225,20 @@
     <value>Enter the bind password again to change the host, port or failover hosts. The saved password is only ever sent to the servers it was entered for.</value>
     <comment>Changing a provider's host, port or failover hosts without re-entering its bind password.</comment>
   </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>There is no role called '{0}'.</value>
+    <comment>{0} = the role name the caller gave.</comment>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>The {0} role always holds every permission and cannot be edited. To give someone fewer rights, map their group to another role.</value>
+    <comment>{0} = the role, Admin. It holds every permission and is not edited.</comment>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>{0} cannot be granted to this role: whoever holds it can make themselves an administrator. Map the group to the Admin role instead.</value>
+    <comment>{0} = the permission, roles.manage, which is held by Admin alone.</comment>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>You cannot grant a permission you do not hold yourself.</value>
+    <comment>Refusal to grant a role a permission the caller does not hold.</comment>
+  </data>
 </root>

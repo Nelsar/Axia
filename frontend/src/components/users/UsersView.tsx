@@ -62,8 +62,10 @@ export function UsersView({
       >
         <Tabs.List label={t("users.tabs")}>
           <Tabs.Tab value="list">{t("users.tabList")}</Tabs.Tab>
-          <Tabs.Tab value="bulk">{t("users.tabBulk")}</Tabs.Tab>
-          <Tabs.Tab value="generate">{t("users.tabGenerate")}</Tabs.Tab>
+          {/* Offered only to whoever the endpoints behind them will serve; they used to be shown
+              to everybody and answer every action with 403. */}
+          {perms.canBulk && <Tabs.Tab value="bulk">{t("users.tabBulk")}</Tabs.Tab>}
+          {perms.canGenerate && <Tabs.Tab value="generate">{t("users.tabGenerate")}</Tabs.Tab>}
         </Tabs.List>
 
         <Tabs.Panel value="list">

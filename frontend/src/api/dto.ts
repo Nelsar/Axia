@@ -310,10 +310,75 @@ export interface AuthenticateRequest {
   password: string;
 }
 
+/**
+ * Permissions.* from Nelsar.Axia.Domain/Authorization/Permissions.cs, in the backend's catalogue
+ * order. A union for the same reason UserRole is one: a misspelt permission in a visibility check
+ * stops compiling instead of quietly hiding a button forever.
+ */
+export type Permission =
+  | "users.read"
+  | "users.list"
+  | "users.create"
+  | "users.update"
+  | "users.delete"
+  | "users.bulk"
+  | "users.generate"
+  | "groups.read"
+  | "groups.manage"
+  | "orgunits.read"
+  | "orgunits.manage"
+  | "computers.read"
+  | "computers.manage"
+  | "audit.read"
+  | "providers.manage"
+  | "ratelimits.manage"
+  | "roles.manage";
+
+export const PERMISSIONS: readonly Permission[] = [
+  "users.read",
+  "users.list",
+  "users.create",
+  "users.update",
+  "users.delete",
+  "users.bulk",
+  "users.generate",
+  "groups.read",
+  "groups.manage",
+  "orgunits.read",
+  "orgunits.manage",
+  "computers.read",
+  "computers.manage",
+  "audit.read",
+  "providers.manage",
+  "ratelimits.manage",
+  "roles.manage",
+];
+
+/** Narrows a string to a Permission; one this console does not know is dropped, not trusted. */
+export function isPermission(value: unknown): value is Permission {
+  return typeof value === "string" && (PERMISSIONS as readonly string[]).includes(value);
+}
+
 /** AuthenticateResponse. */
 export interface AuthenticateResponse {
   token: string;
   user: UserDto;
+  /** What the API will allow this session, in catalogue order — the union of all its roles. */
+  permissions: string[];
+}
+
+/** RolePermissionsDto. */
+export interface RolePermissionsDto {
+  roleName: string;
+  permissions: string[];
+  /** False for Admin, which holds everything and is not edited. */
+  isEditable: boolean;
+}
+
+/** RolesOverviewDto: the permission catalogue, and every role with what it holds. */
+export interface RolesOverviewDto {
+  permissions: string[];
+  roles: RolePermissionsDto[];
 }
 
 /**

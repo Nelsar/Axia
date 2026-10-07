@@ -4,7 +4,7 @@ import { api } from "../api";
 import type { OrganizationalUnitDto, PagedResponse } from "../api/dto";
 import { confirmAndRun } from "../lib/actions";
 import { useDialog } from "../hooks/useDialog";
-import { useIsAdmin } from "../hooks/usePermissions";
+import { useCan } from "../hooks/usePermissions";
 import { usePagedList } from "../hooks/usePagedList";
 import type { PageRequest } from "../hooks/usePagedList";
 import { DirectoryView } from "../components/directory/DirectoryView";
@@ -16,7 +16,7 @@ const fetchOrgUnits = (request: PageRequest): Promise<PagedResponse<Organization
   api.orgUnits.search(request);
 
 export function OrgUnitsPage(): JSX.Element {
-  const canManage = useIsAdmin();
+  const canManage = useCan("orgunits.manage");
   const list = usePagedList<OrganizationalUnitDto>({
     fetchPage: fetchOrgUnits,
     errorFallback: t("orgUnits.loadFailed"),

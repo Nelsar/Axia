@@ -1,7 +1,9 @@
 import { createRoot } from "react-dom/client";
 import type { ReactElement } from "react";
 import type { Root } from "react-dom/client";
-import { hasRole, isAuthenticated } from "./lib/auth";
+import type { Permission } from "./api/dto";
+import { isAuthenticated } from "./lib/auth";
+import { can } from "./lib/permissions";
 import { navigate, route, startRouter } from "./lib/router";
 import { applyStoredLanguage, t as translate } from "./lib/i18n";
 import { applyStoredTheme } from "./lib/theme";
@@ -15,6 +17,7 @@ import { OrgUnitsPage } from "./containers/OrgUnitsPage";
 import { ProvidersPage } from "./containers/ProvidersPage";
 import { RateLimitsPage } from "./containers/RateLimitsPage";
 import { RoleMappingsPage } from "./containers/RoleMappingsPage";
+import { RolesPage } from "./containers/RolesPage";
 import { UsersPage } from "./containers/UsersPage";
 
 const app = document.getElementById("app");
@@ -45,19 +48,22 @@ function guardOrRedirect(): boolean {
   return true;
 }
 
-function requireAdminOr(fallback = "/"): boolean {
-  if (!hasRole("Admin")) {
+function requirePermissionOr(permission: Permission, fallback = "/"): boolean {
+  if (!can(permission)) {
     navigate(fallback);
     return false;
   }
   return true;
 }
 
-/** A page route: the guard, the shell, and the page inside it. */
-function page(path: string, element: () => ReactElement, adminOnly = false): void {
+/**
+ * A page route: the guard, the shell, and the page inside it. `permission` is the one the page's
+ * own listing needs — the same one its menu item is shown for (see lib/navigation).
+ */
+function page(path: string, element: () => ReactElement, permission?: Permission): void {
   route(path, () => {
     if (!guardOrRedirect()) return;
-    if (adminOnly && !requireAdminOr()) return;
+    if (permission !== undefined && !requirePermissionOr(permission)) return;
     mount(<AppShellContainer activePath={path}>{element()}</AppShellContainer>);
   });
 }
@@ -76,10 +82,11 @@ page("/users", () => <UsersPage />);
 page("/groups", () => <GroupsPage />);
 page("/org-units", () => <OrgUnitsPage />);
 page("/computers", () => <ComputersPage />);
-page("/providers", () => <ProvidersPage />, true);
-page("/role-mappings", () => <RoleMappingsPage />, true);
-page("/rate-limits", () => <RateLimitsPage />, true);
-page("/audit", () => <AuditPage />, true);
+page("/providers", () => <ProvidersPage />, "providers.manage");
+page("/role-mappings", () => <RoleMappingsPage />, "roles.manage");
+page("/roles", () => <RolesPage />, "roles.manage");
+page("/rate-limits", () => <RateLimitsPage />, "ratelimits.manage");
+page("/audit", () => <AuditPage />, "audit.read");
 
 applyStoredTheme();
 applyStoredLanguage();

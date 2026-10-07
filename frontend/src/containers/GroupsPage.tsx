@@ -4,7 +4,7 @@ import { api } from "../api";
 import type { GroupDto, PagedResponse } from "../api/dto";
 import { confirmAndRun } from "../lib/actions";
 import { useDialog } from "../hooks/useDialog";
-import { useIsAdmin } from "../hooks/usePermissions";
+import { useCan } from "../hooks/usePermissions";
 import { usePagedList } from "../hooks/usePagedList";
 import type { PageRequest } from "../hooks/usePagedList";
 import { DirectoryView } from "../components/directory/DirectoryView";
@@ -20,7 +20,7 @@ type GroupDialogKind = "form" | "members";
 const fetchGroups = (request: PageRequest): Promise<PagedResponse<GroupDto>> => api.groups.search(request);
 
 export function GroupsPage(): JSX.Element {
-  const canManage = useIsAdmin();
+  const canManage = useCan("groups.manage");
   // A 501 lands here when the directory is served by the Windows ActiveDirectory provider: it does
   // not manage groups, and its message is more use than an empty list.
   const list = usePagedList<GroupDto>({

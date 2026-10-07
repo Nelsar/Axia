@@ -2,9 +2,12 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nelsar.Axia.Application.Common;
+using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Contracts.Common;
 using Nelsar.Axia.Contracts.Responses;
+using Nelsar.Axia.Contracts.Abstractions;
+using Nelsar.Axia.Domain.Authorization;
 using Nelsar.Axia.Domain.Events;
 using Nelsar.Axia.Contracts.Diagnostics;
 
@@ -36,6 +39,8 @@ internal sealed class AuthenticateCommandHandler : IRequestHandler<AuthenticateC
     private readonly ITokenService _tokenService;
     private readonly IDomainEventPublisher _events;
     private readonly UserDirectory _directory;
+    private readonly IPermissionResolver _permissions;
+    private readonly ActingUser _actingUser;
     private readonly ILogger<AuthenticateCommandHandler> _logger;
 
     public AuthenticateCommandHandler(
@@ -43,12 +48,16 @@ internal sealed class AuthenticateCommandHandler : IRequestHandler<AuthenticateC
         ITokenService tokenService,
         IDomainEventPublisher events,
         UserDirectory directory,
+        IPermissionResolver permissions,
+        ActingUser actingUser,
         ILogger<AuthenticateCommandHandler> logger)
     {
         _ldapService = ldapService;
         _tokenService = tokenService;
         _events = events;
         _directory = directory;
+        _permissions = permissions;
+        _actingUser = actingUser;
         _logger = logger;
     }
 
@@ -105,10 +114,16 @@ internal sealed class AuthenticateCommandHandler : IRequestHandler<AuthenticateC
 
         await _directory.RememberAsync(userDto);
 
+        // Resolved the way every later request will resolve them — for this entry, in the directory
+        // being signed in to — so the console shows from the start what the API will allow, rather
+        // than guessing from Role, which is one role where the API grants the union of all of them.
+        var held = await _permissions.ResolveAsync(dn, _actingUser.ProviderId, cancellationToken);
+
         var response = new AuthenticateResponse
         {
             Token = _tokenService.GenerateToken(userDto),
-            User = userDto
+            User = userDto,
+            Permissions = Permissions.All.Where(held.Contains).ToList()
         };
 
         // The address rather than Email: an account without mail would otherwise be audited as

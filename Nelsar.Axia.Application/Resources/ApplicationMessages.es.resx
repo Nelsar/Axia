@@ -196,4 +196,16 @@
   <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
     <value>Vuelva a introducir la contraseña de enlace para cambiar el host, el puerto o los hosts de conmutación por error. La contraseña guardada solo se envía a los servidores para los que se introdujo.</value>
   </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>No existe ningún rol llamado «{0}».</value>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>El rol {0} siempre tiene todos los permisos y no se puede editar. Para dar a alguien menos derechos, asigne su grupo a otro rol.</value>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>No se puede conceder {0} a este rol: quien lo tenga puede convertirse en administrador. Asigne el grupo al rol Admin en su lugar.</value>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>No puede conceder un permiso que usted no tiene.</value>
+  </data>
 </root>

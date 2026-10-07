@@ -181,6 +181,16 @@ public static class ApplicationMessages
     /// </summary>
     public static string BindPasswordRequiredForNewEndpoint() => Get(nameof(BindPasswordRequiredForNewEndpoint));
 
+    public static string RoleUnknown(string roleName) => Format(nameof(RoleUnknown), roleName);
+
+    /// <summary>Points at what to do instead — a different mapping — because that is the real
+    /// question behind trying to take rights away from Admin.</summary>
+    public static string RoleNotEditable(string roleName) => Format(nameof(RoleNotEditable), roleName);
+
+    public static string PermissionNotGrantable(string permission) => Format(nameof(PermissionNotGrantable), permission);
+
+    public static string CannotGrantUnheldPermission() => Get(nameof(CannotGrantUnheldPermission));
+
     private static string Get(string key) =>
         Manager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
 
