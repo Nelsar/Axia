@@ -111,7 +111,7 @@ public class UserAttributesTests
     }
 
     [Fact]
-    public async Task AnAccountWithMail_IsAddressedByItsMail_NotItsLogin()
+    public async Task DeletingAnAccountWithMail_AddressesItsEntry_NotItsMail()
     {
         var entry = new LdapUserInfo
         {
@@ -128,13 +128,14 @@ public class UserAttributesTests
         var user = (await sender.Send(new GetAllUsersQuery())).Items.Single();
         await sender.Send(new DeleteUserCommand(user.Id));
 
-        // Writes go to the directory by the address, and mail wins when there is one — the
-        // portable search filter matches either, but the id derives from this same choice.
-        ldap.Verify(x => x.DeleteUserAsync("a.mukatov@nelsar.kz"), Times.Once);
+        // By the DN of the entry the id resolved to. Writes used to go by the address, which the
+        // directory was then searched for again — and mail is not unique, so the search could
+        // return a different entry than the one this id names.
+        ldap.Verify(x => x.DeleteUserAsync("uid=amukatov,ou=people,dc=nelsar,dc=kz"), Times.Once);
     }
 
     [Fact]
-    public async Task DeletingAnAccountWithNoMail_AddressesItByLogin_NotByAnEmptyString()
+    public async Task DeletingAnAccountWithNoMail_AddressesItsEntry_NotAnEmptyString()
     {
         var ldap = DirectoryHolding(AccountWithoutMail());
         ldap.Setup(x => x.DeleteUserAsync(It.IsAny<string>())).ReturnsAsync(true);
@@ -143,9 +144,8 @@ public class UserAttributesTests
         var user = (await sender.Send(new GetAllUsersQuery())).Items.Single();
         await sender.Send(new DeleteUserCommand(user.Id));
 
-        // Email is empty for this entry now. Passing it through would ask the directory to
-        // delete the account addressed by "" — which matches nothing, or worse, matches wrongly.
-        ldap.Verify(x => x.DeleteUserAsync("Anuar Mukatov"), Times.Once);
+        // Email is empty for this entry. Its DN is not, and is what the delete is addressed by.
+        ldap.Verify(x => x.DeleteUserAsync("uid=Anuar Mukatov,ou=people,dc=nelsar,dc=kz"), Times.Once);
     }
 
     [Fact]

@@ -17,10 +17,17 @@ namespace Nelsar.Axia.Contracts.Abstractions;
 public interface ICurrentUser
 {
     /// <summary>
-    /// The login permissions are resolved by — the same value the directory is searched with.
-    /// Null when nobody is signed in.
+    /// The login the caller is known by — what the audit trail names them as. Null when nobody
+    /// is signed in. Not what permissions are resolved by: see <see cref="DistinguishedName"/>.
     /// </summary>
     string? Subject { get; }
+
+    /// <summary>
+    /// The directory entry the caller authenticated as. Permissions are resolved from this
+    /// entry's group membership, read by DN rather than found by searching for the login, which
+    /// two entries can share. Null when nobody is signed in.
+    /// </summary>
+    string? DistinguishedName { get; }
 
     /// <summary>
     /// Which directory the caller authenticated against, when they named one. Permissions are

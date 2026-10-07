@@ -88,12 +88,6 @@
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
     <value>הספרייה לא הצליחה לדווח על חברות בקבוצות עבור «{0}».</value>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>הספרייה לא החזירה רשומה עבור «{0}», ולכן החברות בקבוצות אינה ידועה.</value>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>AD לא החזיר אובייקט עבור «{0}», ולכן החברות בקבוצות אינה ידועה.</value>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>הספרייה דחתה את יצירת «{0}».</value>
   </data>
@@ -190,10 +184,43 @@
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>מספר הפריטים ליצירה חייב להיות בין {0} ל-{1}.</value>
   </data>
-  <data name="DirectoryCertificateRejected" xml:space="preserve">
-    <value>לא ניתן היה לאמת את תעודת ה-TLS של הספרייה, ולכן החיבור לא נוצל. בקשו ממנהל לבדוק את התעודה ואת רשות האישורים המהימנה.</value>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>אינך יכול לשנות חשבון או קבוצה זו: יש לה הרשאות שאין לך.</value>
   </data>
-  <data name="LdapSecurityUnknown" xml:space="preserve">
-    <value>'{0}' אינו מצב אבטחת חיבור. השתמשו ב-Ldaps, ב-StartTls או ב-None.</value>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>החשבון שלך כבר אינו במקום שבו היה בעת הכניסה. יש להתחבר מחדש.</value>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>חשבון אחר בספרייה כבר משתמש בכתובת הדוא״ל הזו.</value>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>יש להזין שוב את סיסמת הקישור כדי לשנות את המארח, הפורט או מארחי הגיבוי. הסיסמה השמורה נשלחת רק לשרתים שעבורם הוזנה.</value>
+  </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>אין תפקיד בשם '{0}'.</value>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>לתפקיד {0} יש תמיד את כל ההרשאות ולא ניתן לערוך אותו. כדי לתת למישהו פחות זכויות, מפה את הקבוצה שלו לתפקיד אחר.</value>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>לא ניתן להעניק את {0} לתפקיד זה: מי שמחזיק בו יכול להפוך את עצמו למנהל. מפה את הקבוצה לתפקיד Admin במקום זאת.</value>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>אינך יכול להעניק הרשאה שאין לך בעצמך.</value>
+  </data>
+  <data name="TargetIsProtected" xml:space="preserve">
+    <value>חשבון או קבוצה זו מוגדרים כבעלי הרשאות יתר בספרייה (למשל חבר ב-Domain Admins). רק מנהל של היישום הזה יכול לשנות אותם.</value>
+  </data>
+  <data name="ServiceAccountNotManaged" xml:space="preserve">
+    <value>זהו החשבון שבו היישום עצמו משתמש כדי להתחבר לספרייה. לא ניתן לשנות אותו דרך היישום.</value>
+  </data>
+  <data name="PasswordRejectedByDirectory" xml:space="preserve">
+    <value>הספרייה דחתה את הסיסמה החדשה. כנראה שהיא אינה עומדת במדיניות הסיסמאות (אורך, מורכבות או היסטוריה).</value>
+  </data>
+  <data name="PasswordChangeNeedsEncryption" xml:space="preserve">
+    <value>Active Directory מקבל סיסמה חדשה רק דרך חיבור מוצפן. יש להתחבר לספרייה באמצעות LDAPS.</value>
+  </data>
+  <data name="PasswordChangeUnsupported" xml:space="preserve">
+    <value>ספרייה זו אינה מציעה דרך בטוחה להגדיר סיסמה (לא Active Directory ולא פעולת LDAP Password Modify), ולכן לא נכתבה סיסמה.</value>
   </data>
 </root>

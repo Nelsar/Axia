@@ -96,14 +96,6 @@
     <value>The directory could not report group membership for '{0}'.</value>
     <comment>{0} = login.</comment>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>The directory returned no entry for '{0}', so group membership is unknown.</value>
-    <comment>{0} = login.</comment>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>AD returned no principal for '{0}', so group membership is unknown.</value>
-    <comment>{0} = login.</comment>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>The directory rejected creation of '{0}'.</value>
     <comment>{0} = distinguished name.</comment>
@@ -217,11 +209,56 @@
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>The number of items to generate must be between {0} and {1}.</value>
   </data>
-  <data name="DirectoryCertificateRejected" xml:space="preserve">
-    <value>The directory's TLS certificate could not be verified, so the connection was not used. Ask an administrator to check the certificate and the trusted certificate authority.</value>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>You cannot change this account or group: it holds permissions you do not have yourself.</value>
+    <comment>Refusal to act on an account or group that grants permissions the caller does not hold.</comment>
   </data>
-  <data name="LdapSecurityUnknown" xml:space="preserve">
-    <value>'{0}' is not a connection security mode. Use Ldaps, StartTls or None.</value>
-    <comment>{0} = the rejected value.</comment>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>Your account is no longer where it was when you signed in. Sign in again.</value>
+    <comment>The directory entry the session was opened for has been moved, renamed or deleted.</comment>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>Another account in the directory already uses this email address.</value>
+    <comment>An address change would give an account an address another account already answers to.</comment>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>Enter the bind password again to change the host, port or failover hosts. The saved password is only ever sent to the servers it was entered for.</value>
+    <comment>Changing a provider's host, port or failover hosts without re-entering its bind password.</comment>
+  </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>There is no role called '{0}'.</value>
+    <comment>{0} = the role name the caller gave.</comment>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>The {0} role always holds every permission and cannot be edited. To give someone fewer rights, map their group to another role.</value>
+    <comment>{0} = the role, Admin. It holds every permission and is not edited.</comment>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>{0} cannot be granted to this role: whoever holds it can make themselves an administrator. Map the group to the Admin role instead.</value>
+    <comment>{0} = the permission, roles.manage, which is held by Admin alone.</comment>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>You cannot grant a permission you do not hold yourself.</value>
+    <comment>Refusal to grant a role a permission the caller does not hold.</comment>
+  </data>
+  <data name="TargetIsProtected" xml:space="preserve">
+    <value>This account or group is privileged in the directory (for example, a member of Domain Admins). Only an administrator of this application can change it.</value>
+    <comment>Refusal to change an account or group the directory treats as privileged (adminCount, protected groups).</comment>
+  </data>
+  <data name="ServiceAccountNotManaged" xml:space="preserve">
+    <value>This is the account the application itself uses to connect to the directory. It cannot be changed through the application.</value>
+    <comment>Refusal to change the account the application binds to the directory as.</comment>
+  </data>
+  <data name="PasswordRejectedByDirectory" xml:space="preserve">
+    <value>The directory rejected the new password. It probably does not meet the password policy (length, complexity or history).</value>
+    <comment>The directory refused a new password, usually because of its password policy.</comment>
+  </data>
+  <data name="PasswordChangeNeedsEncryption" xml:space="preserve">
+    <value>Active Directory only accepts a new password over an encrypted connection. Connect to the directory with LDAPS.</value>
+    <comment>Active Directory refused unicodePwd because the connection is not encrypted.</comment>
+  </data>
+  <data name="PasswordChangeUnsupported" xml:space="preserve">
+    <value>This directory offers no safe way to set a password (neither Active Directory nor the LDAP Password Modify operation), so none was written.</value>
+    <comment>The directory offers neither Active Directory's unicodePwd nor the LDAP Password Modify operation.</comment>
   </data>
 </root>

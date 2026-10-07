@@ -88,12 +88,6 @@
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
     <value>目录无法报告“{0}”的组成员关系。</value>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>目录未返回“{0}”的条目，因此其组成员关系未知。</value>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>AD 未返回“{0}”的主体对象，因此其组成员关系未知。</value>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>目录拒绝创建“{0}”。</value>
   </data>
@@ -190,10 +184,43 @@
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>要生成的条目数必须介于 {0} 和 {1} 之间。</value>
   </data>
-  <data name="DirectoryCertificateRejected" xml:space="preserve">
-    <value>无法验证目录的 TLS 证书，因此未使用该连接。请让管理员检查证书和受信任的证书颁发机构。</value>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>您无法更改此帐户或组：它拥有您自己没有的权限。</value>
   </data>
-  <data name="LdapSecurityUnknown" xml:space="preserve">
-    <value>'{0}' 不是有效的连接安全模式。请使用 Ldaps、StartTls 或 None。</value>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>您的帐户已不在登录时所在的位置。请重新登录。</value>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>目录中的另一个帐户已在使用此电子邮件地址。</value>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>要更改主机、端口或故障转移主机，请重新输入绑定密码。已保存的密码只会发送到输入时所针对的服务器。</value>
+  </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>不存在名为“{0}”的角色。</value>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>{0} 角色始终拥有全部权限，无法编辑。若要给某人较少的权限，请将其组映射到其他角色。</value>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>无法将 {0} 授予此角色：持有它的人可以让自己成为管理员。请改为将该组映射到 Admin 角色。</value>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>您不能授予自己没有的权限。</value>
+  </data>
+  <data name="TargetIsProtected" xml:space="preserve">
+    <value>此帐户或组在目录中具有特权（例如 Domain Admins 的成员）。只有本应用程序的管理员才能更改它。</value>
+  </data>
+  <data name="ServiceAccountNotManaged" xml:space="preserve">
+    <value>这是应用程序本身用于连接目录的帐户，不能通过应用程序更改。</value>
+  </data>
+  <data name="PasswordRejectedByDirectory" xml:space="preserve">
+    <value>目录拒绝了新密码，可能不符合密码策略（长度、复杂度或历史记录）。</value>
+  </data>
+  <data name="PasswordChangeNeedsEncryption" xml:space="preserve">
+    <value>Active Directory 只接受通过加密连接设置的新密码。请使用 LDAPS 连接目录。</value>
+  </data>
+  <data name="PasswordChangeUnsupported" xml:space="preserve">
+    <value>该目录没有提供安全设置密码的方式（既不是 Active Directory，也不支持 LDAP Password Modify 操作），因此未写入任何密码。</value>
   </data>
 </root>

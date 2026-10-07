@@ -15,6 +15,22 @@ public interface IRoleMappingResolver
     Task<IReadOnlySet<string>> ResolveRolesAsync(IEnumerable<string> groupDns, Guid? providerId);
 
     /// <summary>
+    /// Only the roles the groups are actually mapped to — empty when none is, rather than the
+    /// User role <see cref="ResolveRolesAsync"/> falls back to. "What does membership of this
+    /// group confer?" is a question about the group, and the fallback is a fact about people.
+    /// </summary>
+    Task<IReadOnlySet<string>> ResolveGrantedRolesAsync(IEnumerable<string> groupDns, Guid? providerId);
+
+    /// <summary>
+    /// Roles granted by any mapping whose group goes by <paramref name="groupName"/>, wherever it
+    /// sits. For a group that does not exist yet, or is about to be renamed, and so has no DN to
+    /// match exactly: a group created under a mapped group's name is either about to be granted
+    /// its role or about to be mistaken for it, and neither should be decided by whoever is
+    /// creating it.
+    /// </summary>
+    Task<IReadOnlySet<string>> ResolveRolesForGroupNameAsync(string groupName, Guid? providerId);
+
+    /// <summary>
     /// The single role reported as <c>UserDto.Role</c>. Kept because that field is part of the
     /// login response and the UI reads it; authorisation itself no longer uses it, and this is
     /// the one place the old winner-takes-all precedence still applies.

@@ -24,7 +24,21 @@ export function roleMappingColumns({
   onDelete,
 }: RoleMappingColumnsConfig): Array<Column<RoleMappingDto>> {
   return [
-    { key: "group", header: t("roleMappings.columnGroup"), className: "cell-mono", cell: (mapping) => mapping.groupName },
+    {
+      key: "group",
+      header: t("roleMappings.columnGroup"),
+      className: "cell-mono",
+      // Flagged, because a mapping by name grants its role to every group that shares the name —
+      // whoever can create a group can create one. The page hint says what to do about it.
+      cell: (mapping) =>
+        mapping.identifiesGroupByNameOnly ? (
+          <>
+            {mapping.groupName} <Badge tone="warning">{t("roleMappings.byNameBadge")}</Badge>
+          </>
+        ) : (
+          mapping.groupName
+        ),
+    },
     { key: "role", header: t("common.role"), cell: (mapping) => <Badge tone="accent">{mapping.roleName}</Badge> },
     {
       key: "provider",

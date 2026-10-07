@@ -88,12 +88,6 @@
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
     <value>تعذّر على الدليل الإبلاغ عن عضوية المجموعات لـ «{0}».</value>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>لم يُرجع الدليل أي سجل لـ «{0}»، لذا فعضوية المجموعات غير معروفة.</value>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>لم يُرجع AD أي كائن لـ «{0}»، لذا فعضوية المجموعات غير معروفة.</value>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>رفض الدليل إنشاء «{0}».</value>
   </data>
@@ -190,10 +184,43 @@
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>يجب أن يكون عدد العناصر المراد توليدها بين {0} و{1}.</value>
   </data>
-  <data name="DirectoryCertificateRejected" xml:space="preserve">
-    <value>تعذّر التحقق من شهادة TLS الخاصة بالدليل، لذلك لم يُستخدم الاتصال. اطلب من المسؤول التحقق من الشهادة ومن جهة إصدار الشهادات الموثوقة.</value>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>لا يمكنك تعديل هذا الحساب أو هذه المجموعة: فهي تملك صلاحيات لا تملكها أنت.</value>
   </data>
-  <data name="LdapSecurityUnknown" xml:space="preserve">
-    <value>'{0}' ليس وضعًا لأمان الاتصال. استخدم Ldaps أو StartTls أو None.</value>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>لم يعد حسابك في المكان الذي كان فيه عند تسجيل دخولك. سجّل الدخول مرة أخرى.</value>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>يستخدم حساب آخر في الدليل عنوان البريد الإلكتروني هذا بالفعل.</value>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>أدخل كلمة مرور الربط مرة أخرى لتغيير المضيف أو المنفذ أو المضيفين الاحتياطيين. لا تُرسَل كلمة المرور المحفوظة إلا إلى الخوادم التي أُدخلت لها.</value>
+  </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>لا يوجد دور باسم '{0}'.</value>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>يمتلك الدور {0} جميع الصلاحيات دائمًا ولا يمكن تعديله. لمنح شخص صلاحيات أقل، اربط مجموعته بدور آخر.</value>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>لا يمكن منح {0} لهذا الدور: فمن يملكه يستطيع أن يجعل نفسه مسؤولاً. اربط المجموعة بدور Admin بدلاً من ذلك.</value>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>لا يمكنك منح صلاحية لا تملكها أنت.</value>
+  </data>
+  <data name="TargetIsProtected" xml:space="preserve">
+    <value>هذا الحساب أو هذه المجموعة ذو امتياز في الدليل (مثل عضو في Domain Admins). لا يمكن تغييره إلا من قِبل مسؤول هذا التطبيق.</value>
+  </data>
+  <data name="ServiceAccountNotManaged" xml:space="preserve">
+    <value>هذا هو الحساب الذي يستخدمه التطبيق نفسه للاتصال بالدليل. لا يمكن تغييره عبر التطبيق.</value>
+  </data>
+  <data name="PasswordRejectedByDirectory" xml:space="preserve">
+    <value>رفض الدليل كلمة المرور الجديدة. على الأرجح أنها لا تستوفي سياسة كلمات المرور (الطول أو التعقيد أو السجل).</value>
+  </data>
+  <data name="PasswordChangeNeedsEncryption" xml:space="preserve">
+    <value>لا يقبل Active Directory كلمة مرور جديدة إلا عبر اتصال مشفّر. اتصل بالدليل باستخدام LDAPS.</value>
+  </data>
+  <data name="PasswordChangeUnsupported" xml:space="preserve">
+    <value>لا يوفّر هذا الدليل طريقة آمنة لتعيين كلمة مرور (لا Active Directory ولا عملية LDAP Password Modify)، لذلك لم تُكتب أي كلمة مرور.</value>
   </data>
 </root>

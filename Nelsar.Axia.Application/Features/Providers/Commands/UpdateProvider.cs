@@ -3,9 +3,11 @@ using MediatR;
 using Nelsar.Axia.Application.Common.Auditing;
 using Nelsar.Axia.Application.Common.Authorization;
 using Nelsar.Axia.Application.Interfaces;
+using Nelsar.Axia.Application.Resources;
 using Nelsar.Axia.Contracts.Common;
 using Nelsar.Axia.Domain.Authorization;
 using Nelsar.Axia.Domain.Entities;
+using Nelsar.Axia.Domain.Exceptions;
 using Nelsar.Axia.Domain.Repositories;
 using Nelsar.Axia.Domain.ValueObjects;
 
@@ -72,12 +74,21 @@ internal sealed class UpdateProviderCommandHandler : IRequestHandler<UpdateProvi
         // enforced on the way in and lost on the way out, and it is also why keeping the existing
         // password took a ternary: the copy started blank, so the old value had to be carried
         // over explicitly or it was erased. Here, not rotating the credential simply leaves it.
+        var port = LdapPort.Create(request.Port);
+
+        // Checked before anything changes, against where the provider points now. Keeping the
+        // stored password while moving the provider somewhere new would have this server send
+        // that password, in a simple bind, to whichever host the request named — see
+        // Provider.WouldReachNewEndpoint. A provider with no stored password has nothing to give
+        // away, and one given a new password is being told what to send.
+        var keepsStoredPassword = string.IsNullOrEmpty(request.AdminPassword)
+                                  && !existing.EncryptedAdminPassword.IsEmpty;
+
+        if (keepsStoredPassword && existing.WouldReachNewEndpoint(request.Host, port, request.FailoverHosts))
+            throw new DomainValidationException(ApplicationMessages.BindPasswordRequiredForNewEndpoint());
+
         existing.Rename(request.Name);
-        existing.PointAt(
-            request.Host,
-            LdapPort.Create(request.Port),
-            ProviderSecurity.Parse(request.Security, whenOmitted: existing.Security),
-            request.FailoverHosts);
+        existing.PointAt(request.Host, port, request.FailoverHosts);
         existing.ChangeType(request.ProviderType);
         existing.UseSearchRoot(request.BaseDn);
         existing.UseAdminAccount(request.AdminUsername);

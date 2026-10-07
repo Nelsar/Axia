@@ -38,12 +38,12 @@ function StatCard({ label, value, note }: StatCardProps): JSX.Element {
 
 interface AuditPreviewProps {
   audit: PagedResponse<AuditEventDto> | null;
-  isAdmin: boolean;
+  canReadAudit: boolean;
 }
 
-function AuditPreview({ audit, isAdmin }: AuditPreviewProps): JSX.Element {
-  if (!isAdmin) {
-    return <div className="card__pad text-muted">{t("dashboard.auditAdminOnly")}</div>;
+function AuditPreview({ audit, canReadAudit }: AuditPreviewProps): JSX.Element {
+  if (!canReadAudit) {
+    return <div className="card__pad text-muted">{t("dashboard.auditNotPermitted")}</div>;
   }
   if (audit === null || audit.items.length === 0) {
     return <div className="card__pad text-muted">{t("dashboard.noEvents")}</div>;
@@ -93,12 +93,12 @@ export function DashboardView({ user, status, data }: DashboardViewProps): JSX.E
             <StatCard
               label={t("nav.providers")}
               value={data.providers !== null ? data.providers.length : null}
-              note={data.isAdmin ? null : t("common.adminOnly")}
+              note={data.canSeeProviders ? null : t("common.notPermitted")}
             />
             <StatCard
               label={t("nav.roleMappings")}
               value={data.roleMappings !== null ? data.roleMappings.length : null}
-              note={data.isAdmin ? null : t("common.adminOnly")}
+              note={data.canSeeRoleMappings ? null : t("common.notPermitted")}
             />
             <StatCard
               label={t("nav.groups")}
@@ -115,9 +115,9 @@ export function DashboardView({ user, status, data }: DashboardViewProps): JSX.E
           <Card>
             <Card.Header>
               <span>{t("dashboard.recentAudit")}</span>
-              {data.isAdmin && <a href="#/audit">{t("dashboard.auditLink")}</a>}
+              {data.canReadAudit && <a href="#/audit">{t("dashboard.auditLink")}</a>}
             </Card.Header>
-            <AuditPreview audit={data.audit} isAdmin={data.isAdmin} />
+            <AuditPreview audit={data.audit} canReadAudit={data.canReadAudit} />
           </Card>
 
           <div className="stub-notice" style={{ textAlign: "start" }}>

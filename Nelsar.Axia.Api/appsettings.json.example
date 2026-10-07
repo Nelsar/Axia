@@ -85,6 +85,31 @@
         "AllowSelfRegistration": false
     },
 
+    // Which directory group each role is granted to, by distinguished name. Admin is required:
+    // without it the application refuses to start, because nobody could sign in to configure it.
+    // On an existing database, global mappings still written by group name are converted to these
+    // DNs at the next start.
+    //
+    // A mapping by name ("Administrators") matches every group of that name anywhere in the
+    // directory, so anyone able to create a group could make themselves an administrator. Such
+    // mappings are ignored unless AllowMappingsByName is true, which reopens exactly that hole.
+    "RoleMappings": {
+        "GroupDns": {
+            "Admin": "cn=Administrators,ou=groups,dc=nelsar,dc=kz",
+            "UserCreator": "cn=UserCreators,ou=groups,dc=nelsar,dc=kz"
+        },
+        "AllowMappingsByName": false
+    },
+
+    // Groups that only an administrator of this application may change, or change anyone in. Active
+    // Directory needs nothing here: adminCount already marks Domain Admins and the other protected
+    // groups and their members. OpenLDAP marks nothing, so name the groups that make someone an
+    // administrator of the directory itself. The account in Ldap:AdminUsername is never changeable
+    // through the application, by anyone.
+    "DirectoryProtection": {
+        "ProtectedGroups": [ "cn=Administrators,ou=groups,dc=nelsar,dc=kz" ]
+    },
+
     // Which websites may call this API from a browser. Empty means loopback only, which is
     // what development needs and what keeps an exposed port from becoming an open API. Name
     // the console's own origin when it is hosted anywhere else; naming any origin replaces the

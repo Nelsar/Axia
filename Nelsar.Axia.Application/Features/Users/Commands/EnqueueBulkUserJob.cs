@@ -71,7 +71,8 @@ internal sealed class EnqueueBulkUserJobCommandHandler : IRequestHandler<Enqueue
 
             // Who the job runs as. The worker has no request to read a principal from, so without
             // this the batch ran as nobody: unchecked, and unattributed in the audit trail.
-            RequestedBy = _currentUser.Subject
+            RequestedBy = _currentUser.Subject,
+            RequestedByDn = _currentUser.DistinguishedName
         };
 
         _bulkJobStore.Add(job);

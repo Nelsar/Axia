@@ -92,12 +92,6 @@ public static class ApplicationMessages
     public static string DirectoryGroupMembershipFailed(string login) =>
         Format(nameof(DirectoryGroupMembershipFailed), login);
 
-    public static string DirectoryEntryMissingForMembership(string login) =>
-        Format(nameof(DirectoryEntryMissingForMembership), login);
-
-    public static string AdPrincipalMissingForMembership(string login) =>
-        Format(nameof(AdPrincipalMissingForMembership), login);
-
     public static string DirectoryRejectedCreate(string distinguishedName) =>
         Format(nameof(DirectoryRejectedCreate), distinguishedName);
 
@@ -174,6 +168,50 @@ public static class ApplicationMessages
     /// caller probing the API a map of the authorisation model — that detail goes to the log.
     /// </summary>
     public static string PermissionDenied() => Get(nameof(PermissionDenied));
+
+    /// <summary>
+    /// The caller may perform the operation, just not on this account or group, because it can do
+    /// something they cannot. Says no more than that, for the reason PermissionDenied does not
+    /// name the permission: which ones the target holds is for the log.
+    /// </summary>
+    public static string TargetHoldsMorePermissions() => Get(nameof(TargetHoldsMorePermissions));
+
+    /// <summary>
+    /// The session names a directory entry that is no longer there. A 401, so the console signs
+    /// its user out and back in, which finds the account wherever it is now.
+    /// </summary>
+    public static string SessionEntryGone() => Get(nameof(SessionEntryGone));
+
+    public static string EmailAlreadyInUse() => Get(nameof(EmailAlreadyInUse));
+
+    /// <summary>
+    /// Says what to do rather than why: the reason — that the stored password would otherwise be
+    /// sent to the new host — is in Provider.WouldReachNewEndpoint, and the person changing the
+    /// address needs only to know the password has to come with it.
+    /// </summary>
+    public static string BindPasswordRequiredForNewEndpoint() => Get(nameof(BindPasswordRequiredForNewEndpoint));
+
+    public static string RoleUnknown(string roleName) => Format(nameof(RoleUnknown), roleName);
+
+    /// <summary>Points at what to do instead — a different mapping — because that is the real
+    /// question behind trying to take rights away from Admin.</summary>
+    public static string RoleNotEditable(string roleName) => Format(nameof(RoleNotEditable), roleName);
+
+    public static string PermissionNotGrantable(string permission) => Format(nameof(PermissionNotGrantable), permission);
+
+    public static string CannotGrantUnheldPermission() => Get(nameof(CannotGrantUnheldPermission));
+
+    /// <summary>Privileged by the directory's own reckoning; names the usual reason, not the attribute.</summary>
+    public static string TargetIsProtected() => Get(nameof(TargetIsProtected));
+
+    public static string ServiceAccountNotManaged() => Get(nameof(ServiceAccountNotManaged));
+
+    /// <summary>The directory's policy said no — the caller's to fix, so it reads as advice.</summary>
+    public static string PasswordRejectedByDirectory() => Get(nameof(PasswordRejectedByDirectory));
+
+    public static string PasswordChangeNeedsEncryption() => Get(nameof(PasswordChangeNeedsEncryption));
+
+    public static string PasswordChangeUnsupported() => Get(nameof(PasswordChangeUnsupported));
 
     private static string Get(string key) =>
         Manager.GetString(key, CultureInfo.CurrentUICulture) ?? key;

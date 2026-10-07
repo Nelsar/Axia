@@ -88,12 +88,6 @@
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
     <value>Каталог «{0}» пайдаланушысының топтардағы мүшелігін хабарлай алмады.</value>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>Каталог «{0}» үшін жазба қайтармады, сондықтан топтардағы мүшелігі белгісіз.</value>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>AD «{0}» үшін объект қайтармады, сондықтан топтардағы мүшелігі белгісіз.</value>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>Каталог «{0}» жасауды қабылдамады.</value>
   </data>
@@ -190,10 +184,43 @@
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>Жасалатын элементтер саны {0} мен {1} аралығында болуы тиіс.</value>
   </data>
-  <data name="DirectoryCertificateRejected" xml:space="preserve">
-    <value>Каталогтың TLS сертификатын тексеру мүмкін болмады, сондықтан қосылым пайдаланылмады. Әкімшіден сертификатты және сенімді сертификаттау орталығын тексеруді сұраңыз.</value>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>Бұл тіркелгіні немесе топты өзгерте алмайсыз: оның сізде жоқ рұқсаттары бар.</value>
   </data>
-  <data name="LdapSecurityUnknown" xml:space="preserve">
-    <value>'{0}' қосылымды қорғау режимі емес. Ldaps, StartTls немесе None қолданыңыз.</value>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>Тіркелгіңіз жүйеге кірген кездегі орнында енді жоқ. Қайта кіріңіз.</value>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>Каталогтағы басқа тіркелгі бұл электрондық пошта мекенжайын пайдаланып отыр.</value>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>Хостты, портты немесе резервтік хосттарды өзгерту үшін байланыс құпиясөзін қайта енгізіңіз. Сақталған құпиясөз тек ол енгізілген серверлерге ғана жіберіледі.</value>
+  </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>«{0}» деп аталатын рөл жоқ.</value>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>{0} рөлінде әрқашан барлық рұқсаттар бар және оны өңдеуге болмайды. Біреуге аз құқық беру үшін оның тобын басқа рөлге сәйкестендіріңіз.</value>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>{0} бұл рөлге берілмейді: оны иеленген адам өзін әкімші ете алады. Оның орнына топты Admin рөліне сәйкестендіріңіз.</value>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>Өзіңізде жоқ рұқсатты бере алмайсыз.</value>
+  </data>
+  <data name="TargetIsProtected" xml:space="preserve">
+    <value>Бұл тіркелгі немесе топ каталогта артықшылықты (мысалы, Domain Admins мүшесі). Оны тек осы қолданбаның әкімшісі өзгерте алады.</value>
+  </data>
+  <data name="ServiceAccountNotManaged" xml:space="preserve">
+    <value>Бұл қолданбаның өзі каталогқа қосылу үшін пайдаланатын тіркелгі. Оны қолданба арқылы өзгертуге болмайды.</value>
+  </data>
+  <data name="PasswordRejectedByDirectory" xml:space="preserve">
+    <value>Каталог жаңа құпиясөзді қабылдамады. Ол құпиясөз саясатына (ұзындық, күрделілік немесе тарих) сай келмейтін сияқты.</value>
+  </data>
+  <data name="PasswordChangeNeedsEncryption" xml:space="preserve">
+    <value>Active Directory жаңа құпиясөзді тек шифрланған қосылым арқылы қабылдайды. Каталогқа LDAPS арқылы қосылыңыз.</value>
+  </data>
+  <data name="PasswordChangeUnsupported" xml:space="preserve">
+    <value>Бұл каталогта құпиясөзді қауіпсіз орнату тәсілі жоқ (Active Directory де, LDAP Password Modify операциясы да жоқ), сондықтан ешқандай құпиясөз жазылмады.</value>
   </data>
 </root>

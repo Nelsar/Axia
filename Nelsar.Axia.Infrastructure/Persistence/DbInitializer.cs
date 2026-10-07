@@ -19,7 +19,7 @@ public static class DbInitializer
         // this method has run — and seeding is where the encryption key is first used.
         _ = scope.ServiceProvider.GetRequiredService<IOptions<JwtSettings>>().Value;
         _ = scope.ServiceProvider.GetRequiredService<IOptions<EncryptionSettings>>().Value;
-        _ = scope.ServiceProvider.GetRequiredService<IOptions<LdapSettings>>().Value;
+        var roleMappings = scope.ServiceProvider.GetRequiredService<IOptions<RoleMappingOptions>>().Value;
 
         var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<AppDbContext>>();
@@ -28,9 +28,11 @@ public static class DbInitializer
         logger.LogInformation("Database migration applied.");
 
         await SeedLdapConfigurationAsync(db, logger, scope.ServiceProvider);
-        await SeedRoleMappingsAsync(db, logger);
+        await SeedRoleMappingsAsync(db, logger, roleMappings);
         await SeedRateLimitSettingsAsync(db, logger);
         await SeedRolePermissionsAsync(db, logger);
+        await ReportMappingsByNameAsync(db, logger, roleMappings);
+        await EnsureAnAdministratorIsMappedAsync(db, roleMappings);
     }
 
     /// <summary>
@@ -149,24 +151,126 @@ public static class DbInitializer
         logger.LogInformation("Seeded default role permissions for {RoleCount} roles.", grants.Count);
     }
 
-    private static async Task SeedRoleMappingsAsync(IAppDbContext db, ILogger logger)
+    /// <summary>
+    /// The role mappings a deployment starts with, and the upgrade of the ones it already has.
+    ///
+    /// On an empty table: one mapping per group in RoleMappings:GroupDns, by DN. Nothing is
+    /// guessed: where a directory this instance has never seen keeps its administrators is the
+    /// operator's to say. The old by-name defaults are written only where the operator has said
+    /// RoleMappings:AllowMappingsByName, which is the old behaviour, hole included.
+    ///
+    /// On a table that has rows: every global mapping still written by name, for a role
+    /// GroupDns now gives a DN for, is converted to that DN. That is the whole upgrade — set the
+    /// DNs, restart — and it touches only global rows, because a DN names a group in one
+    /// directory and a row scoped to another directory is not about that group.
+    /// </summary>
+    internal static async Task SeedRoleMappingsAsync(IAppDbContext db, ILogger logger, RoleMappingOptions options)
     {
-        if (await db.RoleMappings.AnyAsync())
+        if (!await db.RoleMappings.AnyAsync())
         {
+            if (options.GroupDns.Count > 0)
+            {
+                foreach (var (role, groupDn) in options.GroupDns)
+                {
+                    var canonical = UserRoles.Canonical(role)!;
+                    db.RoleMappings.Add(RoleMapping.Create(null, groupDn, canonical, canonical == UserRoles.Admin ? 0 : 10));
+                }
+
+                await db.SaveChangesAsync();
+                logger.LogInformation("Seeded role mappings for {Roles} from RoleMappings:GroupDns.",
+                    string.Join(", ", options.GroupDns.Keys));
+            }
+            else if (options.AllowMappingsByName)
+            {
+                db.RoleMappings.AddRange(
+                    RoleMapping.SeedByGroupName(null, "Administrators", UserRoles.Admin, 0),
+                    RoleMapping.SeedByGroupName(null, "UserCreators", UserRoles.UserCreator, 10),
+                    RoleMapping.SeedByGroupName(null, "UserEditors", UserRoles.UserEditor, 10),
+                    RoleMapping.SeedByGroupName(null, "UserDeleters", UserRoles.UserDeleter, 10));
+
+                await db.SaveChangesAsync();
+                logger.LogWarning("Seeded role mappings by group name, as RoleMappings:AllowMappingsByName asks.");
+            }
+
             return;
         }
 
-        // Global (ProviderId = null) defaults matching the historical hardcoded mapping.
-        // Editable afterwards via /api/v1/role-mappings without a redeploy.
-        db.RoleMappings.AddRange(
-            Nelsar.Axia.Domain.Entities.RoleMapping.Create(null, "Administrators", UserRoles.Admin, 0),
-            Nelsar.Axia.Domain.Entities.RoleMapping.Create(null, "UserCreators", UserRoles.UserCreator, 10),
-            Nelsar.Axia.Domain.Entities.RoleMapping.Create(null, "UserEditors", UserRoles.UserEditor, 10),
-            Nelsar.Axia.Domain.Entities.RoleMapping.Create(null, "UserDeleters", UserRoles.UserDeleter, 10)
-        );
+        var converted = 0;
+        foreach (var mapping in await db.RoleMappings.Where(m => m.ProviderId == null).ToListAsync())
+        {
+            if (!mapping.IdentifiesGroupByNameOnly
+                || UserRoles.Canonical(mapping.RoleName) is not { } role
+                || !options.GroupDns.TryGetValue(role, out var groupDn))
+            {
+                continue;
+            }
 
-        await db.SaveChangesAsync();
-        logger.LogInformation("Seeded default role mappings.");
+            logger.LogInformation("Role mapping {MappingId} for {Role}: group '{Group}' becomes {GroupDn}.",
+                mapping.Id, role, mapping.GroupName, groupDn);
+            mapping.MapGroup(groupDn);
+            converted++;
+        }
+
+        if (converted > 0)
+            await db.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Names every role mapping that still identifies its group by CN alone — as ignored, which is
+    /// what they are by default, or as the hole they are where RoleMappings:AllowMappingsByName
+    /// keeps them working. Logged on every start, so it cannot be missed for long.
+    /// </summary>
+    private static async Task ReportMappingsByNameAsync(IAppDbContext db, ILogger logger, RoleMappingOptions options)
+    {
+        var byName = (await db.RoleMappings.AsNoTracking().ToListAsync())
+            .Where(mapping => mapping.IdentifiesGroupByNameOnly)
+            .ToList();
+
+        foreach (var mapping in byName)
+        {
+            if (options.AllowMappingsByName)
+            {
+                logger.LogWarning(
+                    "Role mapping {MappingId} grants {Role} to members of any group named {Group}, wherever it is. "
+                    + "Give it the group's distinguished name through /api/v1/role-mappings or RoleMappings:GroupDns.",
+                    mapping.Id, mapping.RoleName, mapping.GroupName);
+            }
+            else
+            {
+                logger.LogError(
+                    "Role mapping {MappingId} names its group as '{Group}' and grants {Role} to nobody: mappings by name "
+                    + "are ignored. Set RoleMappings:GroupDns:{Role} to the group's distinguished name and restart.",
+                    mapping.Id, mapping.GroupName, mapping.RoleName, mapping.RoleName);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Refuses to start when nobody could administer the application: no mapping grants the Admin
+    /// role by distinguished name, and mappings by name — which might — are switched off.
+    ///
+    /// The alternative is an instance that starts and that nobody can sign in to as an
+    /// administrator, so nobody can fix the mappings through it either. Better to stop here, with
+    /// the setting named, than to leave that to be discovered at the sign-in screen.
+    /// </summary>
+    internal static async Task EnsureAnAdministratorIsMappedAsync(IAppDbContext db, RoleMappingOptions options)
+    {
+        if (options.AllowMappingsByName)
+            return;
+
+        var mappings = await db.RoleMappings.AsNoTracking().ToListAsync();
+        var adminByDn = mappings.Any(mapping =>
+            !mapping.IdentifiesGroupByNameOnly
+            && string.Equals(mapping.RoleName, UserRoles.Admin, StringComparison.OrdinalIgnoreCase));
+
+        if (!adminByDn)
+        {
+            throw new InvalidOperationException(
+                "No role mapping grants the Admin role by distinguished name, so nobody could administer this "
+                + "application. Set RoleMappings:GroupDns:Admin to the DN of the directory group whose members should "
+                + "be administrators (for example RoleMappings__GroupDns__Admin=\"CN=Axia-Admins,OU=Groups,DC=example,DC=com\") "
+                + "and restart. Mappings by group name are ignored because they match every group of that name.");
+        }
     }
 
     private static async Task SeedLdapConfigurationAsync(IAppDbContext db, ILogger logger, IServiceProvider services)

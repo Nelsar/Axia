@@ -88,12 +88,6 @@
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
     <value>Das Verzeichnis konnte die Gruppenmitgliedschaft für „{0}“ nicht melden.</value>
   </data>
-  <data name="DirectoryEntryMissingForMembership" xml:space="preserve">
-    <value>Das Verzeichnis lieferte keinen Eintrag für „{0}“, die Gruppenmitgliedschaft ist daher unbekannt.</value>
-  </data>
-  <data name="AdPrincipalMissingForMembership" xml:space="preserve">
-    <value>AD lieferte kein Principal-Objekt für „{0}“, die Gruppenmitgliedschaft ist daher unbekannt.</value>
-  </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
     <value>Das Verzeichnis hat das Anlegen von „{0}“ abgelehnt.</value>
   </data>
@@ -190,10 +184,43 @@
   <data name="GeneratedItemLimitOutOfRange" xml:space="preserve">
     <value>Die Anzahl der zu erzeugenden Elemente muss zwischen {0} und {1} liegen.</value>
   </data>
-  <data name="DirectoryCertificateRejected" xml:space="preserve">
-    <value>Das TLS-Zertifikat des Verzeichnisses konnte nicht überprüft werden, daher wurde die Verbindung nicht verwendet. Bitten Sie einen Administrator, das Zertifikat und die vertrauenswürdige Zertifizierungsstelle zu prüfen.</value>
+  <data name="TargetHoldsMorePermissions" xml:space="preserve">
+    <value>Sie können dieses Konto bzw. diese Gruppe nicht ändern: Es verfügt über Berechtigungen, die Sie selbst nicht haben.</value>
   </data>
-  <data name="LdapSecurityUnknown" xml:space="preserve">
-    <value>'{0}' ist kein Modus für die Verbindungssicherheit. Verwenden Sie Ldaps, StartTls oder None.</value>
+  <data name="SessionEntryGone" xml:space="preserve">
+    <value>Ihr Konto befindet sich nicht mehr dort, wo es bei der Anmeldung war. Melden Sie sich erneut an.</value>
+  </data>
+  <data name="EmailAlreadyInUse" xml:space="preserve">
+    <value>Ein anderes Konto im Verzeichnis verwendet diese E-Mail-Adresse bereits.</value>
+  </data>
+  <data name="BindPasswordRequiredForNewEndpoint" xml:space="preserve">
+    <value>Geben Sie das Bind-Passwort erneut ein, um Host, Port oder Failover-Hosts zu ändern. Das gespeicherte Passwort wird nur an die Server gesendet, für die es eingegeben wurde.</value>
+  </data>
+  <data name="RoleUnknown" xml:space="preserve">
+    <value>Es gibt keine Rolle namens „{0}“.</value>
+  </data>
+  <data name="RoleNotEditable" xml:space="preserve">
+    <value>Die Rolle {0} hat immer alle Berechtigungen und kann nicht bearbeitet werden. Um jemandem weniger Rechte zu geben, ordnen Sie seine Gruppe einer anderen Rolle zu.</value>
+  </data>
+  <data name="PermissionNotGrantable" xml:space="preserve">
+    <value>{0} kann dieser Rolle nicht erteilt werden: Wer sie hat, kann sich selbst zum Administrator machen. Ordnen Sie die Gruppe stattdessen der Rolle Admin zu.</value>
+  </data>
+  <data name="CannotGrantUnheldPermission" xml:space="preserve">
+    <value>Sie können keine Berechtigung erteilen, die Sie selbst nicht haben.</value>
+  </data>
+  <data name="TargetIsProtected" xml:space="preserve">
+    <value>Dieses Konto bzw. diese Gruppe ist im Verzeichnis privilegiert (zum Beispiel Mitglied von Domain Admins). Nur ein Administrator dieser Anwendung kann es ändern.</value>
+  </data>
+  <data name="ServiceAccountNotManaged" xml:space="preserve">
+    <value>Dies ist das Konto, mit dem sich die Anwendung selbst beim Verzeichnis anmeldet. Es kann nicht über die Anwendung geändert werden.</value>
+  </data>
+  <data name="PasswordRejectedByDirectory" xml:space="preserve">
+    <value>Das Verzeichnis hat das neue Passwort abgelehnt. Wahrscheinlich erfüllt es die Kennwortrichtlinie nicht (Länge, Komplexität oder Verlauf).</value>
+  </data>
+  <data name="PasswordChangeNeedsEncryption" xml:space="preserve">
+    <value>Active Directory akzeptiert ein neues Passwort nur über eine verschlüsselte Verbindung. Verbinden Sie sich per LDAPS mit dem Verzeichnis.</value>
+  </data>
+  <data name="PasswordChangeUnsupported" xml:space="preserve">
+    <value>Dieses Verzeichnis bietet keine sichere Möglichkeit, ein Passwort zu setzen (weder Active Directory noch die LDAP-Operation Password Modify), daher wurde keines geschrieben.</value>
   </data>
 </root>

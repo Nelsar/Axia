@@ -58,7 +58,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
             $"ActiveDirectoryProvider cannot use Security={_settings.Security}; the settings check should have refused it.")
     };
 
-    public bool Authenticate(string username, string password)
+    public string? Authenticate(string username, string password)
     {
         try
         {
@@ -66,7 +66,22 @@ internal class ActiveDirectoryProvider : ILdapProvider
             // could not ask — so, unlike the Novell client, the two cases arrive separately
             // here and the catch below is unambiguously an outage.
             using var context = CreateContext();
-            return context.ValidateCredentials(username, password, BindOptions);
+            if (!context.ValidateCredentials(username, password))
+                return null;
+
+            // The session belongs to the principal the password was checked for, so its DN is
+            // what is returned. sAMAccountName and userPrincipalName are both unique in a domain
+            // and are the two forms ValidateCredentials accepts, so this finds that principal and
+            // no other.
+            using var user = FindByLogin(context, username);
+            if (user?.DistinguishedName is not { Length: > 0 } dn)
+            {
+                _logger.LogWarning("AD accepted the credentials for {Login} but no principal answers to it.",
+                    LogMask.Login(username));
+                return null;
+            }
+
+            return dn;
         }
         catch (Exception ex)
         {
@@ -91,6 +106,46 @@ internal class ActiveDirectoryProvider : ILdapProvider
             _logger.LogError(ex, "Error finding AD user {Login}.", LogMask.Login(username));
             throw new DirectoryUnavailableException(
                 ApplicationMessages.DirectorySearchFailed(username), ex);
+        }
+    }
+
+    public LdapUserInfo? FindUserByDn(string distinguishedName)
+    {
+        if (string.IsNullOrWhiteSpace(distinguishedName))
+            return null;
+
+        try
+        {
+            using var context = CreateContext();
+            using var user = UserPrincipal.FindByIdentity(context, IdentityType.DistinguishedName, distinguishedName.Trim());
+            if (user == null)
+                return null;
+
+            var entry = Map(user);
+            return new LdapUserInfo
+            {
+                Dn = entry.Dn,
+                Username = entry.Username,
+                DisplayName = entry.DisplayName,
+                Email = entry.Email,
+
+                // DNs, as StandardLdapProvider reports them from memberOf. This used to hand back
+                // bare group names, which a role mapping written as a DN can never match — and a
+                // name is exactly what must not decide who is an administrator.
+                Groups = user.GetGroups()
+                    .Select(group => string.IsNullOrWhiteSpace(group.DistinguishedName) ? group.Name : group.DistinguishedName)
+                    .ToArray(),
+                IsPrivileged = entry.IsPrivileged,
+                IsServiceAccount = entry.IsServiceAccount
+            };
+        }
+        catch (Exception ex)
+        {
+            // See StandardLdapProvider.FindUserByDn: "membership unknown" must not be answered
+            // with "no groups", or an outage quietly strips an administrator's role.
+            _logger.LogError(ex, "Error reading AD principal {Dn}.", LogMask.DistinguishedName(distinguishedName));
+            throw new DirectoryUnavailableException(
+                ApplicationMessages.DirectoryGroupMembershipFailed(distinguishedName), ex);
         }
     }
 
@@ -127,11 +182,11 @@ internal class ActiveDirectoryProvider : ILdapProvider
         _logger.LogInformation("AD user created: {Login}", LogMask.Login(samAccount));
     }
 
-    public void UpdateUser(string username, string? newName, string? newEmail, string? newPassword)
+    public void UpdateUser(string distinguishedName, string? newName, string? newEmail, string? newPassword)
     {
         using var context = CreateContext();
-        using var user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username)
-            ?? throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInAd(username));
+        using var user = UserPrincipal.FindByIdentity(context, IdentityType.DistinguishedName, distinguishedName)
+            ?? throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInAd(distinguishedName));
 
         if (!string.IsNullOrWhiteSpace(newName))
             user.DisplayName = newName;
@@ -145,58 +200,33 @@ internal class ActiveDirectoryProvider : ILdapProvider
             user.SetPassword(newPassword);
 
         user.Save();
-        _logger.LogInformation("AD user updated: {Login}", LogMask.Login(username));
+        _logger.LogInformation("AD user updated: {Dn}", LogMask.DistinguishedName(distinguishedName));
     }
 
-    public bool DeleteUser(string username)
+    public bool DeleteUser(string distinguishedName)
     {
         try
         {
             using var context = CreateContext();
-            using var user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username);
+            using var user = UserPrincipal.FindByIdentity(context, IdentityType.DistinguishedName, distinguishedName);
             if (user == null) return false;
             user.Delete();
-            _logger.LogInformation("AD user deleted: {Login}", LogMask.Login(username));
+            _logger.LogInformation("AD user deleted: {Dn}", LogMask.DistinguishedName(distinguishedName));
             return true;
         }
         catch (Exception ex)
         {
             // Matches StandardLdapProvider.DeleteUser: false means the account genuinely was
             // not there, so a failure must not borrow that meaning and be reported as 404.
-            _logger.LogError(ex, "Error deleting AD user {Login}.", LogMask.Login(username));
-            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(username), ex);
+            _logger.LogError(ex, "Error deleting AD user {Dn}.", LogMask.DistinguishedName(distinguishedName));
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(distinguishedName), ex);
         }
     }
 
-    public string[] GetUserGroups(string username)
-    {
-        try
-        {
-            using var context = CreateContext();
-            using var user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username);
-            if (user == null)
-            {
-                // See StandardLdapProvider.GetUserGroups: "membership unknown" must not be
-                // answered with "no groups", or an outage quietly strips an administrator's role.
-                throw new DirectoryUnavailableException(
-                    ApplicationMessages.AdPrincipalMissingForMembership(username));
-            }
-
-            return user.GetGroups()
-                .Select(g => g.Name)
-                .ToArray();
-        }
-        catch (DirectoryUnavailableException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting AD groups for {Login}.", LogMask.Login(username));
-            throw new DirectoryUnavailableException(
-                ApplicationMessages.DirectoryGroupMembershipFailed(username), ex);
-        }
-    }
+    /// <summary>The principal a login names, in either form ValidateCredentials accepts.</summary>
+    private static UserPrincipal? FindByLogin(PrincipalContext context, string login) =>
+        UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, login)
+        ?? UserPrincipal.FindByIdentity(context, IdentityType.UserPrincipalName, login);
 
     // Organizational units are not modelled by System.DirectoryServices.AccountManagement at
     // all — it deals in principals — so implementing them here would mean a second, untestable
@@ -269,12 +299,32 @@ internal class ActiveDirectoryProvider : ILdapProvider
         throw new FeatureNotImplementedException(
             ApplicationMessages.UserAttributesUnsupportedByAdProvider());
 
-    private static LdapUserInfo Map(UserPrincipal user) => new()
+    private LdapUserInfo Map(UserPrincipal user) => new()
     {
         Dn = user.DistinguishedName ?? string.Empty,
         Username = user.SamAccountName ?? string.Empty,
         DisplayName = user.DisplayName ?? string.Empty,
         Email = user.EmailAddress ?? string.Empty,
-        Groups = []
+        Groups = [],
+        IsPrivileged = AdminCount(user) > 0,
+        IsServiceAccount = IsBindAccount(user)
     };
+
+    /// <summary>adminCount, which UserPrincipal does not surface; SDProp's mark on the protected.</summary>
+    private static int AdminCount(Principal principal) =>
+        principal.GetUnderlyingObject() is System.DirectoryServices.DirectoryEntry entry
+        && entry.Properties["adminCount"]?.Value is int count
+            ? count
+            : 0;
+
+    /// <summary>Whether this is the account the provider binds as, however that name is written.</summary>
+    private bool IsBindAccount(UserPrincipal user)
+    {
+        var bindName = _settings.AdminUsername?.Trim();
+        if (string.IsNullOrEmpty(bindName))
+            return false;
+
+        return new[] { user.SamAccountName, user.UserPrincipalName, user.DistinguishedName, user.EmailAddress }
+            .Any(value => !string.IsNullOrEmpty(value) && string.Equals(value, bindName, StringComparison.OrdinalIgnoreCase));
+    }
 }

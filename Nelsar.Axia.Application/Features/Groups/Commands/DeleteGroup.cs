@@ -20,11 +20,13 @@ internal sealed class DeleteGroupCommandHandler : IRequestHandler<DeleteGroupCom
 {
     private readonly ILdapService _ldapService;
     private readonly GroupDirectory _directory;
+    private readonly PrivilegeGuard _privilegeGuard;
 
-    public DeleteGroupCommandHandler(ILdapService ldapService, GroupDirectory directory)
+    public DeleteGroupCommandHandler(ILdapService ldapService, GroupDirectory directory, PrivilegeGuard privilegeGuard)
     {
         _ldapService = ldapService;
         _directory = directory;
+        _privilegeGuard = privilegeGuard;
     }
 
     public async Task<bool> Handle(DeleteGroupCommand request, CancellationToken cancellationToken)
@@ -32,6 +34,10 @@ internal sealed class DeleteGroupCommandHandler : IRequestHandler<DeleteGroupCom
         var group = await _directory.ResolveAsync(request.Id);
         if (group == null)
             return false;
+
+        // Deleting the group mapped to Admin takes the role from every administrator at once;
+        // only a caller holding what it confers may. See PrivilegeGuard.
+        await _privilegeGuard.EnsureMayManageGroupAsync(group, null, cancellationToken);
 
         return await _ldapService.DeleteGroupAsync(group.Dn);
     }

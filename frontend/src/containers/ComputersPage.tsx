@@ -4,7 +4,7 @@ import { api } from "../api";
 import type { ComputerDto, PagedResponse } from "../api/dto";
 import { confirmAndRun } from "../lib/actions";
 import { useDialog } from "../hooks/useDialog";
-import { useIsAdmin } from "../hooks/usePermissions";
+import { useCan } from "../hooks/usePermissions";
 import { usePagedList } from "../hooks/usePagedList";
 import type { PageRequest } from "../hooks/usePagedList";
 import { DirectoryView } from "../components/directory/DirectoryView";
@@ -16,7 +16,7 @@ const fetchComputers = (request: PageRequest): Promise<PagedResponse<ComputerDto
   api.computers.search(request);
 
 export function ComputersPage(): JSX.Element {
-  const canManage = useIsAdmin();
+  const canManage = useCan("computers.manage");
   const list = usePagedList<ComputerDto>({
     fetchPage: fetchComputers,
     errorFallback: t("computers.loadFailed"),

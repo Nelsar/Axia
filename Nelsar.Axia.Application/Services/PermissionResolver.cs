@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using Nelsar.Axia.Application.Configuration;
 using Nelsar.Axia.Contracts.Exceptions;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Application.Resources;
@@ -22,47 +24,63 @@ internal class PermissionResolver : IPermissionResolver
     private readonly IRoleMappingResolver _roleMappingResolver;
     private readonly IRolePermissionRepository _rolePermissions;
     private readonly IMemoryCache _cache;
+    private readonly DirectoryProtectionOptions _protection;
 
     public PermissionResolver(
         ILdapService ldapService,
         IRoleMappingResolver roleMappingResolver,
         IRolePermissionRepository rolePermissions,
-        IMemoryCache cache)
+        IMemoryCache cache,
+        IOptions<DirectoryProtectionOptions> protection)
     {
         _ldapService = ldapService;
         _roleMappingResolver = roleMappingResolver;
         _rolePermissions = rolePermissions;
         _cache = cache;
+        _protection = protection.Value;
     }
 
     public async Task<IReadOnlySet<string>> ResolveAsync(
-        string subject,
+        string distinguishedName,
+        Guid? providerId,
+        CancellationToken cancellationToken = default) =>
+        (await AssessEntryAsync(distinguishedName, providerId, cancellationToken))?.Permissions
+        // The session names an entry that is not there any more. Nothing it could be granted is
+        // safe to guess at, and a fresh sign-in is what would find the account under its new DN.
+        ?? throw new NotAuthenticatedException(ApplicationMessages.SessionEntryGone());
+
+    public async Task<EntryAssessment?> AssessEntryAsync(
+        string distinguishedName,
         Guid? providerId,
         CancellationToken cancellationToken = default)
     {
         // Keyed by provider too: the same group name can mean different things in different
         // domains, so a cached answer from one must never be served for another.
-        var cacheKey = $"permissions:{providerId}:{subject.ToLowerInvariant()}";
+        var cacheKey = $"permissions:{providerId}:{distinguishedName.ToLowerInvariant()}";
 
-        if (_cache.TryGetValue(cacheKey, out IReadOnlySet<string>? cached) && cached is not null)
+        if (_cache.TryGetValue(cacheKey, out EntryAssessment? cached) && cached is not null)
             return cached;
 
-        // Throws if membership cannot be determined. Not caught here on purpose — see the
-        // remarks on IPermissionResolver.
-        var groups = await _ldapService.GetUserGroupsAsync(subject);
+        // Read at the DN rather than searched for by login. A search returns whichever entry the
+        // directory lists first among those sharing the login, and "first" is not an identity.
+        // Throws if the directory cannot be asked — not caught here on purpose, see the remarks
+        // on IPermissionResolver. Absence is not cached: an entry restored a moment later should
+        // not stay missing for the length of the TTL.
+        var entry = await _ldapService.GetUserByDnAsync(distinguishedName);
+        if (entry is null)
+            return null;
 
-        // The port promises a list; null would mean a provider silently answered "unknown", and
-        // treating that as "in no groups" is the exact failure this design refuses to make.
-        if (groups is null)
-        {
-            throw new DirectoryUnavailableException(
-                ApplicationMessages.DirectoryGroupMembershipFailed(subject));
-        }
-
-        var roles = await _roleMappingResolver.ResolveRolesAsync(groups, providerId);
+        var roles = await _roleMappingResolver.ResolveRolesAsync(entry.Groups, providerId);
         var permissions = await _rolePermissions.GetPermissionsForRolesAsync(roles, cancellationToken);
 
-        _cache.Set(cacheKey, permissions, CacheTtl);
-        return permissions;
+        // Privileged by the directory's own reckoning, whatever roles the entry maps to here:
+        // adminCount in Active Directory, or a group named in DirectoryProtection.
+        var assessment = new EntryAssessment(
+            permissions,
+            IsProtected: entry.IsPrivileged || entry.Groups.Any(_protection.Protects),
+            IsServiceAccount: entry.IsServiceAccount);
+
+        _cache.Set(cacheKey, assessment, CacheTtl);
+        return assessment;
     }
 }

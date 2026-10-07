@@ -1,5 +1,8 @@
-import { useCallback, useMemo } from "react";
-import { getCurrentUser, getSessionDirectory, hasRole, logout } from "../lib/auth";
+import { useCallback, useEffect, useMemo } from "react";
+import { getCurrentUser, getSessionDirectory, logout } from "../lib/auth";
+import { api } from "../api";
+import { setPermissions } from "../lib/permissions";
+import { usePermissionSet } from "./usePermissions";
 import type { SessionUser } from "../lib/auth";
 import { getApiBaseUrl } from "../lib/config";
 import { NAV_GROUPS } from "../lib/navigation";
@@ -47,16 +50,28 @@ export function useAppShell(): AppShellState {
   const apiBaseUrl = useMemo<string>(() => getApiBaseUrl(), []);
   const directoryName = useMemo<string | null>(() => getSessionDirectory()?.name ?? null, []);
 
+  // Asked afresh whenever the shell mounts — every navigation — so a change made on the roles
+  // screen, or to someone's groups, reaches the menu and the buttons without signing in again.
+  // A failure keeps what the session already had: the API still checks every request, and a
+  // 401 here signs the user out through the client like any other.
+  useEffect(() => {
+    void api.me
+      .permissions()
+      .then(setPermissions)
+      .catch((): void => undefined);
+  }, []);
+
   // A hidden menu item is a convenience rather than a protection: an unreachable route is closed
-  // by the guard in main.tsx, and the endpoint itself by [Authorize(Roles=…)] on the backend.
+  // by the guard in main.tsx, and the endpoint itself by [Authorize(Policy=…)] on the backend.
+  const held = usePermissionSet();
   const nav = useMemo<readonly NavGroup[]>(
     () =>
       NAV_GROUPS.map((group) => ({
         id: group.id,
         title: group.title,
-        items: group.items.filter((item) => item.roles === undefined || hasRole(...item.roles)),
+        items: group.items.filter((item) => item.permission === undefined || held.has(item.permission)),
       })).filter((group) => group.items.length > 0),
-    []
+    [held]
   );
 
 

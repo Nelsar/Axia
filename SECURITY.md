@@ -47,6 +47,27 @@ Inside that, the following are meant to hold, and a case where they do not is wo
   request from directory group membership and the role mappings, never from a claim the token
   carries. Every guarded use case has a test asserting the refusal. Signing in grants read access
   and nothing more; a bulk batch needs the single-account permission for each kind of row it holds.
+- **A permission does not reach targets that hold more than the caller.** Updating, resetting the
+  password of or deleting an account, and changing or deleting a group mapped to a role, are
+  refused when the target confers any permission the caller lacks.
+- **A session is the directory entry that proved the password.** The token carries that entry's
+  DN, permissions are read from the entry at that DN, and writes to an account are addressed by
+  its DN — never by searching for a login or address, which two entries can share. A token
+  without the DN is refused.
+- **A role mapping names one group.** Mappings take the group's DN. Rows written by CN alone, by
+  earlier builds, are ignored unless `RoleMappings:AllowMappingsByName` is set, and the API will not
+  start without an Admin mapping by DN.
+- **A target privileged in the directory is an administrator's to change.** Accounts and groups
+  with `adminCount` set, or in `DirectoryProtection:ProtectedGroups`, can only be changed by a
+  caller holding every permission; the bind account cannot be changed through the application.
+- **Passwords are never written in clear.** They are set with `unicodePwd` in Active Directory and
+  the Password Modify operation elsewhere, so the directory hashes and checks them; a directory
+  offering neither is refused a password rather than given one as a plain attribute.
+- **Computers and contacts are not users.** Entries of those classes are left out of every lookup,
+  listing and write made through the users endpoints, and attributes whose names mark them as
+  secrets — LAPS passwords among them — are withheld from the attributes view.
+- **A stored bind password is only sent where it was entered for.** Moving a directory to a new
+  host, port or failover host requires the password again.
 - **An operation cannot cross into another directory.** The directory is bound to the session at
   sign-in and carried in the token; a request naming a different one in `X-LDAP-Provider-Id` is
   refused rather than silently served from the default.

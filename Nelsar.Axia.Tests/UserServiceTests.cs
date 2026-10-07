@@ -70,7 +70,7 @@ public class UserServiceTests
     {
         var ldapServiceMock = new Mock<ILdapService>();
         ldapServiceMock.Setup(x => x.AuthenticateAsync("user@example.com", "pass"))
-            .ReturnsAsync(false);
+            .ReturnsAsync((string?)null);
 
         var sender = CreateSender(ldapServiceMock.Object);
 
@@ -84,15 +84,15 @@ public class UserServiceTests
     {
         var ldapServiceMock = new Mock<ILdapService>();
         ldapServiceMock.Setup(x => x.AuthenticateAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(true);
-        ldapServiceMock.Setup(x => x.GetUserDetailsAsync("user@example.com"))
+            .ReturnsAsync("uid=user,ou=people,dc=example,dc=com");
+        ldapServiceMock.Setup(x => x.GetUserByDnAsync("uid=user,ou=people,dc=example,dc=com"))
             .ReturnsAsync(new LdapUserInfo
             {
                 Email = "user@example.com",
                 DisplayName = "User Example",
                 Dn = "uid=user,ou=people,dc=example,dc=com"
             });
-        ldapServiceMock.Setup(x => x.GetUserRoleAsync("user@example.com"))
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>()))
             .ReturnsAsync(UserRoles.Admin);
 
         var sender = CreateSender(ldapServiceMock.Object);
@@ -103,6 +103,9 @@ public class UserServiceTests
         Assert.NotEmpty(response.Token);
         Assert.Equal("user@example.com", response.User.Email);
         Assert.Equal(UserRoles.Admin, response.User.Role);
+
+        // What the console decides from — the resolver's answer, here everything, in catalogue order.
+        Assert.Equal(Nelsar.Axia.Domain.Authorization.Permissions.All, response.Permissions);
     }
 
     [Fact]
@@ -148,7 +151,7 @@ public class UserServiceTests
             });
         ldapServiceMock.Setup(x => x.CreateUserAsync("Create User", "create@example.com", "Password1"))
             .Returns(Task.CompletedTask);
-        ldapServiceMock.Setup(x => x.UpdateUserAsync("update@example.com", "Updated Name", null, "NewPass1"))
+        ldapServiceMock.Setup(x => x.UpdateUserAsync("uid=update,ou=people,dc=example,dc=com", "Updated Name", null, "NewPass1"))
             .Returns(Task.CompletedTask);
 
         var queueMock = new Mock<IBulkJobQueue>();
@@ -241,15 +244,15 @@ public class UserServiceTests
     {
         var ldapServiceMock = new Mock<ILdapService>();
         ldapServiceMock.Setup(x => x.AuthenticateAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(true);
-        ldapServiceMock.Setup(x => x.GetUserDetailsAsync("user@example.com"))
+            .ReturnsAsync("uid=user,ou=people,dc=example,dc=com");
+        ldapServiceMock.Setup(x => x.GetUserByDnAsync("uid=user,ou=people,dc=example,dc=com"))
             .ReturnsAsync(new LdapUserInfo
             {
                 Email = "user@example.com",
                 DisplayName = "User Example",
                 Dn = "uid=user,ou=people,dc=example,dc=com"
             });
-        ldapServiceMock.Setup(x => x.GetUserRoleAsync("user@example.com"))
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>()))
             .ReturnsAsync(UserRoles.Admin);
 
         var events = new Mock<IDomainEventPublisher>();
@@ -267,11 +270,36 @@ public class UserServiceTests
     }
 
     [Fact]
+    public async Task AuthenticateAsync_DescribesTheEntryThePasswordWasProvenAgainst()
+    {
+        // Two entries answer to the login. The bind landed on the editor's, so the session must be
+        // the editor's — not whichever entry a second search by the same login turns up first.
+        const string editorDn = "uid=editor,ou=people,dc=example,dc=com";
+
+        var ldapServiceMock = new Mock<ILdapService>();
+        ldapServiceMock.Setup(x => x.AuthenticateAsync("shared@example.com", "pass")).ReturnsAsync(editorDn);
+        ldapServiceMock.Setup(x => x.GetUserByDnAsync(editorDn))
+            .ReturnsAsync(new LdapUserInfo { Dn = editorDn, Username = "editor", Email = "shared@example.com" });
+        ldapServiceMock.Setup(x => x.GetUserDetailsAsync("shared@example.com"))
+            .ReturnsAsync(new LdapUserInfo { Dn = "uid=admin,ou=people,dc=example,dc=com", Username = "admin" });
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>())).ReturnsAsync(UserRoles.User);
+
+        var sender = CreateSender(ldapServiceMock.Object);
+
+        var response = await sender.Send(new AuthenticateCommand("shared@example.com", "pass"));
+
+        Assert.NotNull(response);
+        Assert.Equal(editorDn, response.User.Dn);
+        Assert.Equal("editor", response.User.Username);
+        ldapServiceMock.Verify(x => x.GetUserDetailsAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
     public async Task AuthenticateAsync_PublishesUserAuthenticationFailed_WhenCredentialsAreRejected()
     {
         var ldapServiceMock = new Mock<ILdapService>();
         ldapServiceMock.Setup(x => x.AuthenticateAsync("user@example.com", "wrong"))
-            .ReturnsAsync(false);
+            .ReturnsAsync((string?)null);
 
         var events = new Mock<IDomainEventPublisher>();
         var sender = CreateSender(ldapServiceMock.Object, events: events.Object);
@@ -407,7 +435,7 @@ public class UserServiceTests
 
         var ldapServiceMock = new Mock<ILdapService>();
         ldapServiceMock.Setup(x => x.GetUserDetailsAsync(email)).ReturnsAsync(Alice());
-        ldapServiceMock.Setup(x => x.DeleteUserAsync(email)).ReturnsAsync(true);
+        ldapServiceMock.Setup(x => x.DeleteUserAsync(Alice().Dn)).ReturnsAsync(true);
 
         var lookup = new Mock<IUserLookupRepository>();
         lookup.Setup(x => x.FindEmailAsync(id, It.IsAny<CancellationToken>())).ReturnsAsync(email);
@@ -439,7 +467,7 @@ public class UserServiceTests
         // Previously the new address never left the service: it was applied to the returned
         // DTO and nothing else, so the change vanished when the cache entry expired.
         ldapServiceMock.Verify(
-            x => x.UpdateUserAsync("alice@example.com", "Alice Updated", "alice_new@example.com", null),
+            x => x.UpdateUserAsync(Alice().Dn, "Alice Updated", "alice_new@example.com", null),
             Times.Once);
     }
 
@@ -474,6 +502,24 @@ public class UserServiceTests
         Assert.Equal(before.Id, updated.Id);
         Assert.Equal("alice@example.com", updated.Email);
         lookup.Verify(x => x.RemoveAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_RefusesAnAddressAnotherEntryAlreadyAnswersTo()
+    {
+        // A shared address is a login two entries answer to — the ambiguity a takeover rides on.
+        var ldapServiceMock = AliceDirectory();
+        ldapServiceMock.Setup(x => x.GetUserDetailsAsync("admin@example.com"))
+            .ReturnsAsync(new LdapUserInfo { Dn = "cn=admin,ou=users,dc=example,dc=com", Email = "admin@example.com" });
+        var sender = CreateSender(ldapServiceMock.Object);
+        var before = (await sender.Send(new GetAllUsersQuery())).Items.Single();
+
+        await Assert.ThrowsAsync<DomainConflictException>(
+            () => sender.Send(new UpdateUserCommand(before.Id, "Alice", "admin@example.com", null)));
+
+        ldapServiceMock.Verify(
+            x => x.UpdateUserAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string>()),
+            Times.Never);
     }
 
     [Fact]
@@ -514,7 +560,7 @@ public class UserServiceTests
 
         // BulkUserRequest.NewEmail was declared but read by nothing at all.
         ldapServiceMock.Verify(
-            x => x.UpdateUserAsync("update@example.com", "Updated", "moved@example.com", null),
+            x => x.UpdateUserAsync(Alice().Dn, "Updated", "moved@example.com", null),
             Times.Once);
 
         var item = response.Items.Single();
@@ -603,10 +649,10 @@ public class UserServiceTests
     {
         var ldapServiceMock = new Mock<ILdapService>();
         ldapServiceMock.Setup(x => x.AuthenticateAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(true);
-        ldapServiceMock.Setup(x => x.GetUserDetailsAsync("admin@example.com"))
+            .ReturnsAsync(Alice().Dn);
+        ldapServiceMock.Setup(x => x.GetUserByDnAsync(Alice().Dn))
             .ReturnsAsync(Alice("admin@example.com"));
-        ldapServiceMock.Setup(x => x.GetUserRoleAsync("admin@example.com")).ThrowsAsync(Outage());
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>())).ThrowsAsync(Outage());
 
         var tokenService = new Mock<ITokenService>();
         var events = new Mock<IDomainEventPublisher>();
@@ -629,10 +675,10 @@ public class UserServiceTests
     {
         var ldapServiceMock = new Mock<ILdapService>();
         ldapServiceMock.Setup(x => x.AuthenticateAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(true);
-        ldapServiceMock.Setup(x => x.GetUserDetailsAsync("nobody@example.com"))
+            .ReturnsAsync(Alice().Dn);
+        ldapServiceMock.Setup(x => x.GetUserByDnAsync(Alice().Dn))
             .ReturnsAsync(Alice("nobody@example.com"));
-        ldapServiceMock.Setup(x => x.GetUserRoleAsync("nobody@example.com"))
+        ldapServiceMock.Setup(x => x.GetUserRoleAsync(It.IsAny<LdapUserInfo>()))
             .ReturnsAsync(UserRoles.User);
 
         var sender = CreateSender(ldapServiceMock.Object);

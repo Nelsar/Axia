@@ -47,20 +47,48 @@ public sealed class DistinguishedName : IEquatable<DistinguishedName>
     /// The value of the first CN component, which is how a group DN maps onto the group name
     /// a role mapping is configured with. Falls back to the whole DN when there is no CN
     /// component, so a caller comparing names still has something meaningful to match on.
+    ///
+    /// Split the way <see cref="Rdn"/> is, honouring "\,". A plain Split(',') read
+    /// "CN=Admins\, Tier 0,OU=Groups" as a group called "Admins\" — a name that is not the
+    /// group's and could be someone else's.
     /// </summary>
     public string Cn
     {
         get
         {
-            foreach (var part in Value.Split(','))
+            foreach (var component in SplitComponents(Value))
             {
-                var trimmed = part.Trim();
-                if (trimmed.StartsWith("CN=", StringComparison.OrdinalIgnoreCase))
-                    return trimmed[3..];
+                if (component.StartsWith("CN=", StringComparison.OrdinalIgnoreCase))
+                    return UnescapeRdnValue(component[3..]);
             }
 
             return Value;
         }
+    }
+
+    /// <summary>
+    /// The DN with insignificant whitespace around its separators removed, for comparing two
+    /// spellings of one entry: "CN=Admins, OU=Groups" as an administrator types it and
+    /// "CN=Admins,OU=Groups" as the directory returns it. Case is left alone; comparisons that
+    /// use this ignore it, as <see cref="Equals(DistinguishedName?)"/> does.
+    /// </summary>
+    public string Normalized => string.Join(",", SplitComponents(Value));
+
+    /// <summary>
+    /// Whether <paramref name="value"/> reads as a distinguished name at all — every
+    /// comma-separated component an <c>attribute=value</c> pair — as opposed to a bare name such
+    /// as "Administrators".
+    ///
+    /// Deliberately not a full RFC 4514 parser, for the reason given on the type: entries from
+    /// live directories are not ours to veto. This only tells the two shapes apart.
+    /// </summary>
+    public static bool IsWellFormed(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        var components = SplitComponents(value.Trim()).ToList();
+        return components.Count > 0 && components.All(component => component.IndexOf('=') > 0);
     }
 
     /// <summary>

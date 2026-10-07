@@ -25,6 +25,9 @@ internal sealed class ActingUser
 
     public string? Subject => _background.IsSet ? _background.Subject : _currentUser.Subject;
 
+    public string? DistinguishedName =>
+        _background.IsSet ? _background.DistinguishedName : _currentUser.DistinguishedName;
+
     public Guid? ProviderId => _background.IsSet ? _background.ProviderId : _currentUser.ProviderId;
 
     /// <summary>

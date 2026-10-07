@@ -19,7 +19,11 @@ public static class LdapUserMapper
         };
     }
 
-    public static LdapAttributeSet BuildAttributes(string dn, string name, string email, string password, string baseDn)
+    /// <summary>
+    /// The entry for a new account — without a password, which is set afterwards through the
+    /// directory's own mechanism so that it is hashed and checked (see DirectoryPasswords).
+    /// </summary>
+    public static LdapAttributeSet BuildAttributes(string name, string email)
     {
         var attrs = new LdapAttributeSet();
         attrs.Add(new LdapAttribute("objectClass", new[] { "top", "person", "organizationalPerson", "inetOrgPerson" }));
@@ -28,7 +32,6 @@ public static class LdapUserMapper
         attrs.Add(new LdapAttribute("displayName", name));
         attrs.Add(new LdapAttribute("mail", email));
         attrs.Add(new LdapAttribute("uid", Email.Create(email).LocalPart));
-        attrs.Add(new LdapAttribute("userPassword", password));
         return attrs;
     }
 

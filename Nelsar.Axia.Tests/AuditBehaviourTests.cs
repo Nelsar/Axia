@@ -60,6 +60,7 @@ public class AuditBehaviourTests
         services.AddSingleton(currentUser);
         services.AddSingleton(permissions);
         services.AddSingleton<Nelsar.Axia.Domain.Repositories.IAuditRepository>(trail);
+        services.WithNoRoleMappings();
 
         return (services.BuildServiceProvider().GetRequiredService<ISender>(), trail, ldap);
     }

@@ -22,6 +22,11 @@ services:
   #     # Overrides appsettings.json's checked-in AD-only default (sAMAccountName-only) with
   #     # the portable filter that matches AD, OpenLDAP, and eDirectory in one query.
   #     - Ldap__UserSearchFilter=(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))
+  #     # Required: the group whose members administer the application, by DN. The API refuses to
+  #     # start without it. See RoleMappings in appsettings.json.example.
+  #     - RoleMappings__GroupDns__Admin=${AXIA_ADMIN_GROUP_DN:-cn=Administrators,ou=groups,dc=nelsar,dc=kz}
+  #     # OpenLDAP marks no group privileged; name the ones only an administrator may touch.
+  #     - DirectoryProtection__ProtectedGroups__0=${AXIA_ADMIN_GROUP_DN:-cn=Administrators,ou=groups,dc=nelsar,dc=kz}
   #     # Log destinations. Console and file are on by default; these two are the switches.
   #     # Defaults come from .env — see .env.example.
   #     - Observability__Logstash__Enabled=${OBSERVABILITY_LOGSTASH_ENABLED:-false}

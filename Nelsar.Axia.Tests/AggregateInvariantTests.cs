@@ -97,8 +97,8 @@ public class RoleMappingInvariantTests
     [Theory]
     [InlineData(null, "Admin")]
     [InlineData("", "Admin")]
-    [InlineData("Administrators", null)]
-    [InlineData("Administrators", "  ")]
+    [InlineData("CN=Administrators,OU=Groups,DC=example,DC=com", null)]
+    [InlineData("CN=Administrators,OU=Groups,DC=example,DC=com", "  ")]
     public void AMappingThatGrantsOrMatchesNothing_IsRefused(string? group, string? role)
     {
         // Both failures are silent at sign-in: the user simply lacks permissions they should have.
@@ -109,14 +109,50 @@ public class RoleMappingInvariantTests
     public void ANegativePriority_IsRefused_BecauseItWouldOutrankTheAdminDefault()
     {
         Assert.Throws<DomainValidationException>(
-            () => RoleMapping.Create(null, "Administrators", "Admin", -1));
+            () => RoleMapping.Create(null, "CN=Administrators,OU=Groups,DC=example,DC=com", "Admin", -1));
+    }
+
+    [Theory]
+    [InlineData("Administrators")]
+    [InlineData("Domain Admins")]
+    public void AGroupGivenByNameAlone_IsRefused_BecauseItWouldMatchEveryGroupOfThatName(string group)
+    {
+        Assert.Throws<DomainValidationException>(() => RoleMapping.Create(null, group, "Admin", 0));
+    }
+
+    [Fact]
+    public void AGroupDn_IsStoredWithoutTheSpacingItWasTypedWith()
+    {
+        var mapping = RoleMapping.Create(null, " CN=Administrators, OU=Groups ,DC=example,DC=com ", "Admin", 0);
+
+        Assert.Equal("CN=Administrators,OU=Groups,DC=example,DC=com", mapping.GroupName);
+        Assert.False(mapping.IdentifiesGroupByNameOnly);
+    }
+
+    [Fact]
+    public void TheSeedersMappingByName_IsKept_AndSaysWhatItIs()
+    {
+        var mapping = RoleMapping.SeedByGroupName(null, "Administrators", "Admin", 0);
+
+        Assert.Equal("Administrators", mapping.GroupName);
+        Assert.True(mapping.IdentifiesGroupByNameOnly);
+    }
+
+    [Fact]
+    public void EditingAMappingStillWrittenByName_RequiresADn()
+    {
+        var mapping = RoleMapping.SeedByGroupName(null, "Administrators", "Admin", 0);
+
+        Assert.Throws<DomainValidationException>(() => mapping.MapGroup("Administrators"));
+        mapping.MapGroup("CN=Administrators,CN=Builtin,DC=example,DC=com");
+        Assert.False(mapping.IdentifiesGroupByNameOnly);
     }
 
     [Fact]
     public void ScopeTo_MovesAMappingBetweenGlobalAndOneDomain()
     {
         var providerId = Guid.NewGuid();
-        var mapping = RoleMapping.Create(null, "Administrators", "Admin", 0);
+        var mapping = RoleMapping.Create(null, "CN=Administrators,OU=Groups,DC=example,DC=com", "Admin", 0);
 
         mapping.ScopeTo(providerId);
         Assert.Equal(providerId, mapping.ProviderId);

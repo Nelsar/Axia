@@ -29,11 +29,14 @@ public class PermissionAuthorizationTests
 {
     private static readonly Guid AliceId = Guid.Parse("22222222-2222-2222-2222-222222222222");
 
+    private static string GroupDn(string name) => $"CN={name},OU=Groups,DC=example,DC=com";
+
     private static ApiTestFactory FactoryForMemberOf(params string[] groupNames)
     {
+        // Whichever entry the token names, it is read at that DN and found in these groups.
         var ldap = new Mock<ILdapService>();
-        ldap.Setup(x => x.GetUserGroupsAsync(It.IsAny<string>()))
-            .ReturnsAsync(groupNames.Select(g => $"CN={g},OU=Groups,DC=example,DC=com").ToList());
+        ldap.Setup(x => x.GetUserByDnAsync(It.IsAny<string>()))
+            .ReturnsAsync((string dn) => new LdapUserInfo { Dn = dn, Groups = [.. groupNames.Select(GroupDn)] });
 
         var update = new Mock<IRequestHandler<UpdateUserCommand, UserDto?>>();
         update.Setup(x => x.Handle(It.IsAny<UpdateUserCommand>(), It.IsAny<CancellationToken>()))
@@ -70,10 +73,12 @@ public class PermissionAuthorizationTests
         using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+        // By DN, as a mapping is written now — the seeder's by-name rows are covered in
+        // RoleMappingResolverTests.
         db.RoleMappings.AddRange(
-            RoleMapping.Create(null, "UserEditors", UserRoles.UserEditor, 0),
-            RoleMapping.Create(null, "UserDeleters", UserRoles.UserDeleter, 0),
-            RoleMapping.Create(null, "UserCreators", UserRoles.UserCreator, 0));
+            RoleMapping.Create(null, GroupDn("UserEditors"), UserRoles.UserEditor, 0),
+            RoleMapping.Create(null, GroupDn("UserDeleters"), UserRoles.UserDeleter, 0),
+            RoleMapping.Create(null, GroupDn("UserCreators"), UserRoles.UserCreator, 0));
 
         void Grant(string role, params string[] permissions)
         {
@@ -89,14 +94,16 @@ public class PermissionAuthorizationTests
         db.SaveChanges();
     }
 
-    private static HttpClient SignedIn(ApiTestFactory factory, string email)
+    private static HttpClient SignedIn(ApiTestFactory factory, string email, string? distinguishedName = null,
+        string? preferredUsername = null, bool includeDistinguishedName = true)
     {
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             "Bearer",
             // The role in the token is intentionally the weakest one available. Authorisation
             // must reach its verdict from directory membership regardless of what is claimed here.
-            TestAuth.GenerateToken(UserRoles.User, email));
+            TestAuth.GenerateToken(UserRoles.User, email, preferredUsername: preferredUsername,
+                distinguishedName: distinguishedName, includeDistinguishedName: includeDistinguishedName));
         return client;
     }
 
@@ -161,7 +168,7 @@ public class PermissionAuthorizationTests
     public async Task DirectoryOutageDuringAuthorisation_Fails502_NotForbidden()
     {
         var ldap = new Mock<ILdapService>();
-        ldap.Setup(x => x.GetUserGroupsAsync(It.IsAny<string>()))
+        ldap.Setup(x => x.GetUserByDnAsync(It.IsAny<string>()))
             .ThrowsAsync(new DirectoryUnavailableException("The directory could not be reached."));
 
         using var factory = new ApiTestFactory(services =>
@@ -181,45 +188,81 @@ public class PermissionAuthorizationTests
     }
 
     [Fact]
-    public async Task AnAccountWithNoMailAttribute_IsLookedUpByItsLogin_NotByItsDerivedId()
+    public async Task PermissionsComeFromTheEntryTheTokenNames_NotFromWhoeverAnswersToItsLogin()
     {
-        var lookedUpBy = new List<string>();
+        // The escalation this closes: an editor sets their own mail to an administrator's, signs
+        // in with their own password, and is issued a token whose preferred_username is the
+        // administrator's address. Permissions used to be resolved by searching for that
+        // address, and the directory could answer with the administrator's entry.
+        const string adminDn = "CN=Admin,OU=Users,DC=example,DC=com";
+        const string editorDn = "CN=Editor,OU=Users,DC=example,DC=com";
+        var readAt = new List<string>();
 
-        var ldap = new Mock<ILdapService>();
-        ldap.Setup(x => x.GetUserGroupsAsync(It.IsAny<string>()))
-            .Callback<string>(lookedUpBy.Add)
-            .ReturnsAsync(new List<string> { "CN=UserEditors,OU=Groups,DC=example,DC=com" });
+        var ldap = new Mock<ILdapService>(MockBehavior.Strict);
+        ldap.Setup(x => x.GetUserByDnAsync(It.IsAny<string>()))
+            .Callback<string>(readAt.Add)
+            .ReturnsAsync((string dn) => new LdapUserInfo
+            {
+                Dn = dn,
+                Email = "admin@example.com",
+                Groups = dn == adminDn ? [GroupDn("UserDeleters")] : [GroupDn("UserEditors")]
+            });
 
-        var update = new Mock<IRequestHandler<UpdateUserCommand, UserDto?>>();
-        update.Setup(x => x.Handle(It.IsAny<UpdateUserCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new UserDto { Id = AliceId, Username = "Anuar Mukatov", Name = "Anuar Mukatov" });
+        var delete = new Mock<IRequestHandler<DeleteUserCommand, bool>>();
+        delete.Setup(x => x.Handle(It.IsAny<DeleteUserCommand>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
         using var factory = new ApiTestFactory(services =>
         {
             services.RemoveAll(typeof(ILdapService));
             services.AddSingleton(ldap.Object);
-            services.RemoveAll(typeof(IRequestHandler<UpdateUserCommand, UserDto?>));
-            services.AddSingleton(update.Object);
+            services.RemoveAll(typeof(IRequestHandler<DeleteUserCommand, bool>));
+            services.AddSingleton(delete.Object);
+            services.RemoveAll(typeof(IPermissionResolver));
+            services.AddScoped<IPermissionResolver, PermissionResolver>();
+        });
+        Seed(factory);
+
+        var client = SignedIn(factory, "admin@example.com", distinguishedName: editorDn);
+        var response = await client.DeleteAsync($"/api/v1/users/{AliceId}");
+
+        // Strict mock: nothing searched by login. Only the editor's own entry was read, and the
+        // editor cannot delete.
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(new[] { editorDn }, readAt.Distinct());
+    }
+
+    [Fact]
+    public async Task ATokenThatNamesNoEntry_IsRefusedAtAuthentication()
+    {
+        // What every token issued before the claim existed looks like. Authorising it would mean
+        // searching for its login — the lookup the claim replaces.
+        using var factory = FactoryForMemberOf("UserEditors");
+        var client = SignedIn(factory, "editor@example.com", includeDistinguishedName: false);
+
+        var response = await client.PutAsJsonAsync($"/api/v1/users/{AliceId}", new UserUpdateRequest { Name = "Alice" });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ASessionWhoseEntryIsGone_Fails401_SoTheConsoleSignsIn()
+    {
+        // Renamed, moved or deleted since sign-in. Nothing can be granted to an entry that is not
+        // there, and signing in again is what finds where it went.
+        var ldap = new Mock<ILdapService>();
+        ldap.Setup(x => x.GetUserByDnAsync(It.IsAny<string>())).ReturnsAsync((LdapUserInfo?)null);
+
+        using var factory = new ApiTestFactory(services =>
+        {
+            services.RemoveAll(typeof(ILdapService));
+            services.AddSingleton(ldap.Object);
             services.RemoveAll(typeof(IPermissionResolver));
             services.AddScoped<IPermissionResolver, PermissionResolver>();
         });
 
-        Seed(factory);
+        var client = SignedIn(factory, "moved@example.com");
+        var response = await client.GetAsync($"/api/v1/users/{AliceId}");
 
-        // The token such an account now gets: nothing to put in the email claim, login in
-        // preferred_username.
-        var client = factory.CreateClient();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-            "Bearer",
-            TestAuth.GenerateToken(UserRoles.User, email: "", preferredUsername: "Anuar Mukatov"));
-
-        var response = await client.PutAsJsonAsync($"/api/v1/users/{AliceId}", new UserUpdateRequest { Name = "Anuar Mukatov" });
-
-        // The regression this pins: with the email claim empty, subject resolution fell through
-        // to NameIdentifier — which for a JWT is sub, a derived Guid. Every request from such an
-        // account then asked the directory for an entry named by a Guid and failed with 502.
-        Assert.Equal(new[] { "Anuar Mukatov" }, lookedUpBy.Distinct());
-        Assert.DoesNotContain(lookedUpBy, value => Guid.TryParse(value, out _));
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 }

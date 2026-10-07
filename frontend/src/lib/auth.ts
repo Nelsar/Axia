@@ -1,5 +1,6 @@
 import { isUserRole } from "../api/dto";
-import type { UserDto, UserRole } from "../api/dto";
+import type { UserDto } from "../api/dto";
+import { clearPermissions, setPermissions } from "./permissions";
 
 const TOKEN_KEY = "axia_token";
 const USER_KEY = "axia_user";
@@ -18,9 +19,15 @@ export interface SessionDirectory {
   readonly name: string;
 }
 
-export function setSession(token: string, user: SessionUser, directory: SessionDirectory | null): void {
+export function setSession(
+  token: string,
+  user: SessionUser,
+  directory: SessionDirectory | null,
+  permissions: readonly string[]
+): void {
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(USER_KEY, JSON.stringify(user));
+  setPermissions(permissions);
 
   if (directory === null) localStorage.removeItem(DIRECTORY_KEY);
   else localStorage.setItem(DIRECTORY_KEY, JSON.stringify(directory));
@@ -105,20 +112,10 @@ export function isAuthenticated(): boolean {
   return payload.exp * 1000 > Date.now();
 }
 
-// UserRoles.Admin / UserCreator / UserEditor / UserDeleter / User — see
-// Nelsar.Axia.Application/Configuration/JwtSettings.cs on the backend.
-export function hasRole(...roles: readonly UserRole[]): boolean {
-  const user = getCurrentUser();
-  return user !== null && roles.includes(user.role);
-}
-
-export function isAdmin(): boolean {
-  return hasRole("Admin");
-}
-
 export function logout(): void {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  clearPermissions();
 
   // The directory deliberately outlives the sign-out: the sign-in form uses it to preselect the
   // previous choice, and retyping the same thing on every sign-in is exactly the friction that

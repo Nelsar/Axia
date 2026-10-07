@@ -40,10 +40,10 @@ public class RoleMappingServiceTests
 
         var sender = CreateSender(repo.Object);
 
-        var result = await sender.Send(new CreateRoleMappingCommand(null, "Administrators", "Admin", 0));
+        var result = await sender.Send(new CreateRoleMappingCommand(null, "CN=Administrators,OU=Groups,DC=example,DC=com", "Admin", 0));
 
         Assert.NotEqual(Guid.Empty, result.Id);
-        Assert.Equal("Administrators", result.GroupName);
+        Assert.Equal("CN=Administrators,OU=Groups,DC=example,DC=com", result.GroupName);
         Assert.Equal("Admin", result.RoleName);
         Assert.Equal(0, result.Priority);
         Assert.Null(result.ProviderId);
@@ -57,7 +57,7 @@ public class RoleMappingServiceTests
 
         var sender = CreateSender(repo.Object);
 
-        var result = await sender.Send(new UpdateRoleMappingCommand(Guid.NewGuid(), null, "Administrators", "Admin", 0));
+        var result = await sender.Send(new UpdateRoleMappingCommand(Guid.NewGuid(), null, "CN=Administrators,OU=Groups,DC=example,DC=com", "Admin", 0));
 
         Assert.Null(result);
     }

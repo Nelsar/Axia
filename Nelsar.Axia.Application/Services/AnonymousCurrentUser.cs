@@ -17,6 +17,8 @@ internal sealed class AnonymousCurrentUser : ICurrentUser
 {
     public string? Subject => null;
 
+    public string? DistinguishedName => null;
+
     public Guid? ProviderId => null;
 
     public bool IsSystem => false;

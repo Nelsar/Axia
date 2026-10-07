@@ -11,6 +11,7 @@ using Nelsar.Axia.Application;
 using Nelsar.Axia.Application.Configuration;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Application.Services;
+using Nelsar.Axia.Contracts.Identity;
 using Nelsar.Axia.Domain.Repositories;
 using Nelsar.Axia.Infrastructure.Identity;
 using Nelsar.Axia.Infrastructure.Identity.Abstractions;
@@ -29,7 +30,7 @@ public static class DependencyInjection
     {
         services.AddPersistence(configuration);
         services.AddLdapIdentity(configuration);
-        services.AddApplicationServices();
+        services.AddApplicationServices(configuration);
         services.AddBackgroundJobs();
         services.AddAuthenticationScheme(configuration);
 
@@ -112,7 +113,7 @@ public static class DependencyInjection
     /// how the layer above it is built, and kept every one of those types public for no reason
     /// but this file. What remains is what Infrastructure genuinely owns — the adapters.
     /// </summary>
-    private static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    private static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddApplicationLayer();
 
@@ -120,6 +121,15 @@ public static class DependencyInjection
         services.AddScoped<IProviderRepository, ProviderRepository>();
         services.AddScoped<IAuditRepository, AuditRepository>();
         services.AddScoped<IRoleMappingRepository, RoleMappingRepository>();
+
+        // How role mappings start out and whether mappings by group name count; checked at start,
+        // see RoleMappingOptionsValidation. And which groups only an administrator may touch.
+        services.AddOptions<RoleMappingOptions>()
+            .Bind(configuration.GetSection(RoleMappingOptions.SectionName))
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<RoleMappingOptions>, RoleMappingOptionsValidation>();
+        services.AddOptions<DirectoryProtectionOptions>()
+            .Bind(configuration.GetSection(DirectoryProtectionOptions.SectionName));
         services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
         services.AddScoped<IRateLimitSettingsRepository, RateLimitSettingsRepository>();
         services.AddScoped<IRateLimitSettingsProvider, RateLimitSettingsProvider>();
@@ -188,6 +198,22 @@ public static class DependencyInjection
                     ValidAudience = jwtSettings?.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(jwtSettings?.Key ?? string.Empty))
+                };
+
+                // A token has to say which directory entry it is for. Ones minted before the
+                // claim existed say only which login, and resolving a login is the search that
+                // two entries can answer — the hole the claim was added to close. They are
+                // refused, rather than authorised the old way for the rest of their lifetime;
+                // the console treats the 401 as an expired session and its user signs in again.
+                jwtBearerOptions.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        if (string.IsNullOrWhiteSpace(context.Principal?.FindFirst(AxiaClaims.DistinguishedName)?.Value))
+                            context.Fail("The token does not name a directory entry.");
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
 

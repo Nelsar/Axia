@@ -51,11 +51,16 @@ internal sealed class CreateGroupCommandValidator : AbstractValidator<CreateGrou
 internal sealed class CreateGroupCommandHandler : IRequestHandler<CreateGroupCommand, GroupDto>
 {
     private readonly ILdapService _ldapService;
+    private readonly PrivilegeGuard _privilegeGuard;
     private readonly ILogger<CreateGroupCommandHandler> _logger;
 
-    public CreateGroupCommandHandler(ILdapService ldapService, ILogger<CreateGroupCommandHandler> logger)
+    public CreateGroupCommandHandler(
+        ILdapService ldapService,
+        PrivilegeGuard privilegeGuard,
+        ILogger<CreateGroupCommandHandler> logger)
     {
         _ldapService = ldapService;
+        _privilegeGuard = privilegeGuard;
         _logger = logger;
     }
 
@@ -64,6 +69,11 @@ internal sealed class CreateGroupCommandHandler : IRequestHandler<CreateGroupCom
         var name = (request.Name ?? string.Empty).Trim();
         var members = GroupDirectory.NormaliseMembers(request.MemberDistinguishedNames);
         var description = (request.Description ?? string.Empty).Trim();
+
+        // A new group under a mapped group's name, with the caller as a member, is the Admin role
+        // for anyone who can create groups. Refused unless the caller already holds what that
+        // name is mapped to. See PrivilegeGuard.
+        await _privilegeGuard.EnsureMayManageGroupAsync(null, name, cancellationToken);
 
         var dn = await _ldapService.CreateGroupAsync(
             name, request.ParentDistinguishedName ?? string.Empty, description, members);

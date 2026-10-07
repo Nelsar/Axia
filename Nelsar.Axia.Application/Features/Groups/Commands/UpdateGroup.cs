@@ -35,15 +35,18 @@ internal sealed class UpdateGroupCommandHandler : IRequestHandler<UpdateGroupCom
 {
     private readonly ILdapService _ldapService;
     private readonly GroupDirectory _directory;
+    private readonly PrivilegeGuard _privilegeGuard;
     private readonly ILogger<UpdateGroupCommandHandler> _logger;
 
     public UpdateGroupCommandHandler(
         ILdapService ldapService,
         GroupDirectory directory,
+        PrivilegeGuard privilegeGuard,
         ILogger<UpdateGroupCommandHandler> logger)
     {
         _ldapService = ldapService;
         _directory = directory;
+        _privilegeGuard = privilegeGuard;
         _logger = logger;
     }
 
@@ -52,6 +55,13 @@ internal sealed class UpdateGroupCommandHandler : IRequestHandler<UpdateGroupCom
         var current = await _directory.ResolveAsync(request.Id);
         if (current == null)
             return null;
+
+        // Both what the group confers now — editing the membership of the group mapped to Admin
+        // is how one joins it — and what it would confer under its new name. See PrivilegeGuard.
+        await _privilegeGuard.EnsureMayManageGroupAsync(
+            current,
+            string.IsNullOrWhiteSpace(request.Name) ? null : request.Name.Trim(),
+            cancellationToken);
 
         // Null means "leave the membership alone"; a list that was given has to be usable, and
         // emptying a groupOfNames is not. Not a validator rule: it only applies when the caller

@@ -21,4 +21,21 @@ public static class AxiaClaims
     /// therefore meaningful, not missing, and it is not the same as "any directory will do".
     /// </summary>
     public const string LdapProviderId = "ldap_provider_id";
+
+    /// <summary>
+    /// The distinguished name of the entry the holder proved their password against — the one
+    /// thing that identifies them in the directory unambiguously.
+    ///
+    /// Permissions used to be resolved by searching the directory for the login in
+    /// preferred_username, and taking the first entry that answered. A login is a value of mail,
+    /// uid, sAMAccountName or userPrincipalName, none of which the directory has to keep unique —
+    /// mail in particular is just an attribute — so two entries could answer, and the session
+    /// was then authorised as whichever came back first. Anyone able to set their own mail to an
+    /// administrator's could be that entry. A DN names one entry, and it is the entry that was
+    /// bound to.
+    ///
+    /// Required: a token without it is refused at authentication, rather than authorised the old
+    /// way.
+    /// </summary>
+    public const string DistinguishedName = "ldap_dn";
 }
