@@ -339,7 +339,7 @@ Said plainly, so nobody discovers it after deploying:
 - The `ActiveDirectory` provider is Windows-only and manages fewer object types than
   `StandardLdap`, which also works against Active Directory. Prefer `StandardLdap`.
 
-What is planned, and the status of each piece of it, is in [ROADMAP.md](ROADMAP.md).
+What comes next is in [ROADMAP.md](ROADMAP.md).
 
 ## Contributing
 
