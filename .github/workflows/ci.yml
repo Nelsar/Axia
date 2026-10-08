@@ -67,6 +67,41 @@ jobs:
       # language fails to compile, and that check exists nowhere else.
       - run: npm run build
 
+  quickstart:
+    name: Quick start — compose up and sign in
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The README's first command, run as written. It catches what no other job builds: both
+      # Dockerfiles, the nginx proxy, the generated certificate and keys, the demo directory and
+      # the role mappings in docker-compose.yml.
+      - run: docker compose up -d --build
+
+      # Readiness is polled on the unauthenticated picker rather than on sign-in: sign-in is
+      # rate-limited to five attempts a minute, and polling it would spend them.
+      - name: Sign in as admin.demo through the console's proxy
+        run: |
+          for attempt in $(seq 1 60); do
+            curl -fsS -o /dev/null http://localhost:8080/api/v1/providers/selectable && break
+            sleep 5
+          done
+          for attempt in $(seq 1 12); do
+            if curl -fsS -X POST http://localhost:8080/api/v1/auth/login \
+                 -H 'Content-Type: application/json' \
+                 -d '{"email":"admin.demo","password":"Axia-Demo-1"}' | grep -q '"role":"Admin"'; then
+              echo "admin.demo signed in as Admin."
+              exit 0
+            fi
+            sleep 10
+          done
+          docker compose ps -a
+          docker compose logs
+          exit 1
+
+      - if: always()
+        run: docker compose down -v
+
   dependencies:
     name: Dependencies — known vulnerabilities
     runs-on: ubuntu-latest
