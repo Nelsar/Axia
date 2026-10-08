@@ -1,0 +1,132 @@
+# Demo content for the quick start's OpenLDAP, applied once, on the first start of an empty
+# directory. Every password is "Axia-Demo-1". This directory is for trying the console out: its
+# ports are not published, and the console is bound to localhost only.
+#
+# The role groups are written in two shapes on purpose — groupOfNames and groupOfUniqueNames —
+# because directories use both, and this image's memberof overlay only covers the second.
+
+dn: ou=people,dc=example,dc=org
+objectClass: organizationalUnit
+ou: people
+description: Accounts
+
+dn: ou=groups,dc=example,dc=org
+objectClass: organizationalUnit
+ou: groups
+description: Groups, including the ones mapped to the console's roles
+
+dn: ou=staff,ou=people,dc=example,dc=org
+objectClass: organizationalUnit
+ou: staff
+description: Ordinary employees
+
+# --- People who sign in to the console ---------------------------------------------------------
+
+dn: uid=admin.demo,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: admin.demo
+cn: Aigerim Admin
+sn: Admin
+givenName: Aigerim
+displayName: Aigerim Admin
+mail: admin.demo@example.org
+userPassword: Axia-Demo-1
+
+dn: uid=creator.demo,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: creator.demo
+cn: Chingiz Creator
+sn: Creator
+givenName: Chingiz
+displayName: Chingiz Creator
+mail: creator.demo@example.org
+userPassword: Axia-Demo-1
+
+dn: uid=editor.demo,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: editor.demo
+cn: Elena Editor
+sn: Editor
+givenName: Elena
+displayName: Elena Editor
+mail: editor.demo@example.org
+userPassword: Axia-Demo-1
+
+dn: uid=user.demo,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: user.demo
+cn: Ulan User
+sn: User
+givenName: Ulan
+displayName: Ulan User
+mail: user.demo@example.org
+userPassword: Axia-Demo-1
+
+# --- Accounts to manage -------------------------------------------------------------------------
+
+dn: uid=ivan.petrov,ou=staff,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: ivan.petrov
+cn: Ivan Petrov
+sn: Petrov
+givenName: Ivan
+displayName: Ivan Petrov
+mail: ivan.petrov@example.org
+userPassword: Axia-Demo-1
+
+dn: uid=aliya.nurlanova,ou=staff,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: aliya.nurlanova
+cn: Aliya Nurlanova
+sn: Nurlanova
+givenName: Aliya
+displayName: Aliya Nurlanova
+mail: aliya.nurlanova@example.org
+userPassword: Axia-Demo-1
+
+dn: uid=maria.garcia,ou=staff,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: maria.garcia
+cn: Maria Garcia
+sn: Garcia
+givenName: Maria
+displayName: Maria Garcia
+mail: maria.garcia@example.org
+userPassword: Axia-Demo-1
+
+dn: uid=john.smith,ou=staff,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: john.smith
+cn: John Smith
+sn: Smith
+givenName: John
+displayName: John Smith
+mail: john.smith@example.org
+userPassword: Axia-Demo-1
+
+# --- Groups mapped to roles in docker-compose.yml ------------------------------------------------
+
+dn: cn=axia-admins,ou=groups,dc=example,dc=org
+objectClass: groupOfNames
+cn: axia-admins
+description: Admin in the console. Also a protected group: only an Admin can change its members.
+member: uid=admin.demo,ou=people,dc=example,dc=org
+
+dn: cn=axia-creators,ou=groups,dc=example,dc=org
+objectClass: groupOfUniqueNames
+cn: axia-creators
+description: UserCreator in the console
+uniqueMember: uid=creator.demo,ou=people,dc=example,dc=org
+
+dn: cn=axia-editors,ou=groups,dc=example,dc=org
+objectClass: groupOfNames
+cn: axia-editors
+description: UserEditor in the console
+member: uid=editor.demo,ou=people,dc=example,dc=org
+
+dn: cn=engineering,ou=groups,dc=example,dc=org
+objectClass: groupOfNames
+cn: engineering
+description: An ordinary group, mapped to nothing
+member: uid=ivan.petrov,ou=staff,ou=people,dc=example,dc=org
+member: uid=john.smith,ou=staff,ou=people,dc=example,dc=org

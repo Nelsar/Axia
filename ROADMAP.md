@@ -17,8 +17,6 @@ What stands between the MVP and running it comfortably in production, roughly in
   valid until it expires, and disabling an account does not end one already issued.
 - **Revocation checks for directory certificates**, without turning an unreachable CRL endpoint
   into an outage.
-- **A working Docker quick start**: compose files that bring up the API, the console and an
-  OpenLDAP with test data and TLS.
 - **Bulk jobs that survive a restart.** They are held in memory today; moving them into the
   database is also what makes a second instance possible.
 - **PostgreSQL alongside SQLite**, for deployments that need more than one process. Better decided

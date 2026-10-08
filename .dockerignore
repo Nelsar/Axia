@@ -9,7 +9,9 @@
 .gitignore
 .env
 *.md
-OpenLdap/
+# Not part of the API image: the console has its own, and the quick start mounts its files.
+frontend/
+deploy/
 
 # Local secrets and local state. The Dockerfile copies whole project folders, and the Web SDK
 # publishes every .json it finds in one, so anything that is not excluded here ends up in the

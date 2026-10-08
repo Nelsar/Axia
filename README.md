@@ -83,6 +83,36 @@ Permissions are resolved per request from the caller's directory group membershi
 Application layer before a use case runs — not at the controller. A handler cannot be reached
 without passing that check, and a test asserts it.
 
+## Quick start
+
+The fastest way to see it working: the API, the console and an OpenLDAP with demo accounts, in
+Docker. It needs Docker with Compose v2 and nothing else.
+
+```bash
+git clone https://github.com/Nelsar/Nelsar.Axia.git
+cd Nelsar.Axia
+docker compose up --build
+```
+
+The first start builds two images and takes a few minutes. When the API logs `Now listening on`,
+open <http://localhost:8080> and sign in. Every demo password is `Axia-Demo-1`.
+
+| Login | Role | Try |
+| --- | --- | --- |
+| `admin.demo` | `Admin` | Everything, including directories, role mappings and the audit log. |
+| `creator.demo` | `UserCreator` | Creating accounts, bulk batches and the name generator. |
+| `editor.demo` | `UserEditor` | Editing accounts and resetting passwords — except `admin.demo`'s, which is in a protected group. |
+| `user.demo` | `User` | Reading, and nothing else. |
+
+It is wired the way a real deployment should be: the API reaches the directory over LDAPS and
+verifies its certificate, issued by a CA generated on the first start; the API's keys are
+generated too and never written into a file in the repository; the console's nginx proxies the
+API from the same origin and is the only thing published, on localhost only.
+
+It is for trying the project out. The directory, its demo passwords and the API's database live
+in local Docker volumes, and `docker compose down -v` removes all of it. To point the API at your
+own directory, run it as below.
+
 ## Getting started
 
 ### Prerequisites
@@ -337,9 +367,6 @@ Said plainly, so nobody discovers it after deploying:
   chains and names the host is accepted. See [SECURITY.md](SECURITY.md#known-limitations).
 - **A session cannot be ended.** Tokens are bearer JWTs valid until they expire, 60 minutes by
   default, with no sign-out and no deny list.
-- **No Docker quick start.** The compose files in the repository are not currently in a working
-  state, and the OpenLDAP bootstrap fixtures are missing. Point the API at a directory you already
-  have.
 - **Password policy, account lockout and group membership editing from the user screen** are not
   implemented.
 - The `ActiveDirectory` provider is Windows-only and manages fewer object types than

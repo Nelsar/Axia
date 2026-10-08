@@ -1,0 +1,7 @@
+# Files that are read inside Linux containers keep LF line endings on every platform. A Windows
+# checkout with core.autocrlf would otherwise hand the quick start's init script to sh with a
+# carriage return on every line, and it fails on the first one.
+*.sh    text eol=lf
+*.ldif  text eol=lf
+*.conf  text eol=lf
+Dockerfile text eol=lf

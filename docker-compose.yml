@@ -1,57 +1,124 @@
+# Quick start: the API, the console and an OpenLDAP with demo accounts, wired together the way a
+# real deployment should be — LDAPS to the directory with a verified certificate, a reverse proxy
+# in front of the API, generated keys, nothing published beyond the console on localhost.
+#
+#   docker compose up --build
+#
+# Then open http://localhost:8080 and sign in as admin.demo / Axia-Demo-1. See README.md, "Quick
+# start", for the other accounts and what each one may do.
+#
+# This is for trying the project out, not for production: the directory, its demo passwords and
+# the API's database live in local Docker volumes. `docker compose down -v` removes all of it.
+
+name: nelsar-axia
+
 services:
-  # api:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: nelsar-axia-api
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Development
-  #     - ConnectionStrings__DefaultConnection=Data Source=/data/nelsar-axia.db
-  #     # StandardLdap works against AD, OpenLDAP, and eDirectory alike — see
-  #     # StandardLdapProvider's class doc comment. Do not switch this to ActiveDirectory
-  #     # here: that provider needs System.DirectoryServices, which is Windows-only and
-  #     # throws PlatformNotSupportedException in this Linux container.
-  #     - Ldap__ProviderType=${LDAP_PROVIDER_TYPE:-StandardLdap}
-  #     - Ldap__Server=${LDAP_SERVER:-openldap}
-  #     - Ldap__Security=${LDAP_SECURITY:-Ldaps}
-  #     - Ldap__Port=${LDAP_PORT:-636}
-  #     - Ldap__TrustedCaCertificatePath=${LDAP_TRUSTED_CA:-}
-  #     - Ldap__BaseDn=${LDAP_BASE_DN:-dc=nelsar,dc=kz}
-  #     - Ldap__AdminUsername=${LDAP_ADMIN_USERNAME:-cn=admin,dc=nelsar,dc=kz}
-  #     - Ldap__AdminPassword=${LDAP_ADMIN_PASSWORD:-password@}
-  #     # Overrides appsettings.json's checked-in AD-only default (sAMAccountName-only) with
-  #     # the portable filter that matches AD, OpenLDAP, and eDirectory in one query.
-  #     - Ldap__UserSearchFilter=(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))
-  #     # Required: the group whose members administer the application, by DN. The API refuses to
-  #     # start without it. See RoleMappings in appsettings.json.example.
-  #     - RoleMappings__GroupDns__Admin=${AXIA_ADMIN_GROUP_DN:-cn=Administrators,ou=groups,dc=nelsar,dc=kz}
-  #     # OpenLDAP marks no group privileged; name the ones only an administrator may touch.
-  #     - DirectoryProtection__ProtectedGroups__0=${AXIA_ADMIN_GROUP_DN:-cn=Administrators,ou=groups,dc=nelsar,dc=kz}
-  #     # Log destinations. Console and file are on by default; these two are the switches.
-  #     # Defaults come from .env — see .env.example.
-  #     - Observability__Logstash__Enabled=${OBSERVABILITY_LOGSTASH_ENABLED:-false}
-  #     - Observability__Logstash__Uri=${OBSERVABILITY_LOGSTASH_URI:-}
-  #     - Observability__Loki__Enabled=${OBSERVABILITY_LOKI_ENABLED:-false}
-  #     - Observability__Loki__Uri=${OBSERVABILITY_LOKI_URI:-}
-  #     - Observability__Loki__Password=${OBSERVABILITY_LOKI_PASSWORD:-}
-  #     # The file sink writes inside the container, so it dies with it unless the path is on a
-  #     # volume. api_logs below is also what a Filebeat sidecar would mount to feed Logstash
-  #     # without the application shipping anything itself.
-  #     - Observability__File__Path=/logs/axia-.json
-  #   volumes:
-  #     - api_data:/data
-  #     - api_logs:/logs
-  #   ports:
-  #     - "5000:8080"
-  #   depends_on:
-  #     - openldap
-  #   networks:
-  #     - nelsar-net
-  #   restart: unless-stopped
+  # Generates the directory's certificate and the API's keys on the first start; see the script.
+  init:
+    # The directory's image, already needed below, for the openssl it carries.
+    image: osixia/openldap:1.5.0
+    entrypoint: ["sh", "/init.sh"]
+    volumes:
+      - ./deploy/quickstart/init.sh:/init.sh:ro
+      - ldap-certs:/ldap-certs
+      - api-secrets:/api-secrets
+
+  openldap:
+    image: osixia/openldap:1.5.0
+    # --copy-service: the image rewrites its asset folders while it starts, and the certificates
+    # and demo data below are mounted read-only.
+    command: ["--copy-service"]
+    # The name the API connects to, and the name in the directory's certificate.
+    hostname: openldap
+    environment:
+      LDAP_ORGANISATION: Nelsar.Axia quick start
+      LDAP_DOMAIN: example.org
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD:-quickstart-admin}
+      LDAP_TLS_CRT_FILENAME: ldap.crt
+      LDAP_TLS_KEY_FILENAME: ldap.key
+      LDAP_TLS_CA_CRT_FILENAME: ca.crt
+      LDAP_TLS_VERIFY_CLIENT: never
+    volumes:
+      - ldap-certs:/container/service/slapd/assets/certs:ro
+      - ./deploy/quickstart/bootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/50-demo.ldif:ro
+      - ldap-data:/var/lib/ldap
+      - ldap-config:/etc/ldap/slapd.d
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    healthcheck:
+      # Ready once the demo data is in, which is after the image's own first-start setup.
+      test: ["CMD-SHELL", "ldapwhoami -x -H ldap://localhost -D uid=admin.demo,ou=people,dc=example,dc=org -w Axia-Demo-1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # The keys come from the file init wrote, read into the environment just before the API starts,
+    # so they never appear in this file, in `docker inspect` or in an image layer.
+    entrypoint: ["sh", "-c", "set -a && . /secrets/api.env && set +a && exec dotnet Nelsar.Axia.Api.dll"]
+    environment:
+      ConnectionStrings__DefaultConnection: Data Source=/data/nelsar-axia.db
+
+      # The directory: LDAPS on 636 (both defaults), with the quick start's own CA trusted.
+      Ldap__Server: openldap
+      Ldap__TrustedCaCertificatePath: /secrets/ca.crt
+      Ldap__BaseDn: dc=example,dc=org
+      Ldap__AdminUsername: cn=admin,dc=example,dc=org
+      Ldap__AdminPassword: ${LDAP_ADMIN_PASSWORD:-quickstart-admin}
+
+      # Which directory groups are which roles, by DN, and which group's members only an Admin
+      # may change.
+      RoleMappings__GroupDns__Admin: cn=axia-admins,ou=groups,dc=example,dc=org
+      RoleMappings__GroupDns__UserCreator: cn=axia-creators,ou=groups,dc=example,dc=org
+      RoleMappings__GroupDns__UserEditor: cn=axia-editors,ou=groups,dc=example,dc=org
+      DirectoryProtection__ProtectedGroups__0: cn=axia-admins,ou=groups,dc=example,dc=org
+
+      # The console's nginx is the only way in. Naming it is what lets the API believe its
+      # X-Forwarded-For, so each browser gets its own sign-in rate limit rather than sharing one.
+      ReverseProxy__KnownProxies__0: 172.31.250.10
+
+      # Logs to stdout only: `docker compose logs api`.
+      Observability__File__Enabled: "false"
+      Observability__Console__Json: "false"
+    volumes:
+      - api-secrets:/secrets:ro
+      - api-data:/data
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      openldap:
+        condition: service_healthy
+    restart: unless-stopped
+
+  console:
+    build:
+      context: ./frontend
+    ports:
+      # Localhost only: the demo passwords are in this repository.
+      - "127.0.0.1:${CONSOLE_PORT:-8080}:8080"
+    networks:
+      default:
+        ipv4_address: 172.31.250.10
+    depends_on:
+      - api
+    restart: unless-stopped
 
 networks:
-  nelsar-net:
+  default:
+    ipam:
+      config:
+        # Fixed so the console's address above can be named as the API's trusted proxy.
+        - subnet: 172.31.250.0/24
 
 volumes:
-  api_data:
-  api_logs:
+  ldap-certs:
+  api-secrets:
+  ldap-data:
+  ldap-config:
+  api-data:
