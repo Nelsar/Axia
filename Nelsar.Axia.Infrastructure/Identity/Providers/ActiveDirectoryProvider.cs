@@ -87,7 +87,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
         {
             _logger.LogError(ex, "AD authentication could not be completed for {Login}.", LogMask.Login(username));
             throw new DirectoryUnavailableException(
-                ApplicationMessages.DirectoryCredentialCheckFailed(username), ex);
+                ApplicationMessages.DirectoryCredentialCheckFailed(), ex);
         }
     }
 
@@ -105,7 +105,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
             // otherwise a directory outage reads as "this account is free to create".
             _logger.LogError(ex, "Error finding AD user {Login}.", LogMask.Login(username));
             throw new DirectoryUnavailableException(
-                ApplicationMessages.DirectorySearchFailed(username), ex);
+                ApplicationMessages.DirectorySearchFailed(), ex);
         }
     }
 
@@ -145,7 +145,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
             // with "no groups", or an outage quietly strips an administrator's role.
             _logger.LogError(ex, "Error reading AD principal {Dn}.", LogMask.DistinguishedName(distinguishedName));
             throw new DirectoryUnavailableException(
-                ApplicationMessages.DirectoryGroupMembershipFailed(distinguishedName), ex);
+                ApplicationMessages.DirectoryGroupMembershipFailed(), ex);
         }
     }
 
@@ -186,7 +186,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
     {
         using var context = CreateContext();
         using var user = UserPrincipal.FindByIdentity(context, IdentityType.DistinguishedName, distinguishedName)
-            ?? throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInAd(distinguishedName));
+            ?? throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInAd());
 
         if (!string.IsNullOrWhiteSpace(newName))
             user.DisplayName = newName;
@@ -219,7 +219,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
             // Matches StandardLdapProvider.DeleteUser: false means the account genuinely was
             // not there, so a failure must not borrow that meaning and be reported as 404.
             _logger.LogError(ex, "Error deleting AD user {Dn}.", LogMask.DistinguishedName(distinguishedName));
-            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(distinguishedName), ex);
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(), ex);
         }
     }
 

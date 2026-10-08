@@ -84,26 +84,29 @@ public static class ApplicationMessages
     public static string WriteOperationsUnsupportedOnGlobalCatalog() =>
         Get(nameof(WriteOperationsUnsupportedOnGlobalCatalog));
 
-    public static string DirectorySearchFailed(string login) => Format(nameof(DirectorySearchFailed), login);
+    // The failures from here to UserNotFoundInAd name no account, and that is deliberate. They
+    // used to quote the login or the DN, and an exception's message does not stay with the
+    // caller: it is the {Reason} of a refusal in the log, and the text of every logged exception,
+    // on its way to Logstash or Loki in full — past LogMask, which only masks what it is handed.
+    // The caller loses nothing by it, having just named the account itself; a bulk row's result
+    // carries its own address. What the operator needs is the masked subject the providers log
+    // next to the failure, and the audit trail, which records the target in full on purpose.
 
-    public static string DirectoryCredentialCheckFailed(string login) =>
-        Format(nameof(DirectoryCredentialCheckFailed), login);
+    public static string DirectorySearchFailed() => Get(nameof(DirectorySearchFailed));
 
-    public static string DirectoryGroupMembershipFailed(string login) =>
-        Format(nameof(DirectoryGroupMembershipFailed), login);
+    public static string DirectoryCredentialCheckFailed() => Get(nameof(DirectoryCredentialCheckFailed));
 
-    public static string DirectoryRejectedCreate(string distinguishedName) =>
-        Format(nameof(DirectoryRejectedCreate), distinguishedName);
+    public static string DirectoryGroupMembershipFailed() => Get(nameof(DirectoryGroupMembershipFailed));
 
-    public static string DirectoryRejectedUpdate(string distinguishedName) =>
-        Format(nameof(DirectoryRejectedUpdate), distinguishedName);
+    public static string DirectoryRejectedCreate() => Get(nameof(DirectoryRejectedCreate));
 
-    public static string DirectoryRejectedDelete(string login) =>
-        Format(nameof(DirectoryRejectedDelete), login);
+    public static string DirectoryRejectedUpdate() => Get(nameof(DirectoryRejectedUpdate));
 
-    public static string UserNotFoundInLdap(string login) => Format(nameof(UserNotFoundInLdap), login);
+    public static string DirectoryRejectedDelete() => Get(nameof(DirectoryRejectedDelete));
 
-    public static string UserNotFoundInAd(string login) => Format(nameof(UserNotFoundInAd), login);
+    public static string UserNotFoundInLdap() => Get(nameof(UserNotFoundInLdap));
+
+    public static string UserNotFoundInAd() => Get(nameof(UserNotFoundInAd));
 
     public static string OrganizationalUnitNameRequired() => Get(nameof(OrganizationalUnitNameRequired));
 

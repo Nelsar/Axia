@@ -10,9 +10,13 @@ By opening a pull request you agree that your contribution is licensed under the
 ## Getting it running
 
 You need the [.NET 10 SDK](https://dotnet.microsoft.com/download) and
-[Node 20 or newer](https://nodejs.org). You also need a directory to point at — an LDAP server or
-an Active Directory you can reach. The compose files in the repository are not currently in a
-working state, so this part is on you; see [Not in scope yet](README.md#not-in-scope-yet).
+[Node 20 or newer](https://nodejs.org). The unit and integration tests need nothing else.
+
+To see a change working end to end, the [Docker quick start](README.md#quick-start) is the
+shortest way: `docker compose up --build` builds the API and the console from your working tree
+and starts them against an OpenLDAP with demo accounts, one for each role. Its directory is
+reachable only inside Docker, so to run the API from source, point it at an LDAP server or an
+Active Directory you can reach.
 
 ```bash
 cp Nelsar.Axia.Api/appsettings.json.example Nelsar.Axia.Api/appsettings.json

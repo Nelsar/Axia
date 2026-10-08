@@ -80,28 +80,28 @@
     <value>El proveedor de directorio «{0}» está mal configurado y no se puede usar. Póngase en contacto con un administrador.</value>
   </data>
   <data name="DirectorySearchFailed" xml:space="preserve">
-    <value>No se pudo buscar «{0}» en el directorio.</value>
+    <value>No se pudo buscar la cuenta en el directorio.</value>
   </data>
   <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
-    <value>El directorio no pudo verificar las credenciales de «{0}».</value>
+    <value>El directorio no pudo verificar las credenciales.</value>
   </data>
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
-    <value>El directorio no pudo informar de la pertenencia a grupos de «{0}».</value>
+    <value>El directorio no pudo informar de la pertenencia a grupos.</value>
   </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
-    <value>El directorio rechazó la creación de «{0}».</value>
+    <value>El directorio rechazó la creación de la entrada.</value>
   </data>
   <data name="DirectoryRejectedUpdate" xml:space="preserve">
-    <value>El directorio rechazó la modificación de «{0}».</value>
+    <value>El directorio rechazó la modificación de la entrada.</value>
   </data>
   <data name="DirectoryRejectedDelete" xml:space="preserve">
-    <value>El directorio rechazó la eliminación de «{0}».</value>
+    <value>El directorio rechazó la eliminación de la entrada.</value>
   </data>
   <data name="UserNotFoundInLdap" xml:space="preserve">
-    <value>No se encontró al usuario «{0}» en LDAP.</value>
+    <value>No se encontró al usuario en LDAP.</value>
   </data>
   <data name="UserNotFoundInAd" xml:space="preserve">
-    <value>No se encontró al usuario «{0}» en AD.</value>
+    <value>No se encontró al usuario en AD.</value>
   </data>
   <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
     <value>Las operaciones de escritura LDAP no se admiten en los puertos de Catálogo Global 3268/3269. Use el puerto LDAP/LDAPS de escritura 389/636 y el DN de una OU de destino para crear, modificar y eliminar.</value>

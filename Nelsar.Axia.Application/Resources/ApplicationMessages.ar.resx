@@ -80,28 +80,28 @@
     <value>موفّر الدليل «{0}» مُهيَّأ بشكل خاطئ ولا يمكن استخدامه. اتصل بمسؤول النظام.</value>
   </data>
   <data name="DirectorySearchFailed" xml:space="preserve">
-    <value>تعذّر البحث عن «{0}» في الدليل.</value>
+    <value>تعذّر البحث عن الحساب في الدليل.</value>
   </data>
   <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
-    <value>تعذّر على الدليل التحقّق من بيانات اعتماد «{0}».</value>
+    <value>تعذّر على الدليل التحقّق من بيانات الاعتماد.</value>
   </data>
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
-    <value>تعذّر على الدليل الإبلاغ عن عضوية المجموعات لـ «{0}».</value>
+    <value>تعذّر على الدليل الإبلاغ عن عضوية المجموعات.</value>
   </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
-    <value>رفض الدليل إنشاء «{0}».</value>
+    <value>رفض الدليل إنشاء الإدخال.</value>
   </data>
   <data name="DirectoryRejectedUpdate" xml:space="preserve">
-    <value>رفض الدليل تعديل «{0}».</value>
+    <value>رفض الدليل تعديل الإدخال.</value>
   </data>
   <data name="DirectoryRejectedDelete" xml:space="preserve">
-    <value>رفض الدليل حذف «{0}».</value>
+    <value>رفض الدليل حذف الإدخال.</value>
   </data>
   <data name="UserNotFoundInLdap" xml:space="preserve">
-    <value>لم يُعثر على المستخدم «{0}» في LDAP.</value>
+    <value>لم يُعثر على المستخدم في LDAP.</value>
   </data>
   <data name="UserNotFoundInAd" xml:space="preserve">
-    <value>لم يُعثر على المستخدم «{0}» في AD.</value>
+    <value>لم يُعثر على المستخدم في AD.</value>
   </data>
   <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
     <value>عمليات الكتابة في LDAP غير مدعومة على منفذي الفهرس العام 3268/3269. استخدم منفذ LDAP/LDAPS القابل للكتابة 389/636 والاسم المميّز لوحدة تنظيمية هدف للإنشاء والتعديل والحذف.</value>

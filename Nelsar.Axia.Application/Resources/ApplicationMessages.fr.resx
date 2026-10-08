@@ -80,28 +80,28 @@
     <value>Le fournisseur d’annuaire « {0} » est mal configuré et inutilisable. Contactez un administrateur.</value>
   </data>
   <data name="DirectorySearchFailed" xml:space="preserve">
-    <value>La recherche de « {0} » dans l’annuaire a échoué.</value>
+    <value>La recherche du compte dans l’annuaire a échoué.</value>
   </data>
   <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
-    <value>L’annuaire n’a pas pu vérifier les identifiants de « {0} ».</value>
+    <value>L’annuaire n’a pas pu vérifier les identifiants.</value>
   </data>
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
-    <value>L’annuaire n’a pas pu indiquer l’appartenance aux groupes de « {0} ».</value>
+    <value>L’annuaire n’a pas pu indiquer l’appartenance aux groupes.</value>
   </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
-    <value>L’annuaire a refusé la création de « {0} ».</value>
+    <value>L’annuaire a refusé la création de l’entrée.</value>
   </data>
   <data name="DirectoryRejectedUpdate" xml:space="preserve">
-    <value>L’annuaire a refusé la modification de « {0} ».</value>
+    <value>L’annuaire a refusé la modification de l’entrée.</value>
   </data>
   <data name="DirectoryRejectedDelete" xml:space="preserve">
-    <value>L’annuaire a refusé la suppression de « {0} ».</value>
+    <value>L’annuaire a refusé la suppression de l’entrée.</value>
   </data>
   <data name="UserNotFoundInLdap" xml:space="preserve">
-    <value>L’utilisateur « {0} » est introuvable dans LDAP.</value>
+    <value>L’utilisateur est introuvable dans LDAP.</value>
   </data>
   <data name="UserNotFoundInAd" xml:space="preserve">
-    <value>L’utilisateur « {0} » est introuvable dans AD.</value>
+    <value>L’utilisateur est introuvable dans AD.</value>
   </data>
   <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
     <value>Les écritures LDAP ne sont pas prises en charge sur les ports Catalogue global 3268/3269. Utilisez le port LDAP/LDAPS accessible en écriture 389/636 et le DN d’une OU cible pour créer, modifier et supprimer.</value>

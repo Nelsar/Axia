@@ -80,7 +80,10 @@ Inside that, the following are meant to hold, and a case where they do not is wo
 - **Secrets do not reach the log.** Bind passwords are encrypted at rest with AES-GCM; log
   properties whose names read like a secret are redacted on the way to every sink. Logins and
   distinguished names are masked in the diagnostic log; the audit trail records the actor in full,
-  deliberately.
+  deliberately. The failures reported to a caller name no account either, because the same text
+  is logged as the reason for a refusal and as the message of every logged exception; a test holds
+  every message to that. What a directory server says about its own failure travels with the
+  logged exception as the server worded it.
 
 ## Known limitations
 

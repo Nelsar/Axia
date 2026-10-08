@@ -85,36 +85,36 @@
     <comment>{0} = provider id supplied in X-LDAP-Provider-Id.</comment>
   </data>
   <data name="DirectorySearchFailed" xml:space="preserve">
-    <value>The directory could not be searched for '{0}'.</value>
-    <comment>{0} = login being looked up.</comment>
+    <value>The directory could not be searched for the account.</value>
+    <comment>No placeholder on purpose: the caller knows which account it asked about, and this text is logged as well.</comment>
   </data>
   <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
-    <value>The directory could not verify credentials for '{0}'.</value>
-    <comment>{0} = login.</comment>
+    <value>The directory could not verify the credentials.</value>
+    <comment>No placeholder on purpose: the caller knows which account it asked about, and this text is logged as well.</comment>
   </data>
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
-    <value>The directory could not report group membership for '{0}'.</value>
-    <comment>{0} = login.</comment>
+    <value>The directory could not report group membership.</value>
+    <comment>No placeholder on purpose: the caller knows which account it asked about, and this text is logged as well.</comment>
   </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
-    <value>The directory rejected creation of '{0}'.</value>
-    <comment>{0} = distinguished name.</comment>
+    <value>The directory rejected the creation of the entry.</value>
+    <comment>No placeholder on purpose: the caller knows which account it asked about, and this text is logged as well.</comment>
   </data>
   <data name="DirectoryRejectedUpdate" xml:space="preserve">
-    <value>The directory rejected the update of '{0}'.</value>
-    <comment>{0} = distinguished name.</comment>
+    <value>The directory rejected the update of the entry.</value>
+    <comment>No placeholder on purpose: the caller knows which account it asked about, and this text is logged as well.</comment>
   </data>
   <data name="DirectoryRejectedDelete" xml:space="preserve">
-    <value>The directory rejected deletion of '{0}'.</value>
-    <comment>{0} = login.</comment>
+    <value>The directory rejected the deletion of the entry.</value>
+    <comment>No placeholder on purpose: the caller knows which account it asked about, and this text is logged as well.</comment>
   </data>
   <data name="UserNotFoundInLdap" xml:space="preserve">
-    <value>User '{0}' not found in LDAP.</value>
-    <comment>{0} = login.</comment>
+    <value>User not found in LDAP.</value>
+    <comment>No placeholder on purpose: the caller knows which account it asked about, and this text is logged as well.</comment>
   </data>
   <data name="UserNotFoundInAd" xml:space="preserve">
-    <value>User '{0}' not found in AD.</value>
-    <comment>{0} = login.</comment>
+    <value>User not found in AD.</value>
+    <comment>No placeholder on purpose: the caller knows which account it asked about, and this text is logged as well.</comment>
   </data>
   <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
     <value>LDAP write operations are not supported on Global Catalog ports 3268/3269. Use writable LDAP/LDAPS port 389/636 and a target OU DN for create/update/delete.</value>

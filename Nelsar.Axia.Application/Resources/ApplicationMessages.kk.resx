@@ -80,28 +80,28 @@
     <value>«{0}» каталог провайдері қате бапталған және қолданылмайды. Әкімшіге хабарласыңыз.</value>
   </data>
   <data name="DirectorySearchFailed" xml:space="preserve">
-    <value>Каталогта «{0}» іздеу мүмкін болмады.</value>
+    <value>Каталогта тіркелгіні іздеу мүмкін болмады.</value>
   </data>
   <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
-    <value>Каталог «{0}» тіркелгі деректерін тексере алмады.</value>
+    <value>Каталог тіркелгі деректерін тексере алмады.</value>
   </data>
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
-    <value>Каталог «{0}» пайдаланушысының топтардағы мүшелігін хабарлай алмады.</value>
+    <value>Каталог топтардағы мүшелікті хабарлай алмады.</value>
   </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
-    <value>Каталог «{0}» жасауды қабылдамады.</value>
+    <value>Каталог жазбаны жасауды қабылдамады.</value>
   </data>
   <data name="DirectoryRejectedUpdate" xml:space="preserve">
-    <value>Каталог «{0}» жаңартуды қабылдамады.</value>
+    <value>Каталог жазбаны жаңартуды қабылдамады.</value>
   </data>
   <data name="DirectoryRejectedDelete" xml:space="preserve">
-    <value>Каталог «{0}» жоюды қабылдамады.</value>
+    <value>Каталог жазбаны жоюды қабылдамады.</value>
   </data>
   <data name="UserNotFoundInLdap" xml:space="preserve">
-    <value>«{0}» пайдаланушысы LDAP-та табылмады.</value>
+    <value>Пайдаланушы LDAP-та табылмады.</value>
   </data>
   <data name="UserNotFoundInAd" xml:space="preserve">
-    <value>«{0}» пайдаланушысы AD-та табылмады.</value>
+    <value>Пайдаланушы AD-та табылмады.</value>
   </data>
   <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
     <value>LDAP жазу операциялары Global Catalog 3268/3269 порттарында қолдау таппайды. Жасау, жаңарту және жою үшін жазуға ашық LDAP/LDAPS 389/636 портын және мақсатты OU DN-ін пайдаланыңыз.</value>
