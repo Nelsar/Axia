@@ -13,6 +13,13 @@ updates:
       # version skew between them fails in ways that are tedious to read one package at a time.
       test-stack:
         patterns: ["xunit*", "Moq*", "Microsoft.NET.Test.Sdk", "coverlet*"]
+    ignore:
+      # MediatR is Apache-2.0 up to 12.x. From 13.0 it is dual-licensed — RPL-1.5, or commercial
+      # with a licence key — so the bump Dependabot would offer is a licence change dressed as a
+      # version number, for every deployment of this project. Moving off 12.x is a decision to
+      # make on purpose (another mediator, or none), not a weekly pull request.
+      - dependency-name: "MediatR"
+        versions: ["[13.0,)"]
 
   - package-ecosystem: npm
     directory: /frontend
