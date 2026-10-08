@@ -79,6 +79,7 @@ public static class DependencyInjection
         // This layer's own collaborators. Ports they depend on (ILdapService, the repositories)
         // are still Infrastructure's to supply.
         services.AddScoped<UserDirectory>();
+        services.AddScoped<UserRoleLabeler>();
         services.AddScoped<GroupDirectory>();
         services.AddScoped<OrganizationalUnitDirectory>();
         services.AddScoped<ComputerDirectory>();

@@ -68,6 +68,9 @@ public interface ILdapService
     /// on its entry instead; see <see cref="GetUserByDnAsync"/>.</summary>
     Task<DirectoryGroupListing> GetGroupsAsync();
 
+    /// <summary>Who one group lists as members; see <c>ILdapProvider.GetGroupMembers</c>.</summary>
+    Task<DirectoryGroupMembers> GetGroupMembersAsync(string groupDn);
+
     /// <summary>Returns the DN of the entry that was written. <paramref name="memberDns"/> must
     /// hold at least one member — see <c>ILdapProvider.CreateGroup</c>.</summary>
     Task<string> CreateGroupAsync(string name, string parentDn, string description, IReadOnlyList<string> memberDns);
