@@ -21,7 +21,7 @@ an audit log and bulk user provisioning.
 Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
 [Apache 2.0](LICENSE).
 
-> **Status: MVP.** The API and console do what is described below, and 778 tests cover it. What is
+> **Status: MVP.** The API and console do what is described below, and 782 tests cover it. What is
 > not yet here is listed under [Not in scope yet](#not-in-scope-yet) — read it before deciding
 > whether this fits.
 
@@ -334,7 +334,8 @@ Read this before exposing the API anywhere.
   deployment, by naming the proxy here.
 - **Secrets never reach the log.** Bind passwords are encrypted at rest; log properties whose
   names read like a secret are redacted on the way to every sink; logins and distinguished names
-  are masked in the diagnostic log, while the audit trail records the actor in full on purpose.
+  are masked in the diagnostic log, and error messages name no account, since they are logged
+  too. The audit trail records the actor in full on purpose.
 - **LDAP filters and distinguished names are escaped** at the boundary, so a login containing
   filter metacharacters cannot change the query it lands in.
 
@@ -355,7 +356,7 @@ the tests if a message is left untranslated.
 dotnet test
 ```
 
-778 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
+782 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
 authorisation on every guarded use case, what may reach a log sink, multi-directory isolation, and
 translation completeness in every supported language.
 

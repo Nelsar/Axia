@@ -138,7 +138,7 @@ internal class StandardLdapProvider : ILdapProvider
             // in the log explaining what the directory actually said.
             _logger.LogError(ex, "LDAP lookup failed while authenticating {Login}.", LogMask.Login(username));
             throw new DirectoryUnavailableException(
-                ApplicationMessages.DirectorySearchFailed(username), ex);
+                ApplicationMessages.DirectorySearchFailed(), ex);
         }
 
         if (entry == null)
@@ -170,7 +170,7 @@ internal class StandardLdapProvider : ILdapProvider
             // to reset a credential that was never the problem and hides the outage entirely.
             _logger.LogError(ex, "LDAP authentication could not be completed for {Login}.", LogMask.Login(username));
             throw new DirectoryUnavailableException(
-                ApplicationMessages.DirectoryCredentialCheckFailed(username), ex);
+                ApplicationMessages.DirectoryCredentialCheckFailed(), ex);
         }
     }
 
@@ -208,7 +208,7 @@ internal class StandardLdapProvider : ILdapProvider
             // already there. Callers that genuinely want "absent or unknown" can catch this.
             _logger.LogError(ex, "Error finding LDAP user {Login}.", LogMask.Login(username));
             throw new DirectoryUnavailableException(
-                ApplicationMessages.DirectorySearchFailed(username), ex);
+                ApplicationMessages.DirectorySearchFailed(), ex);
         }
     }
 
@@ -240,7 +240,7 @@ internal class StandardLdapProvider : ILdapProvider
             // as "in no groups" would quietly demote an administrator mid-session.
             _logger.LogError(ex, "Error reading LDAP entry {Dn}.", LogMask.DistinguishedName(target.Value));
             throw new DirectoryUnavailableException(
-                ApplicationMessages.DirectoryGroupMembershipFailed(target.Value), ex);
+                ApplicationMessages.DirectoryGroupMembershipFailed(), ex);
         }
     }
 
@@ -264,7 +264,7 @@ internal class StandardLdapProvider : ILdapProvider
             // that failed is an exception rather than an empty attribute list.
             _logger.LogError(ex, "Error reading LDAP attributes for {Login}.", LogMask.Login(username));
             throw new DirectoryUnavailableException(
-                ApplicationMessages.DirectorySearchFailed(username), ex);
+                ApplicationMessages.DirectorySearchFailed(), ex);
         }
     }
 
@@ -349,7 +349,8 @@ internal class StandardLdapProvider : ILdapProvider
         }
         catch (LdapException ex)
         {
-            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedCreate(dn), ex);
+            _logger.LogError(ex, "Error creating LDAP user {Dn}.", LogMask.DistinguishedName(dn));
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedCreate(), ex);
         }
 
         // The entry is written without a password and given one the directory's own way. If that
@@ -407,11 +408,12 @@ internal class StandardLdapProvider : ILdapProvider
             }
             catch (LdapException ex) when (ex.ResultCode == LdapException.NoSuchObject)
             {
-                throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInLdap(target.Value));
+                throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInLdap());
             }
             catch (LdapException ex)
             {
-                throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(target.Value), ex);
+                _logger.LogError(ex, "Error updating LDAP user {Dn}.", LogMask.DistinguishedName(target.Value));
+                throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(), ex);
             }
 
             _logger.LogInformation("LDAP user updated: {Dn}", LogMask.DistinguishedName(target.Value));
@@ -466,7 +468,7 @@ internal class StandardLdapProvider : ILdapProvider
         }
         catch (LdapException ex) when (ex.ResultCode == LdapException.NoSuchObject)
         {
-            throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInLdap(dn));
+            throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInLdap());
         }
         catch (LdapException ex) when (ex.ResultCode == LdapException.ConstraintViolation)
         {
@@ -484,7 +486,8 @@ internal class StandardLdapProvider : ILdapProvider
         }
         catch (LdapException ex)
         {
-            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(dn), ex);
+            _logger.LogError(ex, "Error setting the password of LDAP user {Dn}.", LogMask.DistinguishedName(dn));
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(), ex);
         }
     }
 
@@ -533,7 +536,7 @@ internal class StandardLdapProvider : ILdapProvider
             // Not false: that used to be reported as 404, telling the caller the account did not
             // exist while it sat there untouched.
             _logger.LogError(ex, "Error deleting LDAP user {Dn}.", LogMask.DistinguishedName(target.Value));
-            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(target.Value), ex);
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(), ex);
         }
 
         _logger.LogInformation("LDAP user deleted: {Dn}", LogMask.DistinguishedName(target.Value));
@@ -626,7 +629,7 @@ internal class StandardLdapProvider : ILdapProvider
         }
         catch (LdapException ex)
         {
-            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedCreate(dn), ex);
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedCreate(), ex);
         }
 
         _logger.LogInformation("LDAP organizational unit created: {Dn}", dn);
@@ -671,7 +674,7 @@ internal class StandardLdapProvider : ILdapProvider
             catch (LdapException ex)
             {
                 throw new DirectoryUnavailableException(
-                    ApplicationMessages.DirectoryRejectedUpdate(current.Value), ex);
+                    ApplicationMessages.DirectoryRejectedUpdate(), ex);
             }
 
             effectiveDn = string.IsNullOrEmpty(targetParent) ? newRdn : $"{newRdn},{targetParent}";
@@ -701,7 +704,7 @@ internal class StandardLdapProvider : ILdapProvider
         }
         catch (LdapException ex)
         {
-            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(effectiveDn), ex);
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(), ex);
         }
 
         _logger.LogInformation("LDAP organizational unit updated: {Dn}", effectiveDn);
@@ -735,7 +738,7 @@ internal class StandardLdapProvider : ILdapProvider
         catch (LdapException ex)
         {
             _logger.LogError(ex, "Error deleting LDAP organizational unit {Dn}.", target.Value);
-            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(target.Value), ex);
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(), ex);
         }
 
         _logger.LogInformation("LDAP organizational unit deleted: {Dn}", target.Value);
@@ -768,7 +771,7 @@ internal class StandardLdapProvider : ILdapProvider
         {
             _logger.LogError(ex, "Error reading the members of LDAP group {Dn}.", target!.Value);
             throw new DirectoryUnavailableException(
-                ApplicationMessages.DirectoryGroupMembershipFailed(target.Value), ex);
+                ApplicationMessages.DirectoryGroupMembershipFailed(), ex);
         }
     }
 
@@ -865,7 +868,7 @@ internal class StandardLdapProvider : ILdapProvider
         }
         catch (LdapException ex)
         {
-            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedCreate(dn), ex);
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedCreate(), ex);
         }
 
         _logger.LogInformation("LDAP group created: {Dn}", dn);
@@ -927,7 +930,7 @@ internal class StandardLdapProvider : ILdapProvider
             catch (LdapException ex)
             {
                 throw new DirectoryUnavailableException(
-                    ApplicationMessages.DirectoryRejectedUpdate(current.Value), ex);
+                    ApplicationMessages.DirectoryRejectedUpdate(), ex);
             }
 
             effectiveDn = string.IsNullOrEmpty(targetParent) ? newRdn : $"{newRdn},{targetParent}";
@@ -979,7 +982,7 @@ internal class StandardLdapProvider : ILdapProvider
     private static Exception TranslateModifyFailure(LdapException exception, string dn) =>
         exception.ResultCode == LdapException.NoSuchObject
             ? new DomainNotFoundException(ApplicationMessages.GroupNotFound(dn))
-            : new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(dn), exception);
+            : new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(), exception);
 
     public bool DeleteGroup(string dn)
     {
@@ -1007,7 +1010,7 @@ internal class StandardLdapProvider : ILdapProvider
         catch (LdapException ex)
         {
             _logger.LogError(ex, "Error deleting LDAP group {Dn}.", target.Value);
-            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(target.Value), ex);
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(), ex);
         }
 
         _logger.LogInformation("LDAP group deleted: {Dn}", target.Value);
@@ -1106,7 +1109,7 @@ internal class StandardLdapProvider : ILdapProvider
         }
         catch (LdapException ex)
         {
-            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedCreate(dn), ex);
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedCreate(), ex);
         }
 
         _logger.LogInformation("LDAP computer created: {Dn}", dn);
@@ -1152,7 +1155,7 @@ internal class StandardLdapProvider : ILdapProvider
             catch (LdapException ex)
             {
                 throw new DirectoryUnavailableException(
-                    ApplicationMessages.DirectoryRejectedUpdate(current.Value), ex);
+                    ApplicationMessages.DirectoryRejectedUpdate(), ex);
             }
 
             effectiveDn = string.IsNullOrEmpty(targetParent) ? newRdn : $"{newRdn},{targetParent}";
@@ -1200,7 +1203,7 @@ internal class StandardLdapProvider : ILdapProvider
         catch (LdapException ex)
         {
             _logger.LogError(ex, "Error deleting LDAP computer {Dn}.", target.Value);
-            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(target.Value), ex);
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedDelete(), ex);
         }
 
         _logger.LogInformation("LDAP computer deleted: {Dn}", target.Value);
@@ -1231,7 +1234,7 @@ internal class StandardLdapProvider : ILdapProvider
         {
             throw ex.ResultCode == LdapException.NoSuchObject
                 ? new DomainNotFoundException(ApplicationMessages.ComputerNotFound(dn))
-                : new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(dn), ex);
+                : new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(), ex);
         }
     }
 
@@ -1259,7 +1262,7 @@ internal class StandardLdapProvider : ILdapProvider
         {
             throw ex.ResultCode == LdapException.NoSuchObject
                 ? new DomainNotFoundException(ApplicationMessages.ComputerNotFound(dn))
-                : new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(dn), ex);
+                : new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(), ex);
         }
 
         var updated = enabled ? current & ~AccountDisabledFlag : current | AccountDisabledFlag;
@@ -1273,7 +1276,7 @@ internal class StandardLdapProvider : ILdapProvider
         }
         catch (LdapException ex)
         {
-            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(dn), ex);
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(), ex);
         }
     }
 

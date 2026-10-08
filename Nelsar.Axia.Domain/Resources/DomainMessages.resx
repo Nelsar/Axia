@@ -47,8 +47,8 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="EmailInvalid" xml:space="preserve">
-    <value>'{0}' is not a valid email address.</value>
-    <comment>{0} = the rejected value.</comment>
+    <value>The email address is not valid.</value>
+    <comment>No placeholder on purpose: the caller knows which address it sent, and this text is logged as well.</comment>
   </data>
   <data name="DistinguishedNameBlank" xml:space="preserve">
     <value>A distinguished name cannot be blank.</value>

@@ -58,9 +58,72 @@ public class ResourceMessageTests
     [Fact]
     public void ParameterisedMessages_SubstituteTheirArguments()
     {
-        Assert.Contains("not-an-address", DomainMessages.EmailInvalid("not-an-address"));
+        Assert.Contains("DisplayName", DomainMessages.ValueRequired("DisplayName"));
         Assert.Contains("70000", DomainMessages.LdapPortOutOfRange(70000, 1, 65535));
-        Assert.Contains("jsmith", ApplicationMessages.UserNotFoundInLdap("jsmith"));
+        Assert.Contains("axia-admins", ApplicationMessages.GroupNotFound("axia-admins"));
+    }
+
+    /// <summary>
+    /// The messages allowed to repeat a string they are given, and why it cannot be a person.
+    /// Everything else that takes one must leave it out of the text.
+    /// </summary>
+    private static readonly Dictionary<string, string> RepeatsNoPerson = new()
+    {
+        [nameof(DomainMessages.LdapSecurityContradictsPort)] = "a configuration value",
+        [nameof(DomainMessages.ValueRequired)] = "a field name",
+        [nameof(DomainMessages.ValueTooLong)] = "a field name",
+        [nameof(DomainMessages.GroupMappingNeedsDistinguishedName)] = "a group",
+        [nameof(DomainMessages.PermissionUnknown)] = "a permission",
+        [nameof(ApplicationMessages.BulkOperationUnknown)] = "an operation name",
+        [nameof(ApplicationMessages.LdapSecurityUnknown)] = "a configuration value",
+        [nameof(ApplicationMessages.DirectoryProviderUnknown)] = "a directory's id",
+        [nameof(ApplicationMessages.DirectoryProviderUnreachable)] = "a directory's id",
+        [nameof(ApplicationMessages.DirectoryProviderMisconfigured)] = "a directory's id",
+        [nameof(ApplicationMessages.OrganizationalUnitNotFound)] = "an organizational unit",
+        [nameof(ApplicationMessages.OrganizationalUnitLookupIncomplete)] = "an organizational unit",
+        [nameof(ApplicationMessages.OrganizationalUnitAlreadyExists)] = "an organizational unit",
+        [nameof(ApplicationMessages.OrganizationalUnitNotEmpty)] = "an organizational unit",
+        [nameof(ApplicationMessages.GroupNotFound)] = "a group",
+        [nameof(ApplicationMessages.GroupLookupIncomplete)] = "a group",
+        [nameof(ApplicationMessages.GroupAlreadyExists)] = "a group",
+        [nameof(ApplicationMessages.GroupNotEmptyContainer)] = "a group",
+        [nameof(ApplicationMessages.ComputerNotFound)] = "a computer",
+        [nameof(ApplicationMessages.ComputerLookupIncomplete)] = "a computer",
+        [nameof(ApplicationMessages.ComputerAlreadyExists)] = "a computer",
+        [nameof(ApplicationMessages.ComputerNotEmptyContainer)] = "a computer",
+        [nameof(ApplicationMessages.RoleUnknown)] = "a role",
+        [nameof(ApplicationMessages.RoleNotEditable)] = "a role",
+        [nameof(ApplicationMessages.PermissionNotGrantable)] = "a permission",
+    };
+
+    [Theory]
+    [MemberData(nameof(MessageClasses))]
+    public void NoMessage_RepeatsAnAccount(Type messagesType)
+    {
+        // These texts are returned to the caller, and they are also the {Reason} of every refusal
+        // in the diagnostic log and the text of every logged exception — in full, because LogMask
+        // can only mask what it is handed. A message that quotes a login or a DN puts it in
+        // Logstash and Loki unmasked. So a message repeats what it is given only when that cannot
+        // be a person, and says so here.
+        const string account = "ivan.petrov@example.org";
+
+        var repeating = messagesType
+            .GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Where(m => m.ReturnType == typeof(string) && !m.IsSpecialName)
+            .Where(m => m.GetParameters().Any(p => p.ParameterType == typeof(string)))
+            .Where(m =>
+            {
+                var arguments = m.GetParameters()
+                    .Select(p => p.ParameterType == typeof(int) ? (object)1 : account)
+                    .ToArray();
+                return ((string)m.Invoke(null, arguments)!).Contains(account, StringComparison.Ordinal);
+            })
+            .Select(m => m.Name)
+            .ToList();
+
+        Assert.All(repeating, name => Assert.True(RepeatsNoPerson.ContainsKey(name),
+            $"{messagesType.Name}.{name} repeats its argument to the caller and to the log. Leave it out " +
+            $"of the text, or, if it cannot be a person, add {name} to {nameof(RepeatsNoPerson)} with the reason."));
     }
 
     [Fact]
@@ -116,11 +179,11 @@ public class ResourceMessageTests
     [MemberData(nameof(TranslatedCultures))]
     public void TranslatedMessages_KeepTheirPlaceholders(string culture)
     {
-        // A translation that drops {0} compiles, ships, and tells an administrator which user was
+        // A translation that drops {0} compiles, ships, and tells an administrator which group was
         // not found by leaving the name out of the sentence.
-        var message = WithUiCulture(culture, () => ApplicationMessages.UserNotFoundInLdap("jsmith"));
+        var message = WithUiCulture(culture, () => ApplicationMessages.GroupNotFound("axia-admins"));
 
-        Assert.Contains("jsmith", message);
+        Assert.Contains("axia-admins", message);
         Assert.DoesNotContain("{0}", message);
     }
 

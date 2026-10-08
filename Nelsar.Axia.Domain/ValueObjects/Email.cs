@@ -38,7 +38,7 @@ public sealed class Email : IEquatable<Email>
     public static Email Create(string? value)
     {
         if (!TryCreate(value, out var email))
-            throw new DomainValidationException(DomainMessages.EmailInvalid(value));
+            throw new DomainValidationException(DomainMessages.EmailInvalid());
 
         return email!;
     }

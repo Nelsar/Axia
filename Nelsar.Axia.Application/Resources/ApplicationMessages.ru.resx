@@ -80,28 +80,28 @@
     <value>Каталог «{0}» настроен неверно и не может быть использован. Обратитесь к администратору.</value>
   </data>
   <data name="DirectorySearchFailed" xml:space="preserve">
-    <value>Не удалось выполнить поиск «{0}» в каталоге.</value>
+    <value>Не удалось выполнить поиск учётной записи в каталоге.</value>
   </data>
   <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
-    <value>Каталог не смог проверить учётные данные «{0}».</value>
+    <value>Каталог не смог проверить учётные данные.</value>
   </data>
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
-    <value>Каталог не смог сообщить о членстве «{0}» в группах.</value>
+    <value>Каталог не смог сообщить о членстве в группах.</value>
   </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
-    <value>Каталог отклонил создание «{0}».</value>
+    <value>Каталог отклонил создание записи.</value>
   </data>
   <data name="DirectoryRejectedUpdate" xml:space="preserve">
-    <value>Каталог отклонил обновление «{0}».</value>
+    <value>Каталог отклонил обновление записи.</value>
   </data>
   <data name="DirectoryRejectedDelete" xml:space="preserve">
-    <value>Каталог отклонил удаление «{0}».</value>
+    <value>Каталог отклонил удаление записи.</value>
   </data>
   <data name="UserNotFoundInLdap" xml:space="preserve">
-    <value>Пользователь «{0}» не найден в LDAP.</value>
+    <value>Пользователь не найден в LDAP.</value>
   </data>
   <data name="UserNotFoundInAd" xml:space="preserve">
-    <value>Пользователь «{0}» не найден в AD.</value>
+    <value>Пользователь не найден в AD.</value>
   </data>
   <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
     <value>Операции записи LDAP не поддерживаются на портах Global Catalog 3268/3269. Используйте доступный для записи порт LDAP/LDAPS 389/636 и DN целевого подразделения для создания, обновления и удаления.</value>

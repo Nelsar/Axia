@@ -80,28 +80,28 @@
     <value>Der Verzeichnisprovider „{0}“ ist fehlerhaft konfiguriert und nicht verwendbar. Wenden Sie sich an einen Administrator.</value>
   </data>
   <data name="DirectorySearchFailed" xml:space="preserve">
-    <value>Im Verzeichnis konnte nicht nach „{0}“ gesucht werden.</value>
+    <value>Im Verzeichnis konnte nicht nach dem Konto gesucht werden.</value>
   </data>
   <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
-    <value>Das Verzeichnis konnte die Zugangsdaten für „{0}“ nicht prüfen.</value>
+    <value>Das Verzeichnis konnte die Zugangsdaten nicht prüfen.</value>
   </data>
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
-    <value>Das Verzeichnis konnte die Gruppenmitgliedschaft für „{0}“ nicht melden.</value>
+    <value>Das Verzeichnis konnte die Gruppenmitgliedschaft nicht melden.</value>
   </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
-    <value>Das Verzeichnis hat das Anlegen von „{0}“ abgelehnt.</value>
+    <value>Das Verzeichnis hat das Anlegen des Eintrags abgelehnt.</value>
   </data>
   <data name="DirectoryRejectedUpdate" xml:space="preserve">
-    <value>Das Verzeichnis hat die Änderung von „{0}“ abgelehnt.</value>
+    <value>Das Verzeichnis hat die Änderung des Eintrags abgelehnt.</value>
   </data>
   <data name="DirectoryRejectedDelete" xml:space="preserve">
-    <value>Das Verzeichnis hat das Löschen von „{0}“ abgelehnt.</value>
+    <value>Das Verzeichnis hat das Löschen des Eintrags abgelehnt.</value>
   </data>
   <data name="UserNotFoundInLdap" xml:space="preserve">
-    <value>Benutzer „{0}“ wurde in LDAP nicht gefunden.</value>
+    <value>Der Benutzer wurde in LDAP nicht gefunden.</value>
   </data>
   <data name="UserNotFoundInAd" xml:space="preserve">
-    <value>Benutzer „{0}“ wurde in AD nicht gefunden.</value>
+    <value>Der Benutzer wurde in AD nicht gefunden.</value>
   </data>
   <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
     <value>LDAP-Schreibvorgänge werden auf den Global-Catalog-Ports 3268/3269 nicht unterstützt. Verwenden Sie den schreibbaren LDAP/LDAPS-Port 389/636 und den DN einer Ziel-OU für Anlegen, Ändern und Löschen.</value>

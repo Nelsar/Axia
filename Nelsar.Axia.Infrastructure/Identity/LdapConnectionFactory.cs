@@ -161,7 +161,7 @@ public class LdapConnectionFactory
 
         // Was `throw new Exception(...)`, which GlobalExceptionHandler could only read as a bug
         // and answer with a 500. A login that names nobody is a normal outcome, not a fault.
-        throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInLdap(username));
+        throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInLdap());
     }
 
     public LdapConnection CreateUserConnection(string username, string password)

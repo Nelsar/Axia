@@ -11,6 +11,7 @@ using Nelsar.Axia.Application.Features.Users.Queries;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Application.Services;
 using Nelsar.Axia.Contracts.Abstractions;
+using Nelsar.Axia.Contracts.Common;
 using Nelsar.Axia.Contracts.Exceptions;
 using Nelsar.Axia.Contracts.Requests;
 using Nelsar.Axia.Domain.Authorization;
@@ -42,6 +43,42 @@ public class LogMaskingTests
 
         var entry = Assert.Single(log.Entries, e => e.Message.StartsWith("Bulk user operation failed", StringComparison.Ordinal));
         Assert.Equal("i***@example.com", entry.Properties["Login"]);
+        log.AssertNothingContains("ivan.petrov");
+    }
+
+    [Fact]
+    public async Task ARefusalLoggedWithItsException_DoesNotNameTheAccountThroughIt()
+    {
+        // The line names the account masked; the exception attached to it used to name it in full.
+        // Here the refusals come from the real code that words them: an address the domain
+        // rejects, and an account that vanished between being found and being checked, which
+        // PrivilegeGuard refuses with the 404 that quoted its DN.
+        var resolver = new Mock<IPermissionResolver>();
+        resolver.Setup(x => x.ResolveAsync(It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new HashSet<string>(Permissions.All));
+        resolver.Setup(x => x.AssessEntryAsync(It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EntryAssessment?)null);
+        var (sender, log, ldap) = Pipeline(resolver.Object);
+        ldap.Setup(x => x.GetUserDetailsAsync(Login)).ReturnsAsync(new LdapUserInfo
+        {
+            Dn = "uid=ivan.petrov,ou=people,dc=example,dc=com",
+            Username = "ivan.petrov",
+            Email = Login
+        });
+
+        var response = await sender.Send(new ProcessBulkUsersCommand(
+        [
+            new BulkUserRequest { Operation = "update", Email = "ivan.petrov@", Name = "Ivan Petrov" },
+            new BulkUserRequest { Operation = "update", Email = Login, Name = "Ivan Petrov" }
+        ]));
+
+        // Both rows failed, each for its own reason, and the caller can still tell which is which
+        // by the address each row carries.
+        Assert.All(response.Items, item => Assert.Equal(BulkOperationStatus.Failed, item.Status));
+        var refusals = log.Entries.Where(e => e.Exception is not null).ToList();
+        Assert.Equal(2, refusals.Count);
+        Assert.All(refusals, entry => Assert.DoesNotContain("ivan.petrov", entry.Exception!.ToString(),
+            StringComparison.OrdinalIgnoreCase));
         log.AssertNothingContains("ivan.petrov");
     }
 
@@ -87,7 +124,8 @@ public class LogMaskingTests
         log.AssertNothingContains("ivan.petrov");
     }
 
-    private static (ISender Sender, CapturingLoggerProvider Log, Mock<ILdapService> Ldap) Pipeline()
+    private static (ISender Sender, CapturingLoggerProvider Log, Mock<ILdapService> Ldap) Pipeline(
+        IPermissionResolver? permissions = null)
     {
         var log = new CapturingLoggerProvider();
         var ldap = new Mock<ILdapService>();
@@ -101,7 +139,7 @@ public class LogMaskingTests
         services.AddSingleton(new Mock<IBulkJobQueue>().Object);
         services.AddSingleton(new Mock<IBulkJobStore>().Object);
         services.AddSingleton<ICurrentUser>(new TestCurrentUser("admin@example.com"));
-        services.AddSingleton<IPermissionResolver>(new FixedPermissionResolver([.. Permissions.All]));
+        services.AddSingleton(permissions ?? new FixedPermissionResolver([.. Permissions.All]));
         services.WithAuditTrail();
 
         return (services.BuildServiceProvider().GetRequiredService<ISender>(), log, ldap);
@@ -122,8 +160,10 @@ public class LogMaskingTests
 
         /// <summary>
         /// Checks the rendered line and every property. The exception is left out on purpose:
-        /// these tests supply their own, and whether exception messages may name an account is
-        /// a question for the exceptions, not for these log lines.
+        /// most of these tests supply their own. Whether the application's own exceptions may name
+        /// an account — they may not — is asserted on them directly, in
+        /// ARefusalLoggedWithItsException_DoesNotNameTheAccountThroughIt and
+        /// ResourceMessageTests.NoMessage_RepeatsAnAccount.
         /// </summary>
         public void AssertNothingContains(string text)
         {

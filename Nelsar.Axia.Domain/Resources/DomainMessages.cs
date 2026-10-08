@@ -19,9 +19,12 @@ public static class DomainMessages
         "Nelsar.Axia.Domain.Resources.DomainMessages",
         typeof(DomainMessages).Assembly);
 
-    /// <param name="value">The rejected address.</param>
-    public static string EmailInvalid(string? value) =>
-        Format(nameof(EmailInvalid), value);
+    /// <summary>
+    /// Does not repeat the rejected address. A mistyped address is still somebody's, and this text
+    /// is logged as the reason for the refusal as well as returned; the caller has just sent it.
+    /// </summary>
+    public static string EmailInvalid() =>
+        Get(nameof(EmailInvalid));
 
     public static string DistinguishedNameBlank() =>
         Get(nameof(DistinguishedNameBlank));

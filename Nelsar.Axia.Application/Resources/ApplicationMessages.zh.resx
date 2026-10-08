@@ -80,28 +80,28 @@
     <value>目录提供程序“{0}”配置有误，无法使用。请联系管理员。</value>
   </data>
   <data name="DirectorySearchFailed" xml:space="preserve">
-    <value>无法在目录中搜索“{0}”。</value>
+    <value>无法在目录中搜索该账户。</value>
   </data>
   <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
-    <value>目录无法验证“{0}”的凭据。</value>
+    <value>目录无法验证凭据。</value>
   </data>
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
-    <value>目录无法报告“{0}”的组成员关系。</value>
+    <value>目录无法报告组成员关系。</value>
   </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
-    <value>目录拒绝创建“{0}”。</value>
+    <value>目录拒绝创建该条目。</value>
   </data>
   <data name="DirectoryRejectedUpdate" xml:space="preserve">
-    <value>目录拒绝更新“{0}”。</value>
+    <value>目录拒绝更新该条目。</value>
   </data>
   <data name="DirectoryRejectedDelete" xml:space="preserve">
-    <value>目录拒绝删除“{0}”。</value>
+    <value>目录拒绝删除该条目。</value>
   </data>
   <data name="UserNotFoundInLdap" xml:space="preserve">
-    <value>在 LDAP 中未找到用户“{0}”。</value>
+    <value>在 LDAP 中未找到该用户。</value>
   </data>
   <data name="UserNotFoundInAd" xml:space="preserve">
-    <value>在 AD 中未找到用户“{0}”。</value>
+    <value>在 AD 中未找到该用户。</value>
   </data>
   <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
     <value>全局编录端口 3268/3269 不支持 LDAP 写操作。创建、更新和删除请使用可写的 LDAP/LDAPS 端口 389/636 以及目标 OU 的 DN。</value>

@@ -80,28 +80,28 @@
     <value>ספק הספרייה «{0}» מוגדר בצורה שגויה ולא ניתן להשתמש בו. פנה למנהל המערכת.</value>
   </data>
   <data name="DirectorySearchFailed" xml:space="preserve">
-    <value>לא ניתן היה לחפש «{0}» בספרייה.</value>
+    <value>לא ניתן היה לחפש את החשבון בספרייה.</value>
   </data>
   <data name="DirectoryCredentialCheckFailed" xml:space="preserve">
-    <value>הספרייה לא הצליחה לאמת את פרטי ההזדהות של «{0}».</value>
+    <value>הספרייה לא הצליחה לאמת את פרטי ההזדהות.</value>
   </data>
   <data name="DirectoryGroupMembershipFailed" xml:space="preserve">
-    <value>הספרייה לא הצליחה לדווח על חברות בקבוצות עבור «{0}».</value>
+    <value>הספרייה לא הצליחה לדווח על חברות בקבוצות.</value>
   </data>
   <data name="DirectoryRejectedCreate" xml:space="preserve">
-    <value>הספרייה דחתה את יצירת «{0}».</value>
+    <value>הספרייה דחתה את יצירת הרשומה.</value>
   </data>
   <data name="DirectoryRejectedUpdate" xml:space="preserve">
-    <value>הספרייה דחתה את עדכון «{0}».</value>
+    <value>הספרייה דחתה את עדכון הרשומה.</value>
   </data>
   <data name="DirectoryRejectedDelete" xml:space="preserve">
-    <value>הספרייה דחתה את מחיקת «{0}».</value>
+    <value>הספרייה דחתה את מחיקת הרשומה.</value>
   </data>
   <data name="UserNotFoundInLdap" xml:space="preserve">
-    <value>המשתמש «{0}» לא נמצא ב-LDAP.</value>
+    <value>המשתמש לא נמצא ב-LDAP.</value>
   </data>
   <data name="UserNotFoundInAd" xml:space="preserve">
-    <value>המשתמש «{0}» לא נמצא ב-AD.</value>
+    <value>המשתמש לא נמצא ב-AD.</value>
   </data>
   <data name="WriteOperationsUnsupportedOnGlobalCatalog" xml:space="preserve">
     <value>פעולות כתיבה ב-LDAP אינן נתמכות בפורטי הקטלוג הגלובלי 3268/3269. השתמש בפורט LDAP/LDAPS הניתן לכתיבה 389/636 וב-DN של יחידה ארגונית יעד ליצירה, עדכון ומחיקה.</value>

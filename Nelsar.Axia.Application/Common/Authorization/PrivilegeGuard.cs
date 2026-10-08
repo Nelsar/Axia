@@ -81,7 +81,7 @@ internal sealed class PrivilegeGuard
         // Resolved the way the target's own sign-in would resolve them, so "what can this account
         // do" has one answer whether it is asked by them or about them.
         var target = await _permissions.AssessEntryAsync(targetDn, _actingUser.ProviderId, cancellationToken)
-                     ?? throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInLdap(targetDn));
+                     ?? throw new DomainNotFoundException(ApplicationMessages.UserNotFoundInLdap());
 
         if (target.IsServiceAccount)
             throw Refuse(targetDn, "it is the service account", ApplicationMessages.ServiceAccountNotManaged());
