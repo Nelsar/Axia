@@ -73,6 +73,14 @@ internal interface ILdapProvider
     DirectoryGroupListing GetAllGroups();
 
     /// <summary>
+    /// Who the group at exactly <paramref name="groupDn"/> lists as members, or
+    /// <see cref="DirectoryGroupMembers.None"/> when there is no such group. Read, not searched
+    /// for. A directory that pages a large member list — Active Directory past 1,500 members —
+    /// may return only part of it; the accounts' own memberOf covers that case.
+    /// </summary>
+    DirectoryGroupMembers GetGroupMembers(string groupDn);
+
+    /// <summary>
     /// Returns the DN of the entry that was written. <paramref name="memberDns"/> must hold at
     /// least one member: the entry is a <c>groupOfNames</c>, whose schema makes <c>member</c>
     /// mandatory, so an empty group is not a state the directory can hold.

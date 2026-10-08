@@ -35,11 +35,16 @@ internal sealed class SearchUsersQueryValidator : AbstractValidator<SearchUsersQ
 internal sealed class SearchUsersQueryHandler : IRequestHandler<SearchUsersQuery, PagedResponse<UserDto>>
 {
     private readonly ILdapService _ldapService;
+    private readonly UserRoleLabeler _roles;
     private readonly ILogger<SearchUsersQueryHandler> _logger;
 
-    public SearchUsersQueryHandler(ILdapService ldapService, ILogger<SearchUsersQueryHandler> logger)
+    public SearchUsersQueryHandler(
+        ILdapService ldapService,
+        UserRoleLabeler roles,
+        ILogger<SearchUsersQueryHandler> logger)
     {
         _ldapService = ldapService;
+        _roles = roles;
         _logger = logger;
     }
 
@@ -56,7 +61,13 @@ internal sealed class SearchUsersQueryHandler : IRequestHandler<SearchUsersQuery
             ? await _ldapService.GetAllUsersAsync()
             : await _ldapService.SearchUsersAsync(ldapFilter);
 
-        var mapped = (listing?.Users ?? Array.Empty<LdapUserInfo>()).Select(Map).ToList();
+        var entries = listing?.Users ?? Array.Empty<LdapUserInfo>();
+        var mapped = entries.Select(Map).ToList();
+
+        // The role column used to read User for every account; see UserRoleLabeler.
+        var roles = await _roles.RolesForAsync(entries);
+        for (var i = 0; i < mapped.Count; i++)
+            mapped[i].Role = roles[i];
 
         return PagedProjection.Page(mapped, request.PageSize, request.PageToken, listing?.IsComplete ?? true);
     }

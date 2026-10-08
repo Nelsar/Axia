@@ -66,6 +66,9 @@ internal class StandardLdapProvider : ILdapProvider
 
     private static readonly string[] RequestedGroupAttributes = ["cn", "description", "member", "uniqueMember", "adminCount"];
 
+    /// <summary>Every attribute a group can list its members in. See GetGroupMembers.</summary>
+    private static readonly string[] GroupMemberAttributes = ["member", "uniqueMember", "memberUid"];
+
     /// <summary>
     /// Matches a group in any of the three directory types: <c>group</c> is Active Directory's
     /// class, <c>groupOfNames</c> and <c>groupOfUniqueNames</c> are the RFC 4519 ones used by
@@ -740,6 +743,34 @@ internal class StandardLdapProvider : ILdapProvider
     }
 
     // --- Groups ---
+
+    public DirectoryGroupMembers GetGroupMembers(string groupDn)
+    {
+        if (!DistinguishedName.TryCreate(groupDn, out var target))
+            return DirectoryGroupMembers.None;
+
+        using var conn = ConnectOrThrow();
+
+        try
+        {
+            // A base-object read of the group itself — no search, so it cannot be another entry.
+            var attrs = conn.Read(target!.Value, GroupMemberAttributes).GetAttributeSet();
+            string[] Values(string name) => attrs.TryGetValue(name, out var values) ? values.StringValueArray ?? [] : [];
+
+            return new DirectoryGroupMembers([.. Values("member"), .. Values("uniqueMember")], Values("memberUid"));
+        }
+        catch (LdapException ex) when (ex.ResultCode == LdapException.NoSuchObject)
+        {
+            // A role mapping can outlive the group it names. That group lists nobody.
+            return DirectoryGroupMembers.None;
+        }
+        catch (LdapException ex)
+        {
+            _logger.LogError(ex, "Error reading the members of LDAP group {Dn}.", target!.Value);
+            throw new DirectoryUnavailableException(
+                ApplicationMessages.DirectoryGroupMembershipFailed(target.Value), ex);
+        }
+    }
 
     public DirectoryGroupListing GetAllGroups()
     {

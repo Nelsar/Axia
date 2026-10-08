@@ -1,3 +1,5 @@
+using Nelsar.Axia.Domain.Entities;
+
 namespace Nelsar.Axia.Application.Interfaces;
 
 /// <summary>
@@ -36,4 +38,11 @@ public interface IRoleMappingResolver
     /// the one place the old winner-takes-all precedence still applies.
     /// </summary>
     Task<string> ResolvePrimaryRoleAsync(IEnumerable<string> groupDns, Guid? providerId);
+
+    /// <summary>
+    /// The mappings that can grant a role in this directory — its own and the global ones —
+    /// leaving out rows written by name where those do not count. For resolving many accounts at
+    /// once with <c>RoleMappingResolver.PrimaryRole</c>, instead of one query per account.
+    /// </summary>
+    Task<IReadOnlyList<RoleMapping>> GetEffectiveMappingsAsync(Guid? providerId);
 }

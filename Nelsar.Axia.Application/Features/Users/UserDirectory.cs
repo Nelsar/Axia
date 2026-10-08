@@ -30,6 +30,7 @@ internal sealed class UserDirectory
     private readonly ILdapService _ldapService;
     private readonly IMemoryCache _userCache;
     private readonly IUserLookupRepository _userLookup;
+    private readonly UserRoleLabeler _roles;
 
     // An email -> UserDto cache, so a Guid can be resolved quickly after sign-in.
     // Sliding expiration rather than keeping entries forever: without it they would pile up in
@@ -41,11 +42,16 @@ internal sealed class UserDirectory
         SlidingExpiration = TimeSpan.FromMinutes(30)
     };
 
-    public UserDirectory(ILdapService ldapService, IMemoryCache userCache, IUserLookupRepository userLookup)
+    public UserDirectory(
+        ILdapService ldapService,
+        IMemoryCache userCache,
+        IUserLookupRepository userLookup,
+        UserRoleLabeler roles)
     {
         _ldapService = ldapService;
         _userCache = userCache;
         _userLookup = userLookup;
+        _roles = roles;
     }
 
     public async Task<UserListingResponse> ListAsync()
@@ -57,6 +63,13 @@ internal sealed class UserDirectory
         // nothing real — it only made caching depend on whether, and how far, the caller
         // happened to enumerate the result.
         var users = listing.Users.Select(Map).ToList();
+
+        // Map leaves every role at User; the labeler works out the real ones for the whole
+        // listing at once. A cached entry keeps its label for as long as it stays cached — it is
+        // shown, never used to decide anything.
+        var roles = await _roles.RolesForAsync(listing.Users);
+        for (var i = 0; i < users.Count; i++)
+            users[i].Role = roles[i];
 
         foreach (var user in users)
             _userCache.Set(user.Id, user, UserCacheEntryOptions);
@@ -185,6 +198,7 @@ internal sealed class UserDirectory
             return null;
         }
 
+        resolved.Role = await _roles.RoleForAsync(details!);
         _userCache.Set(resolved.Id, resolved, UserCacheEntryOptions);
         return resolved;
     }

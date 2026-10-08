@@ -56,15 +56,32 @@ internal class RoleMappingResolver : IRoleMappingResolver
         if (groups.Count == 0)
             return UserRoles.User;
 
-        var best = (await MatchingMappingsAsync(groups, providerId))
+        return PrimaryRole(await GetEffectiveMappingsAsync(providerId), groups);
+    }
+
+    public async Task<IReadOnlyList<Domain.Entities.RoleMapping>> GetEffectiveMappingsAsync(Guid? providerId) =>
+        (await _repo.GetActiveForProviderAsync(providerId))
+            .Where(m => _allowMappingsByName || !m.IdentifiesGroupByNameOnly)
+            .ToList();
+
+    /// <summary>
+    /// The one role an account with these groups is shown with, among mappings already loaded by
+    /// <see cref="GetEffectiveMappingsAsync"/>. What <see cref="ResolvePrimaryRoleAsync"/> answers,
+    /// without a query per account.
+    /// </summary>
+    internal static string PrimaryRole(IEnumerable<Domain.Entities.RoleMapping> mappings, IEnumerable<string> groupDns) =>
+        PrimaryRole(mappings, ParseGroups(groupDns));
+
+    private static string PrimaryRole(
+        IEnumerable<Domain.Entities.RoleMapping> mappings,
+        IReadOnlyCollection<DistinguishedName> groups) =>
+        mappings
+            .Where(m => groups.Any(m.Matches))
             // A mapping scoped to this provider takes precedence over a global one
             // for the same group name, regardless of Priority.
             .OrderByDescending(m => m.ProviderId != null)
             .ThenBy(m => m.Priority)
-            .FirstOrDefault();
-
-        return best?.RoleName ?? UserRoles.User;
-    }
+            .FirstOrDefault()?.RoleName ?? UserRoles.User;
 
     /// <summary>
     /// Which mappings the groups satisfy. Whether a mapping matches a group is the mapping's own
@@ -79,10 +96,7 @@ internal class RoleMappingResolver : IRoleMappingResolver
         IReadOnlyCollection<DistinguishedName> groups,
         Guid? providerId)
     {
-        var mappings = await _repo.GetActiveForProviderAsync(providerId);
-
-        return mappings
-            .Where(m => _allowMappingsByName || !m.IdentifiesGroupByNameOnly)
+        return (await GetEffectiveMappingsAsync(providerId))
             .Where(m => groups.Any(m.Matches))
             .ToList();
     }

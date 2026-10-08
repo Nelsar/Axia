@@ -105,6 +105,9 @@ internal class LdapService : ILdapService
     public Task<DirectoryGroupListing> GetGroupsAsync() =>
         Task.FromResult(_providerFactory.Resolve().GetAllGroups());
 
+    public Task<DirectoryGroupMembers> GetGroupMembersAsync(string groupDn) =>
+        Task.FromResult(_providerFactory.Resolve().GetGroupMembers(groupDn));
+
     public Task<string> CreateGroupAsync(string name, string parentDn, string description, IReadOnlyList<string> memberDns) =>
         Task.FromResult(_providerFactory.Resolve().CreateGroup(name, parentDn, description, memberDns));
 

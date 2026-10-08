@@ -259,6 +259,14 @@ internal class ActiveDirectoryProvider : ILdapProvider
 
     public DirectoryGroupListing GetAllGroups() => throw GroupsUnsupported();
 
+    /// <summary>
+    /// Nobody, rather than the error the other group operations raise: this feeds the role shown
+    /// next to each account in a listing, and a listing should not fail over a label. Accounts
+    /// read through this provider carry no groups of their own either, so they show as User —
+    /// as they always have. StandardLdap reads both against Active Directory.
+    /// </summary>
+    public DirectoryGroupMembers GetGroupMembers(string groupDn) => DirectoryGroupMembers.None;
+
     public string CreateGroup(string name, string parentDn, string description, IReadOnlyList<string> memberDns) =>
         throw GroupsUnsupported();
 
