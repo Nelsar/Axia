@@ -58,7 +58,8 @@ public class LdapPassBackTests
     }
 
     private static UpdateProviderCommand MoveTo(Provider provider, string host, string? password, string? failoverHosts = null) =>
-        new(provider.Id, provider.Name, host, provider.Port.Value, provider.ProviderType, true,
+        // No security mode: an update that omits it keeps the provider's own.
+        new(provider.Id, provider.Name, host, provider.Port.Value, null, provider.ProviderType, true,
             failoverHosts, provider.BaseDn, "cn=svc,dc=corp,dc=local", password, Filter, 500);
 
     [Fact]

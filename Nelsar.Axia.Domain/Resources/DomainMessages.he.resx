@@ -88,4 +88,7 @@
   <data name="GroupMappingNeedsDistinguishedName" xml:space="preserve">
     <value>'{0}' מציין שם של קבוצה אך לא את מיקומה. יש לציין את השם המזהה (DN) המלא של הקבוצה, למשל CN=Administrators,OU=Groups,DC=example,DC=com: שם לבדו מתאים לכל קבוצה הנושאת אותו.</value>
   </data>
+  <data name="LdapSecurityContradictsPort" xml:space="preserve">
+    <value>מצב אבטחת החיבור {0} לא יכול לעבוד בפורט {1}: השתמשו בפורט {2} או במצב אחר.</value>
+  </data>
 </root>

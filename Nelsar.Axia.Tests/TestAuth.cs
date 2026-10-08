@@ -2,13 +2,15 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Nelsar.Axia.Application.Configuration;
 using Nelsar.Axia.Contracts.Identity;
 
 namespace Nelsar.Axia.Tests;
 
 /// <summary>
-/// Mints JWTs signed with the same key/issuer/audience ApiTestFactory injects into the
-/// host configuration, so tests can exercise [Authorize]-protected endpoints end to end.
+/// Mints JWTs signed with the key ApiTestFactory injects into the host configuration, for the
+/// issuer and audience the host defaults to, so tests can exercise [Authorize]-protected
+/// endpoints end to end.
 /// </summary>
 public static class TestAuth
 {
@@ -16,8 +18,11 @@ public static class TestAuth
 
     /// <summary>A valid 32-byte AES key, base64-encoded, for Encryption:Key.</summary>
     public static readonly string EncryptionKey = Convert.ToBase64String(new byte[32]);
-    public const string Issuer = "Nelsar.Axia.Tests";
-    public const string Audience = "Nelsar.Axia.Tests";
+    /// <summary>The application's own defaults: ApiTestFactory leaves both unset.</summary>
+    public const string Issuer = JwtSettings.DefaultIssuerAndAudience;
+
+    /// <inheritdoc cref="Issuer"/>
+    public const string Audience = JwtSettings.DefaultIssuerAndAudience;
 
     /// <param name="preferredUsername">
     /// What the real JwtTokenService puts in preferred_username: the address the directory is

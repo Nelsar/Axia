@@ -88,4 +88,7 @@
   <data name="GroupMappingNeedsDistinguishedName" xml:space="preserve">
     <value>«{0}» называет группу, но не указывает, где она находится. Укажите полный DN группы, например CN=Administrators,OU=Groups,DC=example,DC=com: одно имя совпадает с любой группой, которая его носит.</value>
   </data>
+  <data name="LdapSecurityContradictsPort" xml:space="preserve">
+    <value>Режим защиты подключения {0} не может работать на порту {1}: используйте порт {2} или другой режим.</value>
+  </data>
 </root>

@@ -88,4 +88,7 @@
   <data name="GroupMappingNeedsDistinguishedName" xml:space="preserve">
     <value>“{0}”只给出了组名，没有说明组的位置。请提供该组的完整可分辨名称，例如 CN=Administrators,OU=Groups,DC=example,DC=com：仅凭名称会匹配所有同名的组。</value>
   </data>
+  <data name="LdapSecurityContradictsPort" xml:space="preserve">
+    <value>连接安全模式 {0} 无法在端口 {1} 上工作：请使用端口 {2}，或选择其他模式。</value>
+  </data>
 </root>

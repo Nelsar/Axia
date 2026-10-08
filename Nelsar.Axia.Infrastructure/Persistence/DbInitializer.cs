@@ -19,6 +19,7 @@ public static class DbInitializer
         // this method has run — and seeding is where the encryption key is first used.
         _ = scope.ServiceProvider.GetRequiredService<IOptions<JwtSettings>>().Value;
         _ = scope.ServiceProvider.GetRequiredService<IOptions<EncryptionSettings>>().Value;
+        _ = scope.ServiceProvider.GetRequiredService<IOptions<LdapSettings>>().Value;
         var roleMappings = scope.ServiceProvider.GetRequiredService<IOptions<RoleMappingOptions>>().Value;
 
         var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();

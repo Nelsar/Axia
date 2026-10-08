@@ -195,7 +195,7 @@ internal class StandardLdapProvider : ILdapProvider
         try
         {
             var entry = SearchOne(conn, username);
-            return entry == null ? null : MapEntry(entry);
+            return entry == null ? null : MapEntry(entry, GroupsNaming(conn, entry));
         }
         catch (LdapException ex)
         {
@@ -219,10 +219,11 @@ internal class StandardLdapProvider : ILdapProvider
 
         try
         {
-            // A base-object read of exactly this entry. memberOf is among RequestedUserAttributes,
-            // so the groups that decide the session's permissions come back with it.
+            // A base-object read of exactly this entry, and then the groups that name it: the
+            // groups decide the session's permissions and whether the account is protected, so
+            // memberOf alone — which not every directory keeps — is not enough to go on.
             var entry = conn.Read(target.Value, RequestedUserAttributes);
-            return IsAccount(entry) ? MapEntry(entry) : null;
+            return IsAccount(entry) ? MapEntry(entry, GroupsNaming(conn, entry)) : null;
         }
         catch (LdapException ex) when (ex.ResultCode == LdapException.NoSuchObject)
         {
@@ -298,6 +299,8 @@ internal class StandardLdapProvider : ILdapProvider
                 // Same referral handling as SearchOne: the references AD appends to each page
                 // are not entries, and must not end the enumeration as if it had failed —
                 // that reported every AD listing as truncated.
+                // memberOf only, without GroupsNaming: that is a search per entry, thousands of them
+                // for a listing whose groups are shown and never used to decide anything.
                 while (NextEntryOrNull(results) is { } entry)
                 {
                     if (IsAccount(entry))
@@ -1458,19 +1461,94 @@ internal class StandardLdapProvider : ILdapProvider
             .Replace("\0", "\\00", StringComparison.Ordinal);
     }
 
-    private LdapUserInfo MapEntry(LdapEntry entry)
+    /// <param name="namedBy">
+    /// Groups found to list the entry as a member, merged with its memberOf. See
+    /// <see cref="GroupsNaming"/>.
+    /// </param>
+    private LdapUserInfo MapEntry(LdapEntry entry, IReadOnlyCollection<string>? namedBy = null)
     {
         var attrs = entry.GetAttributeSet();
+        var memberOf = attrs.TryGetValue("memberOf", out var mo) ? mo.StringValueArray ?? [] : [];
         return new LdapUserInfo
         {
             Dn = entry.Dn,
             Username = Get(attrs, "uid", "sAMAccountName", "userPrincipalName", "cn"),
             DisplayName = Get(attrs, "displayName", "cn"),
             Email = Get(attrs, "mail"),
-            Groups = attrs.TryGetValue("memberOf", out var mo) ? mo.StringValueArray ?? [] : [],
+            Groups = namedBy is null ? memberOf : MergeGroups(memberOf, namedBy),
             IsPrivileged = IsMarkedPrivileged(attrs),
             IsServiceAccount = IsServiceAccount(entry.Dn, attrs)
         };
+    }
+
+    /// <summary>
+    /// The groups that list this entry as a member, asked of the groups themselves.
+    ///
+    /// Membership used to be read from memberOf alone, and memberOf is not stored anywhere: Active
+    /// Directory computes it, and OpenLDAP only with the memberof overlay — which a default
+    /// install does not load, and which even where it is loaded is often set up for one group
+    /// class and not the other. Without it every account came back in no groups at all. An
+    /// administrator then signed in as a plain User, which fails safe; the same empty list also
+    /// meant no account was ever recognised as a member of a protected group, which does not —
+    /// anyone allowed to reset passwords could reset an administrator's.
+    ///
+    /// So the groups are searched as well, in each shape a directory keeps membership:
+    /// groupOfNames and Active Directory's group by member, groupOfUniqueNames by uniqueMember,
+    /// and posixGroup by the login in memberUid. The result is merged with memberOf rather than
+    /// replacing it, so a directory that has both loses nothing. Nested groups are not followed
+    /// — as before, and as memberOf does not follow them either.
+    /// </summary>
+    /// <exception cref="LdapException">The search failed; the caller reports it as such.</exception>
+    private string[] GroupsNaming(LdapConnection conn, LdapEntry entry)
+    {
+        var filter = GroupMembershipFilter(entry.Dn, Get(entry.GetAttributeSet(), "uid"));
+
+        // "1.1" asks for no attributes: the DN of each group is all this needs.
+        var results = conn.Search(_settings.BaseDn, LdapConnection.ScopeSub, filter, ["1.1"], false);
+
+        var groups = new List<string>();
+        while (NextEntryOrNull(results) is { } group)
+            groups.Add(group.Dn);
+
+        return [.. groups];
+    }
+
+    /// <summary>
+    /// The filter for every group that names an entry, by its DN or — for posixGroup — by its
+    /// login. Both are escaped: a DN can carry parentheses or an asterisk in its own name, and
+    /// unescaped they would end the filter early or widen it to groups that do not name it.
+    /// </summary>
+    internal static string GroupMembershipFilter(string distinguishedName, string? uid)
+    {
+        var dn = EscapeLdapFilterValue(distinguishedName);
+        return "(|"
+            + $"(&(objectClass=groupOfNames)(member={dn}))"
+            + $"(&(objectClass=group)(member={dn}))"
+            + $"(&(objectClass=groupOfUniqueNames)(uniqueMember={dn}))"
+            + (string.IsNullOrWhiteSpace(uid)
+                ? string.Empty
+                : $"(&(objectClass=posixGroup)(memberUid={EscapeLdapFilterValue(uid)}))")
+            + ")";
+    }
+
+    /// <summary>
+    /// memberOf and the searched groups as one list, each group once. The same group can be
+    /// spelled differently by the two — case, spacing after commas — so they are compared as
+    /// distinguished names rather than as text.
+    /// </summary>
+    internal static string[] MergeGroups(IEnumerable<string> memberOf, IEnumerable<string> namedBy)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var merged = new List<string>();
+
+        foreach (var group in memberOf.Concat(namedBy))
+        {
+            var key = DistinguishedName.TryCreate(group, out var parsed) ? parsed!.Normalized : group.Trim();
+            if (seen.Add(key))
+                merged.Add(group);
+        }
+
+        return [.. merged];
     }
 
     /// <summary>

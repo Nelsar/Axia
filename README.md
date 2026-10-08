@@ -21,7 +21,7 @@ an audit log and bulk user provisioning.
 Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
 [Apache 2.0](LICENSE).
 
-> **Status: MVP.** The API and console do what is described below, and 681 tests cover it. What is
+> **Status: MVP.** The API and console do what is described below, and 773 tests cover it. What is
 > not yet here is listed under [Not in scope yet](#not-in-scope-yet) — read it before deciding
 > whether this fits.
 
@@ -170,6 +170,11 @@ never a way to do more.
 An account in none of the groups signs in as `User`. Mappings are editable in the console under
 **Role mappings**.
 
+Membership is read from the account's `memberOf` and from the groups themselves —
+`groupOfNames` and Active Directory's `group` by `member`, `groupOfUniqueNames` by
+`uniqueMember`, `posixGroup` by the login in `memberUid` — so an OpenLDAP without the memberof
+overlay works too. Nested groups are not followed: map the group an account is directly in.
+
 A mapping that names its group by CN alone, as earlier builds seeded them (`Administrators`),
 grants its role to members of *every* group with that name, wherever it is — so anyone able to
 create a group could create an `Administrators` of their own. Such mappings are **ignored**: the
@@ -230,7 +235,8 @@ container through the environment or a mounted file.
 | `Ldap:Port` | `636`; `389` for `StartTls` and `None` | Leave unset for the mode's standard port. LDAPS on 389, or plain LDAP on 636, stops the API at startup. |
 | `Ldap:TrustedCaCertificatePath` | — | A PEM or DER file with a CA — or a self-signed directory's own certificate — to trust besides the system store. The certificate must still name the host; verification cannot be turned off. Applies to `StandardLdap` directories, including those in the database. |
 | `Ldap:*` | — | The rest of the default directory: host, base DN, bind account, search filter. |
-| `Jwt:Key` / `Jwt:ExpiresInMinutes` | — / `60` | Token signing key and lifetime. Required: at least 32 bytes, not the example placeholder. |
+| `Jwt:Key` / `Jwt:ExpiresInMinutes` | — / `60` | Token signing key and lifetime. Required: at least 32 bytes, not the example placeholder. A lifetime below one minute stops startup. |
+| `Jwt:Issuer` / `Jwt:Audience` | `Nelsar.Axia.Api` | Written into every token and required of it on the way back. Set them to name the deployment; set to empty, they stop startup. |
 | `Encryption:Key` | — | AES key for provider bind passwords at rest. Required: base64 of 16, 24 or 32 bytes, not the example placeholder. |
 | `Observability:Console` / `File` | on | Structured logs: compact JSON to stdout and a rolling file. |
 | `Observability:Logstash` / `Loki` | off | Shippers. Set `Enabled` and a `Uri` to turn one on. |
@@ -319,7 +325,7 @@ the tests if a message is left untranslated.
 dotnet test
 ```
 
-681 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
+773 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
 authorisation on every guarded use case, what may reach a log sink, multi-directory isolation, and
 translation completeness in every supported language.
 

@@ -223,4 +223,10 @@
   <data name="PasswordChangeUnsupported" xml:space="preserve">
     <value>Este directorio no ofrece una forma segura de establecer una contraseña (ni Active Directory ni la operación LDAP Password Modify), por lo que no se escribió ninguna.</value>
   </data>
+  <data name="DirectoryCertificateRejected" xml:space="preserve">
+    <value>No se pudo verificar el certificado TLS del directorio, por lo que no se usó la conexión. Pida a un administrador que revise el certificado y la autoridad de certificación de confianza.</value>
+  </data>
+  <data name="LdapSecurityUnknown" xml:space="preserve">
+    <value>'{0}' no es un modo de seguridad de conexión. Use Ldaps, StartTls o None.</value>
+  </data>
 </root>

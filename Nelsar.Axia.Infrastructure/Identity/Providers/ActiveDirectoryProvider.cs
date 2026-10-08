@@ -66,7 +66,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
             // could not ask — so, unlike the Novell client, the two cases arrive separately
             // here and the catch below is unambiguously an outage.
             using var context = CreateContext();
-            if (!context.ValidateCredentials(username, password))
+            if (!context.ValidateCredentials(username, password, BindOptions))
                 return null;
 
             // The session belongs to the principal the password was checked for, so its DN is
