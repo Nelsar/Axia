@@ -15,6 +15,17 @@ What stands between the MVP and running it comfortably in production, roughly in
 
 - **Ending a session.** Sign-out, short-lived tokens with refresh, or a deny list. Today a token is
   valid until it expires, and disabling an account does not end one already issued.
+- **Two-factor authentication for password sign-in.** TOTP with recovery codes, required by role —
+  at least for roles that can reset passwords or change groups, since one password is all such an
+  account needs today. A password alone earns a short-lived challenge, never a token; secrets are
+  encrypted at rest; resetting someone's enrolment takes a permission of its own and is audited.
+- **Sign-in through an identity provider** over OpenID Connect — Entra ID, AD FS, Keycloak —
+  configured per directory, beside the directory password. Brings single sign-on and the
+  provider's multi-factor and conditional-access policies, and the API stops receiving operators'
+  passwords. The account is matched by an identifier the directory holds (`objectSid`,
+  `objectGUID`, Keycloak's `LDAP_ID`), never by e-mail or name, and permissions still come from
+  directory groups. A directory that uses it can switch password sign-in off: a second factor the
+  password form goes around protects nothing.
 - **Revocation checks for directory certificates**, without turning an unreachable CRL endpoint
   into an outage.
 - **Bulk jobs that survive a restart.** They are held in memory today; moving them into the
