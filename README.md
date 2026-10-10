@@ -67,6 +67,16 @@ Active Directory and OpenLDAP are both supported. The `StandardLdap` provider sp
 (RFC 4511) over LDAPS or StartTLS and works against AD, OpenLDAP and eDirectory alike; a Windows-only `ActiveDirectory`
 provider using `System.DirectoryServices` also exists but manages fewer object types.
 
+## Documentation
+
+This README is the short version. The full documentation is in [`docs/`](docs/README.md):
+[installation](docs/installation.md), [production deployment](docs/production.md), the complete
+[configuration reference](docs/configuration.md), [directories](docs/directories.md) (what is read
+and written in AD and OpenLDAP), [access control](docs/access-control.md),
+[features](docs/features.md), the [REST API](docs/api.md), [operations](docs/operations.md),
+[troubleshooting](docs/troubleshooting.md), a [local test directory](docs/local-directory.md) with
+an AD-shaped domain for development, and [development](docs/development.md).
+
 ## Architecture
 
 ```
