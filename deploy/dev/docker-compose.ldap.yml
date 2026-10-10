@@ -1,0 +1,52 @@
+# An OpenLDAP for running the API from the IDE or `dotnet run` against something other than a real
+# directory. Same image and demo accounts as the quick start, plus the test data next to this file
+# (test-data.ldif, bulk-users.ldif, and an AD-style domain from ad-*.ldif), but published on
+# localhost and spoken to in plain LDAP: the quick start's certificate names the host "openldap",
+# which a process outside Docker does not reach it as.
+#
+#   docker compose -f deploy/dev/docker-compose.ldap.yml up -d
+#
+# Every account's password is Axia-Demo-1; the directory's own admin is cn=admin,dc=example,dc=org
+# with "adminpassword". See docs/local-directory.md for what is in it.
+# `docker compose -f deploy/dev/docker-compose.ldap.yml down -v` throws all of it away.
+
+name: nelsar-axia-dev
+
+services:
+  openldap:
+    image: osixia/openldap:1.5.0
+    # --copy-service: the image rewrites its asset folders while it starts, and the LDIFs are
+    # mounted read-only.
+    command: ["--copy-service"]
+    environment:
+      LDAP_ORGANISATION: Nelsar.Axia development
+      LDAP_DOMAIN: example.org
+      LDAP_ADMIN_PASSWORD: adminpassword
+      LDAP_TLS: "false"
+    ports:
+      - "127.0.0.1:389:389"
+    volumes:
+      # Active Directory's user, computer and group classes, and memberOf kept by member as AD does.
+      # Both before any data: the rest is loaded in file name order.
+      - ./ad-schema.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/40-ad-schema.ldif:ro
+      - ./ad-memberof.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/45-ad-memberof.ldif:ro
+      - ../quickstart/bootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/50-demo.ldif:ro
+      - ./test-data.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/60-test.ldif:ro
+      # A few hundred more, from generate-bulk-users.py.
+      - ./bulk-users.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/70-bulk.ldif:ro
+      # An AD-style domain under ou=Corp: ~1200 users, ~2000 computers, ~90 groups (generate-ad-data.py).
+      - ./ad-data.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/80-ad-data.ldif:ro
+      - ldap-data:/var/lib/ldap
+      - ldap-config:/etc/ldap/slapd.d
+    healthcheck:
+      # Ready once the last generated entry is in: the image answers on 389 while it is still
+      # loading the LDIFs, and the AD data takes a minute or so.
+      test: ["CMD-SHELL", "ldapsearch -x -H ldap://localhost -D cn=admin,dc=example,dc=org -w adminpassword -s base -b 'cn=Domain Computers,ou=Groups,ou=Corp,dc=example,dc=org' dn | grep -q '^dn:'"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 60s
+
+volumes:
+  ldap-data:
+  ldap-config:

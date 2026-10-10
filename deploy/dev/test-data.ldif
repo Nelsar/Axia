@@ -1,0 +1,176 @@
+# Test data on top of the quick start's demo content (../quickstart/bootstrap.ldif), applied after
+# it on the first start of an empty directory. Every password is "Axia-Demo-1".
+#
+# What it adds: the fourth role (UserDeleter), more units to browse and move accounts between,
+# accounts in several groups at once, and the group shapes the API reads membership from but the
+# demo leaves out — posixGroup by memberUid, and a nested group, which is deliberately not followed.
+
+# --- The one role the demo has no group for ------------------------------------------------------
+
+dn: uid=deleter.demo,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: deleter.demo
+cn: Dana Deleter
+sn: Deleter
+givenName: Dana
+displayName: Dana Deleter
+mail: deleter.demo@example.org
+userPassword: Axia-Demo-1
+
+dn: cn=axia-deleters,ou=groups,dc=example,dc=org
+objectClass: groupOfNames
+cn: axia-deleters
+description: UserDeleter in the console
+member: uid=deleter.demo,ou=people,dc=example,dc=org
+
+# --- Units --------------------------------------------------------------------------------------
+
+dn: ou=it,ou=staff,ou=people,dc=example,dc=org
+objectClass: organizationalUnit
+ou: it
+description: IT department
+
+dn: ou=sales,ou=staff,ou=people,dc=example,dc=org
+objectClass: organizationalUnit
+ou: sales
+description: Sales department
+
+dn: ou=contractors,ou=people,dc=example,dc=org
+objectClass: organizationalUnit
+ou: contractors
+description: External contractors
+
+# --- Accounts to manage -------------------------------------------------------------------------
+
+dn: uid=timur.akhmetov,ou=it,ou=staff,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+objectClass: posixAccount
+uid: timur.akhmetov
+cn: Timur Akhmetov
+sn: Akhmetov
+givenName: Timur
+displayName: Timur Akhmetov
+mail: timur.akhmetov@example.org
+title: System administrator
+telephoneNumber: +7 701 555 0101
+uidNumber: 10001
+gidNumber: 10000
+homeDirectory: /home/timur.akhmetov
+loginShell: /bin/bash
+userPassword: Axia-Demo-1
+
+dn: uid=saule.bekova,ou=it,ou=staff,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+objectClass: posixAccount
+uid: saule.bekova
+cn: Saule Bekova
+sn: Bekova
+givenName: Saule
+displayName: Saule Bekova
+mail: saule.bekova@example.org
+title: Developer
+telephoneNumber: +7 701 555 0102
+uidNumber: 10002
+gidNumber: 10000
+homeDirectory: /home/saule.bekova
+loginShell: /bin/bash
+userPassword: Axia-Demo-1
+
+dn: uid=daniyar.omarov,ou=sales,ou=staff,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: daniyar.omarov
+cn: Daniyar Omarov
+sn: Omarov
+givenName: Daniyar
+displayName: Daniyar Omarov
+mail: daniyar.omarov@example.org
+title: Sales manager
+telephoneNumber: +7 701 555 0201
+userPassword: Axia-Demo-1
+
+dn: uid=olga.sidorova,ou=sales,ou=staff,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: olga.sidorova
+cn: Olga Sidorova
+sn: Sidorova
+givenName: Olga
+displayName: Olga Sidorova
+mail: olga.sidorova@example.org
+title: Account manager
+userPassword: Axia-Demo-1
+
+dn: uid=asel.karimova,ou=sales,ou=staff,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: asel.karimova
+cn: Asel Karimova
+sn: Karimova
+givenName: Asel
+displayName: Asel Karimova
+mail: asel.karimova@example.org
+title: Sales assistant
+userPassword: Axia-Demo-1
+
+dn: uid=peter.mueller,ou=contractors,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: peter.mueller
+cn: Peter Mueller
+sn: Mueller
+givenName: Peter
+displayName: Peter Mueller
+mail: peter.mueller@contractor.example.com
+title: Contractor
+userPassword: Axia-Demo-1
+
+dn: uid=temp.intern,ou=contractors,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: temp.intern
+cn: Temp Intern
+sn: Intern
+givenName: Temp
+displayName: Temp Intern
+mail: temp.intern@example.org
+description: A throwaway account to try deleting
+userPassword: Axia-Demo-1
+
+# --- Groups mapped to nothing -------------------------------------------------------------------
+
+dn: cn=sales,ou=groups,dc=example,dc=org
+objectClass: groupOfNames
+cn: sales
+description: Sales department
+member: uid=daniyar.omarov,ou=sales,ou=staff,ou=people,dc=example,dc=org
+member: uid=olga.sidorova,ou=sales,ou=staff,ou=people,dc=example,dc=org
+member: uid=asel.karimova,ou=sales,ou=staff,ou=people,dc=example,dc=org
+
+dn: cn=it-staff,ou=groups,dc=example,dc=org
+objectClass: groupOfUniqueNames
+cn: it-staff
+description: IT department
+uniqueMember: uid=timur.akhmetov,ou=it,ou=staff,ou=people,dc=example,dc=org
+uniqueMember: uid=saule.bekova,ou=it,ou=staff,ou=people,dc=example,dc=org
+
+dn: cn=developers,ou=groups,dc=example,dc=org
+objectClass: posixGroup
+cn: developers
+description: Membership by login (memberUid), the posixGroup way
+gidNumber: 10000
+memberUid: timur.akhmetov
+memberUid: saule.bekova
+
+# Nested: its members include a group. Nested groups are not followed, so the people in "sales"
+# are not members of this one as far as the API is concerned.
+dn: cn=all-staff,ou=groups,dc=example,dc=org
+objectClass: groupOfNames
+cn: all-staff
+description: Everyone directly listed, plus the sales group as a nested member
+member: uid=ivan.petrov,ou=staff,ou=people,dc=example,dc=org
+member: uid=john.smith,ou=staff,ou=people,dc=example,dc=org
+member: uid=timur.akhmetov,ou=it,ou=staff,ou=people,dc=example,dc=org
+member: cn=sales,ou=groups,dc=example,dc=org
+
+dn: cn=contractors,ou=groups,dc=example,dc=org
+objectClass: groupOfNames
+cn: contractors
+description: External contractors
+member: uid=peter.mueller,ou=contractors,ou=people,dc=example,dc=org
+member: uid=temp.intern,ou=contractors,ou=people,dc=example,dc=org

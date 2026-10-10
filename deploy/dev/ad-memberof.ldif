@@ -1,0 +1,13 @@
+# memberOf the way Active Directory keeps it: on every account in an AD-style group, by member.
+# The image's default is groupOfUniqueNames/uniqueMember, and the overlay follows one class only,
+# so the quick start's groupOfUniqueNames groups (axia-creators, it-staff) stop showing up in
+# memberOf here. The API reads membership from the groups themselves as well, so roles are not
+# affected.
+
+dn: olcOverlay={0}memberof,olcDatabase={1}mdb,cn=config
+changetype: modify
+replace: olcMemberOfGroupOC
+olcMemberOfGroupOC: group
+-
+replace: olcMemberOfMemberAD
+olcMemberOfMemberAD: member
