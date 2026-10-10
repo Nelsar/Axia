@@ -16,7 +16,9 @@ To see a change working end to end, the [Docker quick start](README.md#quick-sta
 shortest way: `docker compose up --build` builds the API and the console from your working tree
 and starts them against an OpenLDAP with demo accounts, one for each role. Its directory is
 reachable only inside Docker, so to run the API from source, point it at an LDAP server or an
-Active Directory you can reach.
+Active Directory you can reach, or at the [local test directory](docs/local-directory.md) in
+`deploy/dev`: an OpenLDAP on `127.0.0.1:389` with an AD-shaped domain of ~1,500 accounts and
+~2,000 computers. The full documentation is in [`docs/`](docs/README.md).
 
 ```bash
 cp Nelsar.Axia.Api/appsettings.json.example Nelsar.Axia.Api/appsettings.json

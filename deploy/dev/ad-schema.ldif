@@ -1,0 +1,31 @@
+# The part of Active Directory's schema the API reads and writes, so the development OpenLDAP can
+# hold entries shaped like AD's: user, computer and group objects with sAMAccountName,
+# userPrincipalName, userAccountControl, dNSHostName, operatingSystem and groupType. OIDs and names
+# are AD's own; syntaxes are the nearest standard ones (AD's Large Integer is stored as an Integer).
+#
+# Not a copy of AD's schema: classes are trimmed to what the API and the test data use, and user
+# sits under organizationalPerson, as in AD, so person's MUST sn applies — OpenLDAP's core person
+# cannot be relaxed the way AD's is. Loaded on the first start of an empty directory, before any
+# data (see docker-compose.ldap.yml).
+
+dn: cn=ad-lite,cn=schema,cn=config
+objectClass: olcSchemaConfig
+cn: ad-lite
+olcAttributeTypes: ( 1.2.840.113556.1.4.221 NAME 'sAMAccountName' DESC 'AD: pre-Windows 2000 logon name' EQUALITY caseIgnoreMatch SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+olcAttributeTypes: ( 1.2.840.113556.1.4.656 NAME 'userPrincipalName' DESC 'AD: user@domain logon name' EQUALITY caseIgnoreMatch SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{1024} SINGLE-VALUE )
+olcAttributeTypes: ( 1.2.840.113556.1.4.8 NAME 'userAccountControl' DESC 'AD: account flags, 0x2 = disabled' EQUALITY integerMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 SINGLE-VALUE )
+olcAttributeTypes: ( 1.2.840.113556.1.4.150 NAME 'adminCount' DESC 'AD: protected by AdminSDHolder' EQUALITY integerMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 SINGLE-VALUE )
+olcAttributeTypes: ( 1.2.840.113556.1.2.141 NAME 'department' DESC 'AD: department' EQUALITY caseIgnoreMatch SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{64} SINGLE-VALUE )
+olcAttributeTypes: ( 1.2.840.113556.1.2.146 NAME 'company' DESC 'AD: company' EQUALITY caseIgnoreMatch SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{64} SINGLE-VALUE )
+olcAttributeTypes: ( 1.2.840.113556.1.4.35 NAME 'employeeID' DESC 'AD: employee ID' EQUALITY caseIgnoreMatch SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{16} SINGLE-VALUE )
+olcAttributeTypes: ( 1.2.840.113556.1.4.1696 NAME 'lastLogonTimestamp' DESC 'AD: last logon, FILETIME' EQUALITY integerMatch ORDERING integerOrderingMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 SINGLE-VALUE )
+olcAttributeTypes: ( 1.2.840.113556.1.4.619 NAME 'dNSHostName' DESC 'AD: computer DNS name' EQUALITY caseIgnoreMatch SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{2048} SINGLE-VALUE )
+olcAttributeTypes: ( 1.2.840.113556.1.4.363 NAME 'operatingSystem' DESC 'AD: operating system' EQUALITY caseIgnoreMatch SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+olcAttributeTypes: ( 1.2.840.113556.1.4.365 NAME 'operatingSystemVersion' DESC 'AD: operating system version' EQUALITY caseIgnoreMatch SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{64} SINGLE-VALUE )
+olcAttributeTypes: ( 1.2.840.113556.1.4.364 NAME 'operatingSystemServicePack' DESC 'AD: service pack' EQUALITY caseIgnoreMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{64} SINGLE-VALUE )
+olcAttributeTypes: ( 1.2.840.113556.1.4.222 NAME 'location' DESC 'AD: computer location' EQUALITY caseIgnoreMatch SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{1024} SINGLE-VALUE )
+olcAttributeTypes: ( 1.2.840.113556.1.4.653 NAME 'managedBy' DESC 'AD: managed by' EQUALITY distinguishedNameMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.12 SINGLE-VALUE )
+olcAttributeTypes: ( 1.2.840.113556.1.4.750 NAME 'groupType' DESC 'AD: group scope and type flags' EQUALITY integerMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 SINGLE-VALUE )
+olcObjectClasses: ( 1.2.840.113556.1.5.9 NAME 'user' DESC 'AD: user account' SUP organizationalPerson STRUCTURAL MAY ( sAMAccountName $ userPrincipalName $ userAccountControl $ adminCount $ mail $ displayName $ givenName $ initials $ uid $ department $ company $ employeeID $ employeeNumber $ departmentNumber $ manager $ mobile $ lastLogonTimestamp ) )
+olcObjectClasses: ( 1.2.840.113556.1.3.30 NAME 'computer' DESC 'AD: computer account' SUP user STRUCTURAL MAY ( dNSHostName $ operatingSystem $ operatingSystemVersion $ operatingSystemServicePack $ location $ managedBy ) )
+olcObjectClasses: ( 1.2.840.113556.1.5.8 NAME 'group' DESC 'AD: group' SUP top STRUCTURAL MUST cn MAY ( member $ sAMAccountName $ groupType $ description $ managedBy $ adminCount $ mail ) )
