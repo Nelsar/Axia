@@ -81,7 +81,7 @@ export const he: Record<MessageKey, string> = {
   "login.directoryFallbackHint": "{error} הכניסה תתבצע לספריית ברירת המחדל.",
   "login.directoriesFailed": "טעינת רשימת הספריות נכשלה.",
   "login.login": "שם משתמש",
-  "login.loginPlaceholder": "user@example.kz או sAMAccountName",
+  "login.loginPlaceholder": "user@example.org או sAMAccountName",
   "login.password": "סיסמה",
   "login.submit": "כניסה",
   "login.submitting": "מתחבר…",

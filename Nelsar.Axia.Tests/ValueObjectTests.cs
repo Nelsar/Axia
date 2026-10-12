@@ -36,8 +36,8 @@ public class EmailTests
     [InlineData("no-at-sign")]
     [InlineData("@leading.com")]
     [InlineData("trailing@")]
-    [InlineData("two@@at.com")]
-    [InlineData("one@at.com@again")]
+    [InlineData("two@@example.com")]
+    [InlineData("one@example.com@again")]
     public void TryCreate_RejectsMalformedAddresses(string? value)
     {
         Assert.False(Email.TryCreate(value, out var email));

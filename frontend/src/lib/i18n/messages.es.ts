@@ -81,7 +81,7 @@ export const es: Record<MessageKey, string> = {
   "login.directoryFallbackHint": "{error} El acceso usará el directorio predeterminado.",
   "login.directoriesFailed": "No se pudo cargar la lista de directorios.",
   "login.login": "Usuario",
-  "login.loginPlaceholder": "user@example.kz o sAMAccountName",
+  "login.loginPlaceholder": "user@example.org o sAMAccountName",
   "login.password": "Contraseña",
   "login.submit": "Iniciar sesión",
   "login.submitting": "Iniciando sesión…",

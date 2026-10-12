@@ -85,7 +85,7 @@ export const ru: Record<MessageKey, string> = {
   "login.directoryFallbackHint": "{error} Вход выполнится в каталог по умолчанию.",
   "login.directoriesFailed": "Не удалось загрузить список каталогов.",
   "login.login": "Логин",
-  "login.loginPlaceholder": "user@example.kz или sAMAccountName",
+  "login.loginPlaceholder": "user@example.org или sAMAccountName",
   "login.password": "Пароль",
   "login.submit": "Войти",
   "login.submitting": "Входим…",

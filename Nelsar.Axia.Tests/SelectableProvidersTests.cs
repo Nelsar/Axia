@@ -59,11 +59,11 @@ public class SelectableProvidersTests
         // assertion, and this is the one response on the controller that anyone at all can read.
         using var factory = FactoryFor(TestProvider.Create(
             name: "Branch",
-            host: "dc01.internal.example.kz",
+            host: "dc01.internal.example.org",
             port: 636,
             security: LdapSecurity.Ldaps,
-            failoverHosts: "dc02.internal.example.kz",
-            baseDn: "dc=branch,dc=example,dc=kz",
+            failoverHosts: "dc02.internal.example.org",
+            baseDn: "dc=branch,dc=example,dc=org",
             adminUsername: "svc-bind",
             encryptedAdminPassword: "enc:should-never-appear",
             userSearchFilter: "(&(objectClass=person)(uid={0}))"));
@@ -75,8 +75,8 @@ public class SelectableProvidersTests
         Assert.Contains("Branch", body);
         foreach (var secret in new[]
                  {
-                     "dc01.internal.example.kz",
-                     "dc02.internal.example.kz",
+                     "dc01.internal.example.org",
+                     "dc02.internal.example.org",
                      "dc=branch",
                      "svc-bind",
                      "should-never-appear",

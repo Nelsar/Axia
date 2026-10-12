@@ -81,7 +81,7 @@ export const ar: Record<MessageKey, string> = {
   "login.directoryFallbackHint": "{error} سيتم تسجيل الدخول إلى الدليل الافتراضي.",
   "login.directoriesFailed": "تعذّر تحميل قائمة الأدلة.",
   "login.login": "اسم الدخول",
-  "login.loginPlaceholder": "user@example.kz أو sAMAccountName",
+  "login.loginPlaceholder": "user@example.org أو sAMAccountName",
   "login.password": "كلمة المرور",
   "login.submit": "تسجيل الدخول",
   "login.submitting": "جارٍ تسجيل الدخول…",

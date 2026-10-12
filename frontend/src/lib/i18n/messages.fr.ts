@@ -81,7 +81,7 @@ export const fr: Record<MessageKey, string> = {
   "login.directoryFallbackHint": "{error} La connexion utilisera l’annuaire par défaut.",
   "login.directoriesFailed": "Impossible de charger la liste des annuaires.",
   "login.login": "Identifiant",
-  "login.loginPlaceholder": "user@example.kz ou sAMAccountName",
+  "login.loginPlaceholder": "user@example.org ou sAMAccountName",
   "login.password": "Mot de passe",
   "login.submit": "Se connecter",
   "login.submitting": "Connexion…",

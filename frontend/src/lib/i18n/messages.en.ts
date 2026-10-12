@@ -97,7 +97,7 @@ export const en = {
   "login.directoryFallbackHint": "{error} Sign-in will use the default directory.",
   "login.directoriesFailed": "Could not load the list of directories.",
   "login.login": "Login",
-  "login.loginPlaceholder": "user@example.kz or sAMAccountName",
+  "login.loginPlaceholder": "user@example.org or sAMAccountName",
   "login.password": "Password",
   "login.submit": "Sign in",
   "login.submitting": "Signing in…",

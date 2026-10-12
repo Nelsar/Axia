@@ -62,14 +62,14 @@ public class UserAttributesTests
 
     // An account as OpenLDAP commonly holds it: no mail attribute at all, and a uid that is a
     // person's name rather than a login-shaped string. This is the entry that used to render as
-    // "Email: Anuar Mukatov".
+    // "Email: Aigul Sample".
     private static LdapUserInfo AccountWithoutMail() => new()
     {
-        Dn = "uid=Anuar Mukatov,ou=people,dc=nelsar,dc=kz",
-        Username = "Anuar Mukatov",
-        DisplayName = "Anuar Mukatov",
+        Dn = "uid=Aigul Sample,ou=people,dc=example,dc=org",
+        Username = "Aigul Sample",
+        DisplayName = "Aigul Sample",
         Email = string.Empty,
-        Groups = ["cn=admins,ou=groups,dc=nelsar,dc=kz"]
+        Groups = ["cn=admins,ou=groups,dc=example,dc=org"]
     };
 
     [Fact]
@@ -82,7 +82,7 @@ public class UserAttributesTests
         // The whole point of splitting the fields: a caller reading Email gets the mail
         // attribute or nothing, and can tell which. Before, it got the cn and could not.
         Assert.Equal(string.Empty, user.Email);
-        Assert.Equal("Anuar Mukatov", user.Username);
+        Assert.Equal("Aigul Sample", user.Username);
     }
 
     [Fact]
@@ -95,7 +95,7 @@ public class UserAttributesTests
         // The id still derives from mail-or-login, exactly as it did when that value was also
         // what Email reported. If this ever changes, every id already handed out — in tokens,
         // in the lookup index, in a bookmarked URL — silently stops resolving.
-        Assert.Equal(DeterministicIdFactory.BuildUserId("Anuar Mukatov"), user.Id);
+        Assert.Equal(DeterministicIdFactory.BuildUserId("Aigul Sample"), user.Id);
     }
 
     [Fact]
@@ -106,8 +106,8 @@ public class UserAttributesTests
         var user = (await sender.Send(new GetAllUsersQuery())).Items.Single();
 
         // Both were already read out of the directory and thrown away at the mapping step.
-        Assert.Equal("uid=Anuar Mukatov,ou=people,dc=nelsar,dc=kz", user.Dn);
-        Assert.Equal(["cn=admins,ou=groups,dc=nelsar,dc=kz"], user.Groups);
+        Assert.Equal("uid=Aigul Sample,ou=people,dc=example,dc=org", user.Dn);
+        Assert.Equal(["cn=admins,ou=groups,dc=example,dc=org"], user.Groups);
     }
 
     [Fact]
@@ -115,10 +115,10 @@ public class UserAttributesTests
     {
         var entry = new LdapUserInfo
         {
-            Dn = "uid=amukatov,ou=people,dc=nelsar,dc=kz",
-            Username = "amukatov",
-            DisplayName = "Anuar Mukatov",
-            Email = "a.mukatov@nelsar.kz"
+            Dn = "uid=asample,ou=people,dc=example,dc=org",
+            Username = "asample",
+            DisplayName = "Aigul Sample",
+            Email = "a.sample@example.org"
         };
 
         var ldap = DirectoryHolding(entry);
@@ -131,7 +131,7 @@ public class UserAttributesTests
         // By the DN of the entry the id resolved to. Writes used to go by the address, which the
         // directory was then searched for again — and mail is not unique, so the search could
         // return a different entry than the one this id names.
-        ldap.Verify(x => x.DeleteUserAsync("uid=amukatov,ou=people,dc=nelsar,dc=kz"), Times.Once);
+        ldap.Verify(x => x.DeleteUserAsync("uid=asample,ou=people,dc=example,dc=org"), Times.Once);
     }
 
     [Fact]
@@ -145,17 +145,17 @@ public class UserAttributesTests
         await sender.Send(new DeleteUserCommand(user.Id));
 
         // Email is empty for this entry. Its DN is not, and is what the delete is addressed by.
-        ldap.Verify(x => x.DeleteUserAsync("uid=Anuar Mukatov,ou=people,dc=nelsar,dc=kz"), Times.Once);
+        ldap.Verify(x => x.DeleteUserAsync("uid=Aigul Sample,ou=people,dc=example,dc=org"), Times.Once);
     }
 
     [Fact]
     public async Task GetAttributesAsync_ReadsTheEntryByTheSameAddressTheIdDerivesFrom()
     {
         var ldap = DirectoryHolding(AccountWithoutMail());
-        ldap.Setup(x => x.GetUserAttributesAsync("Anuar Mukatov"))
+        ldap.Setup(x => x.GetUserAttributesAsync("Aigul Sample"))
             .ReturnsAsync(new DirectoryEntryAttributes(
-                "uid=Anuar Mukatov,ou=people,dc=nelsar,dc=kz",
-                [new DirectoryAttribute("cn", ["Anuar Mukatov"])]));
+                "uid=Aigul Sample,ou=people,dc=example,dc=org",
+                [new DirectoryAttribute("cn", ["Aigul Sample"])]));
 
         var sender = CreateSender(ldap.Object);
         var user = (await sender.Send(new GetAllUsersQuery())).Items.Single();
@@ -163,7 +163,7 @@ public class UserAttributesTests
         var attributes = await sender.Send(new GetUserAttributesQuery(user.Id));
 
         Assert.NotNull(attributes);
-        Assert.Equal("uid=Anuar Mukatov,ou=people,dc=nelsar,dc=kz", attributes!.Dn);
+        Assert.Equal("uid=Aigul Sample,ou=people,dc=example,dc=org", attributes!.Dn);
         Assert.Equal("cn", attributes.Attributes.Single().Name);
     }
 
@@ -188,7 +188,7 @@ public class UserAttributesTests
         var attributes = new LdapAttributeSet
         {
             new LdapAttribute("userPassword", "{SSHA}s3cr3thash"),
-            new LdapAttribute("cn", "Anuar Mukatov")
+            new LdapAttribute("cn", "Aigul Sample")
         };
 
         var read = DirectoryAttributeReader.Read(attributes);
@@ -198,7 +198,7 @@ public class UserAttributesTests
         Assert.Empty(password.Values);
 
         // Redaction is per-attribute, not a reason to drop the whole entry.
-        Assert.Equal(["Anuar Mukatov"], read.Single(a => a.Name == "cn").Values);
+        Assert.Equal(["Aigul Sample"], read.Single(a => a.Name == "cn").Values);
     }
 
     [Fact]
@@ -242,9 +242,9 @@ public class UserAttributesTests
     {
         var attributes = new LdapAttributeSet
         {
-            new LdapAttribute("sn", "Mukatov"),
-            new LdapAttribute("cn", "Anuar Mukatov"),
-            new LdapAttribute("mail", "a.mukatov@nelsar.kz")
+            new LdapAttribute("sn", "Sample"),
+            new LdapAttribute("cn", "Aigul Sample"),
+            new LdapAttribute("mail", "a.sample@example.org")
         };
 
         var names = DirectoryAttributeReader.Read(attributes).Select(a => a.Name).ToArray();
@@ -257,7 +257,7 @@ public class UserAttributesTests
     {
         var attributes = new LdapAttributeSet
         {
-            new LdapAttribute("memberOf", ["cn=admins,dc=nelsar,dc=kz", "cn=vpn,dc=nelsar,dc=kz"])
+            new LdapAttribute("memberOf", ["cn=admins,dc=example,dc=org", "cn=vpn,dc=example,dc=org"])
         };
 
         var read = DirectoryAttributeReader.Read(attributes).Single();

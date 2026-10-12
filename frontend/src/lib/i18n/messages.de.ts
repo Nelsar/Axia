@@ -81,7 +81,7 @@ export const de: Record<MessageKey, string> = {
   "login.directoryFallbackHint": "{error} Die Anmeldung erfolgt am Standardverzeichnis.",
   "login.directoriesFailed": "Die Liste der Verzeichnisse konnte nicht geladen werden.",
   "login.login": "Anmeldename",
-  "login.loginPlaceholder": "user@example.kz oder sAMAccountName",
+  "login.loginPlaceholder": "user@example.org oder sAMAccountName",
   "login.password": "Passwort",
   "login.submit": "Anmelden",
   "login.submitting": "Anmeldung läuft…",

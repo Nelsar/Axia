@@ -81,7 +81,7 @@ export const kk: Record<MessageKey, string> = {
   "login.directoryFallbackHint": "{error} Кіру әдепкі каталог арқылы орындалады.",
   "login.directoriesFailed": "Каталогтар тізімін жүктеу мүмкін болмады.",
   "login.login": "Логин",
-  "login.loginPlaceholder": "user@example.kz немесе sAMAccountName",
+  "login.loginPlaceholder": "user@example.org немесе sAMAccountName",
   "login.password": "Құпия сөз",
   "login.submit": "Кіру",
   "login.submitting": "Кіруде…",

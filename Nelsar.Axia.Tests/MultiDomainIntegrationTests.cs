@@ -106,16 +106,16 @@ public class MultiDomainIntegrationTests
     {
         var jdoe = new LdapUserInfo
         {
-            Dn = "uid=jdoe,ou=people,dc=nelsar,dc=com",
+            Dn = "uid=jdoe,ou=people,dc=example,dc=org",
             Username = "jdoe",
             DisplayName = "John Doe",
-            Email = "jdoe@nelsar.com",
-            Groups = ["cn=UserCreators,ou=groups,dc=nelsar,dc=com"]
+            Email = "jdoe@example.org",
+            Groups = ["cn=UserCreators,ou=groups,dc=example,dc=org"]
         };
 
         var mock = new Mock<ILdapProvider>();
-        mock.Setup(x => x.Authenticate("jdoe@nelsar.com", "Test123!")).Returns(jdoe.Dn);
-        mock.Setup(x => x.FindUser("jdoe@nelsar.com")).Returns(jdoe);
+        mock.Setup(x => x.Authenticate("jdoe@example.org", "Test123!")).Returns(jdoe.Dn);
+        mock.Setup(x => x.FindUser("jdoe@example.org")).Returns(jdoe);
         mock.Setup(x => x.FindUserByDn(jdoe.Dn)).Returns(jdoe);
         mock.Setup(x => x.GetAllUsers()).Returns(DirectoryUserListing.Complete([jdoe]));
         return mock;
@@ -208,14 +208,14 @@ public class MultiDomainIntegrationTests
 
         var response = await client.PostAsJsonAsync("/api/v1/auth/login", new AuthenticateRequest
         {
-            Email = "jdoe@nelsar.com",
+            Email = "jdoe@example.org",
             Password = "Test123!"
         });
 
         response.EnsureSuccessStatusCode();
         var payload = await response.Content.ReadFromJsonAsync<AuthenticateResponse>();
         Assert.NotNull(payload);
-        Assert.Equal("jdoe@nelsar.com", payload.User.Email);
+        Assert.Equal("jdoe@example.org", payload.User.Email);
         Assert.Equal(UserRoles.UserCreator, payload.User.Role);
     }
 
@@ -227,14 +227,14 @@ public class MultiDomainIntegrationTests
         var openLdapMock = BuildOpenLdapDomainMock();
         var impostor = new LdapUserInfo
         {
-            Dn = "uid=impostor,ou=people,dc=nelsar,dc=com",
+            Dn = "uid=impostor,ou=people,dc=example,dc=org",
             Username = "impostor",
             DisplayName = "Impostor",
-            Email = "impostor@nelsar.com",
-            Groups = ["cn=Domain Admins,ou=groups,dc=nelsar,dc=com"]
+            Email = "impostor@example.org",
+            Groups = ["cn=Domain Admins,ou=groups,dc=example,dc=org"]
         };
-        openLdapMock.Setup(x => x.Authenticate("impostor@nelsar.com", "Test123!")).Returns(impostor.Dn);
-        openLdapMock.Setup(x => x.FindUser("impostor@nelsar.com")).Returns(impostor);
+        openLdapMock.Setup(x => x.Authenticate("impostor@example.org", "Test123!")).Returns(impostor.Dn);
+        openLdapMock.Setup(x => x.FindUser("impostor@example.org")).Returns(impostor);
         openLdapMock.Setup(x => x.FindUserByDn(impostor.Dn)).Returns(impostor);
 
         using var factory = BuildTwoDomainFactory(openLdapMock: openLdapMock);
@@ -243,7 +243,7 @@ public class MultiDomainIntegrationTests
 
         var response = await client.PostAsJsonAsync("/api/v1/auth/login", new AuthenticateRequest
         {
-            Email = "impostor@nelsar.com",
+            Email = "impostor@example.org",
             Password = "Test123!"
         });
 
@@ -281,7 +281,7 @@ public class MultiDomainIntegrationTests
         var openLdapUsers = await ListUsersAsync(factory, OpenLdapProviderId, sendHeader: true);
 
         Assert.Equal("jsmith@corp.example.com", Assert.Single(adUsers.Items).Email);
-        Assert.Equal("jdoe@nelsar.com", Assert.Single(openLdapUsers.Items).Email);
+        Assert.Equal("jdoe@example.org", Assert.Single(openLdapUsers.Items).Email);
     }
 
     [Fact]
@@ -294,7 +294,7 @@ public class MultiDomainIntegrationTests
 
         var users = await ListUsersAsync(factory, OpenLdapProviderId, sendHeader: false);
 
-        Assert.Equal("jdoe@nelsar.com", Assert.Single(users.Items).Email);
+        Assert.Equal("jdoe@example.org", Assert.Single(users.Items).Email);
     }
 
     [Fact]

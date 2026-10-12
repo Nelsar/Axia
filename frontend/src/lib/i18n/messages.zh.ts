@@ -81,7 +81,7 @@ export const zh: Record<MessageKey, string> = {
   "login.directoryFallbackHint": "{error} 将使用默认目录登录。",
   "login.directoriesFailed": "无法加载目录列表。",
   "login.login": "登录名",
-  "login.loginPlaceholder": "user@example.kz 或 sAMAccountName",
+  "login.loginPlaceholder": "user@example.org 或 sAMAccountName",
   "login.password": "密码",
   "login.submit": "登录",
   "login.submitting": "正在登录…",
