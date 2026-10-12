@@ -60,7 +60,7 @@ internal class BulkUserBackgroundService : BackgroundService
                 // reaching past the module surface — and the one reason the command types had to
                 // stay public.
                 var users = scope.ServiceProvider.GetRequiredService<IUsersModule>();
-                var response = await users.ProcessBulkAsync(job.Requests, stoppingToken);
+                var response = await users.ProcessQueuedBulkAsync(job.Requests, stoppingToken);
                 job.Results.Clear();
                 job.Results.AddRange(response.Items);
                 job.State = response.FailedCount > 0 ? BulkJobState.Failed : BulkJobState.Completed;

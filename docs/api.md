@@ -85,6 +85,7 @@ validation problem details (`errors` per field) instead.
 | `429` | Rate limit. |
 | `501` | Not supported by this provider (groups on `ActiveDirectory`). |
 | `502` | The directory: unreachable, misconfigured, or it refused the operation. |
+| `503` | The bulk job queue is full. Nothing was queued; `Retry-After` says when to send it again. |
 | `500` | Anything else; the message is generic and the detail is in the log under the correlation id. |
 
 Messages never name an account; they are logged too.

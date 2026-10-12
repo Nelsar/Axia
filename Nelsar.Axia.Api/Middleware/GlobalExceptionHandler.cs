@@ -44,6 +44,9 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             // The route exists and the caller used it correctly; we simply have not built what
             // sits behind it. 501 says that, where a 404 would send them hunting for a typo.
             FeatureNotImplementedException => (StatusCodes.Status501NotImplemented, exception.Message),
+            // Refused for want of room, not for anything the caller did: the same request later
+            // will be taken, and Retry-After below says when.
+            ServiceBusyException => (StatusCodes.Status503ServiceUnavailable, exception.Message),
             _ => (StatusCodes.Status500InternalServerError, InRequestCulture(httpContext, ApiMessages.UnexpectedError))
         };
 
@@ -59,6 +62,15 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             // asking for it, not worth waking anybody.
             _logger.LogWarning("Not implemented: {Method} {Path}",
                 httpContext.Request.Method, httpContext.Request.Path);
+        }
+        else if (exception is ServiceBusyException busy)
+        {
+            // Worth seeing when it happens often — it means the limit is too low for how the API
+            // is used — but it is a refusal working as intended, not a fault.
+            _logger.LogWarning("Busy, refused {Method} {Path}: {Reason}",
+                httpContext.Request.Method, httpContext.Request.Path, exception.Message);
+            httpContext.Response.Headers.RetryAfter =
+                ((int)Math.Ceiling(busy.RetryAfter.TotalSeconds)).ToString(CultureInfo.InvariantCulture);
         }
         else if (exception is NotAuthenticatedException or PermissionDeniedException)
         {

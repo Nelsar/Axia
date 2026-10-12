@@ -51,6 +51,15 @@ public interface IUsersModule : IOpencoreModule
         IEnumerable<BulkUserRequest>? requests,
         CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Runs a queued batch: the same as <see cref="ProcessBulkAsync"/>, for the background worker,
+    /// which may run batches larger than a caller waiting on the answer may send.
+    /// </summary>
+    Task<BulkOperationResponse<BulkUserResult>> ProcessQueuedBulkAsync(
+        IEnumerable<BulkUserRequest>? requests,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Null when there is no such job, or it is not the caller's to see.</summary>
     Task<BulkOperationResponse<BulkUserResult>?> GetBulkJobStatusAsync(
         string jobId,
         CancellationToken cancellationToken = default);

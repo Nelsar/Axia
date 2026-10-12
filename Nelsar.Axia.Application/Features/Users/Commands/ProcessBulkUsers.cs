@@ -31,9 +31,29 @@ namespace Nelsar.Axia.Application.Features.Users.Commands;
 /// the job (see BackgroundPrincipal), so a queued batch is checked the same way, at the time it
 /// runs.
 /// </summary>
-internal sealed record ProcessBulkUsersCommand(IReadOnlyList<BulkUserRequest> Requests)
+/// <param name="Queued">
+/// Whether the worker is running a queued job, rather than a caller waiting on the answer — which
+/// decides how many rows the batch may hold.
+/// </param>
+internal sealed record ProcessBulkUsersCommand(IReadOnlyList<BulkUserRequest> Requests, bool Queued = false)
     : IRequest<BulkOperationResponse<BulkUserResult>>, IRequireAdditionalPermissions, IAuditedCommand
 {
+    /// <summary>
+    /// The most rows one synchronous batch may hold. It runs on the request's thread, a directory
+    /// round trip or two per row, while the caller waits; nothing used to bound it, so one request
+    /// could hold a thread for as long as it cared to make the batch. Larger batches are queued.
+    /// </summary>
+    public const int MaximumSynchronousRows = 100;
+
+    /// <summary>
+    /// The most rows one queued batch may hold: as many logins as one preview of the generator
+    /// produces (GenerateUserPatternsQuery.MaximumItems), so whatever it previews can be created
+    /// in one job.
+    /// </summary>
+    public const int MaximumQueuedRows = 10_000;
+
+    public int MaximumRows => Queued ? MaximumQueuedRows : MaximumSynchronousRows;
+
     /// <inheritdoc />
     public string RequiredPermission => Permissions.UsersBulk;
 
@@ -51,6 +71,13 @@ internal sealed class ProcessBulkUsersCommandValidator : AbstractValidator<Proce
         RuleFor(c => c.Requests)
             .NotEmpty()
             .WithMessage(_ => ApplicationMessages.BulkRequestEmpty());
+
+        RuleFor(c => c.Requests)
+            .Must((command, rows) => rows.Count <= command.MaximumRows)
+            .When(c => c.Requests is not null)
+            .WithMessage(c => c.Queued
+                ? ApplicationMessages.BulkRequestTooLarge(c.MaximumRows)
+                : ApplicationMessages.BulkSynchronousRequestTooLarge(c.MaximumRows));
 
         // A null row has nothing to report a per-item outcome against, so it fails the batch
         // rather than the handler.

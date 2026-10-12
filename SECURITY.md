@@ -73,6 +73,9 @@ Inside that, the following are meant to hold, and a case where they do not is wo
   refused rather than silently served from the default.
 - **A login cannot change the query it lands in.** Filters and distinguished names are escaped at
   the boundary, and the escaping is tested against the metacharacters that matter.
+- **A bulk job is its owner's.** Its results name every account in the batch and why each row
+  failed, so only the account that queued it, in the same directory, can read them. Batches and
+  the queue are bounded, so no caller can hold a request thread or the process's memory with one.
 - **Every change is attributable.** Every attempt to change a directory or this application's
   settings is written to the audit trail with the principal who made it — the signed-in caller, or
   for a queued bulk job the person who queued it — whether it was permitted or refused. A test

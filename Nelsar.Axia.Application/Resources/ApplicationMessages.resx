@@ -280,4 +280,16 @@
     <value>Your account has been disabled in the directory, so this session has ended. Ask an administrator to enable it.</value>
     <comment>The signed-in account was disabled, expired or locked by an administrator in the directory; its session ends.</comment>
   </data>
+  <data name="BulkRequestTooLarge" xml:space="preserve">
+    <value>A bulk batch can hold at most {0} rows. Split it into smaller batches.</value>
+    <comment>{0} = the most rows one queued bulk batch may hold.</comment>
+  </data>
+  <data name="BulkSynchronousRequestTooLarge" xml:space="preserve">
+    <value>A batch processed while you wait can hold at most {0} rows. Queue larger batches instead (POST /api/v1/users/bulk).</value>
+    <comment>{0} = the most rows one synchronous bulk batch may hold; larger ones go to the queued endpoint.</comment>
+  </data>
+  <data name="BulkQueueFull" xml:space="preserve">
+    <value>Too many bulk jobs are waiting to run. Try again in a little while.</value>
+    <comment>The queue of bulk jobs is full; the request may be retried later (sent with Retry-After).</comment>
+  </data>
 </root>
