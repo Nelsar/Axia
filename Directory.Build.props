@@ -1,0 +1,8 @@
+<Project>
+  <!-- The release version of the API and its libraries, stamped into every assembly. Kept in step
+       with frontend/package.json and the newest heading in CHANGELOG.md; see "Releasing" in
+       CONTRIBUTING.md. Without it every build called itself 1.0.0. -->
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+</Project>
