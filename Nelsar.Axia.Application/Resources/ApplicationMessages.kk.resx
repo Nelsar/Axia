@@ -229,4 +229,7 @@
   <data name="LdapSecurityUnknown" xml:space="preserve">
     <value>'{0}' қосылымды қорғау режимі емес. Ldaps, StartTls немесе None қолданыңыз.</value>
   </data>
+  <data name="BindPasswordRequiredForPlainLdap" xml:space="preserve">
+    <value>Бұл каталогты шифрланбаған LDAP-қа ауыстыру үшін байланыс құпиясөзін қайта енгізіңіз. Шифрлаусыз сақталған құпиясөз желі арқылы жол бойындағы кез келген адам оқи алатын күйде өтеді.</value>
+  </data>
 </root>

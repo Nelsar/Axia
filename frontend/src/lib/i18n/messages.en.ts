@@ -313,7 +313,7 @@ export const en = {
   "providers.failoverHosts": "Failover hosts (comma separated)",
   "providers.bindUser": "Bind user",
   "providers.bindPassword": "Bind password",
-  "providers.bindPasswordKeep": "Bind password (leave empty to keep it; required when the host, port or failover hosts change)",
+  "providers.bindPasswordKeep": "Bind password (leave empty to keep it; required when the host, port or failover hosts change, or when encryption is turned off)",
   "providers.searchFilter": "User search filter",
   "providers.pageSize": "Search page size",
   "providers.active": "Active",

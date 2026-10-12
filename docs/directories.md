@@ -106,7 +106,9 @@ with a 2-second TCP connect probe. The first that answers is used. The answer is
 seconds; a failure is cached for 5 seconds, so a dead directory is not probed on every request.
 
 Changing a directory's host, port or failover hosts **requires entering its bind password again**.
-Otherwise the stored password would be sent to whatever the new address points at.
+Otherwise the stored password would be sent to whatever the new address points at. Switching its
+security to `None` requires it too: the stored password would otherwise cross the network
+unencrypted. Moving between `Ldaps` and `StartTls`, or turning encryption on, does not.
 
 Directories created before LDAPS existed were set to `None` by the `AddProviderSecurity`
 migration so that they kept working. The console marks them *not encrypted*.

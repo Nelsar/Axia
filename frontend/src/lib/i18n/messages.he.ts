@@ -287,7 +287,7 @@ export const he: Record<MessageKey, string> = {
   "providers.failoverHosts": "מארחי גיבוי (מופרדים בפסיקים)",
   "providers.bindUser": "משתמש bind",
   "providers.bindPassword": "סיסמת bind",
-  "providers.bindPasswordKeep": "סיסמת bind (השאר ריק כדי לשמור על הקיימת; חובה כאשר המארח, הפורט או מארחי הגיבוי משתנים)",
+  "providers.bindPasswordKeep": "סיסמת bind (השאר ריק כדי לשמור על הקיימת; חובה כאשר המארח, הפורט או מארחי הגיבוי משתנים, או כאשר ההצפנה מושבתת)",
   "providers.searchFilter": "מסנן חיפוש משתמשים",
   "providers.pageSize": "גודל עמוד בחיפוש",
   "providers.active": "פעיל",

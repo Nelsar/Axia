@@ -287,7 +287,7 @@ export const fr: Record<MessageKey, string> = {
   "providers.failoverHosts": "Hôtes de secours (séparés par des virgules)",
   "providers.bindUser": "Utilisateur de bind",
   "providers.bindPassword": "Mot de passe de bind",
-  "providers.bindPasswordKeep": "Mot de passe de bind (laisser vide pour le conserver ; obligatoire si l’hôte, le port ou les hôtes de basculement changent)",
+  "providers.bindPasswordKeep": "Mot de passe de bind (laisser vide pour le conserver ; obligatoire si l’hôte, le port ou les hôtes de basculement changent, ou si le chiffrement est désactivé)",
   "providers.searchFilter": "Filtre de recherche des utilisateurs",
   "providers.pageSize": "Taille de page de recherche",
   "providers.active": "Actif",

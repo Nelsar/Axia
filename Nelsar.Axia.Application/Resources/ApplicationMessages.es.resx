@@ -229,4 +229,7 @@
   <data name="LdapSecurityUnknown" xml:space="preserve">
     <value>'{0}' no es un modo de seguridad de conexión. Use Ldaps, StartTls o None.</value>
   </data>
+  <data name="BindPasswordRequiredForPlainLdap" xml:space="preserve">
+    <value>Vuelva a introducir la contraseña de enlace para cambiar este directorio a LDAP sin cifrar. Sin cifrado, la contraseña guardada cruzaría la red legible para cualquiera en el camino.</value>
+  </data>
 </root>

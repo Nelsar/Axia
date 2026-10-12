@@ -229,7 +229,8 @@ security (`Ldaps`/`StartTls`/`None`), provider type, failover hosts, base DN, bi
 password (write-only; never returned), user search filter, page size, active.
 
 - The bind password is encrypted with `Encryption:Key` before it is stored.
-- Changing host, port or failover hosts requires the password again.
+- Changing host, port or failover hosts requires the password again, as does switching security
+  to `None`.
 - `GET /api/v1/providers/selectable` is **anonymous** (for the sign-in picker), returns only ids and
   names of active directories, and is rate-limited (`providers-selectable`, 30 per minute).
 - The console marks directories using `None` as *not encrypted*.

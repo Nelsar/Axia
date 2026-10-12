@@ -233,4 +233,7 @@
   <data name="LdapSecurityUnknown" xml:space="preserve">
     <value>'{0}' не является режимом защиты подключения. Используйте Ldaps, StartTls или None.</value>
   </data>
+  <data name="BindPasswordRequiredForPlainLdap" xml:space="preserve">
+    <value>Чтобы перевести этот каталог на LDAP без шифрования, введите пароль привязки заново. Без шифрования сохранённый пароль пойдёт по сети в открытом виде, и его сможет прочитать любой на пути.</value>
+  </data>
 </root>

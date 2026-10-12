@@ -194,6 +194,9 @@ public static class ApplicationMessages
     /// </summary>
     public static string BindPasswordRequiredForNewEndpoint() => Get(nameof(BindPasswordRequiredForNewEndpoint));
 
+    /// <summary>The same advice for the same reason as the message above; see Provider.WouldDropEncryption.</summary>
+    public static string BindPasswordRequiredForPlainLdap() => Get(nameof(BindPasswordRequiredForPlainLdap));
+
     public static string RoleUnknown(string roleName) => Format(nameof(RoleUnknown), roleName);
 
     /// <summary>Points at what to do instead — a different mapping — because that is the real

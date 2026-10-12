@@ -287,7 +287,7 @@ export const ar: Record<MessageKey, string> = {
   "providers.failoverHosts": "مضيفات احتياطية (مفصولة بفواصل)",
   "providers.bindUser": "مستخدم الربط",
   "providers.bindPassword": "كلمة مرور الربط",
-  "providers.bindPasswordKeep": "كلمة مرور الربط (اتركها فارغة للإبقاء عليها؛ مطلوبة عند تغيير المضيف أو المنفذ أو المضيفين الاحتياطيين)",
+  "providers.bindPasswordKeep": "كلمة مرور الربط (اتركها فارغة للإبقاء عليها؛ مطلوبة عند تغيير المضيف أو المنفذ أو المضيفين الاحتياطيين، أو عند إيقاف التشفير)",
   "providers.searchFilter": "مرشّح البحث عن المستخدمين",
   "providers.pageSize": "حجم صفحة البحث",
   "providers.active": "نشِط",

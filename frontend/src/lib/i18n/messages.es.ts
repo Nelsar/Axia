@@ -287,7 +287,7 @@ export const es: Record<MessageKey, string> = {
   "providers.failoverHosts": "Hosts de reserva (separados por comas)",
   "providers.bindUser": "Usuario de bind",
   "providers.bindPassword": "Contraseña de bind",
-  "providers.bindPasswordKeep": "Contraseña de bind (déjela vacía para conservarla; obligatoria si cambian el host, el puerto o los hosts de conmutación por error)",
+  "providers.bindPasswordKeep": "Contraseña de bind (déjela vacía para conservarla; obligatoria si cambian el host, el puerto o los hosts de conmutación por error, o si se desactiva el cifrado)",
   "providers.searchFilter": "Filtro de búsqueda de usuarios",
   "providers.pageSize": "Tamaño de página de búsqueda",
   "providers.active": "Activo",

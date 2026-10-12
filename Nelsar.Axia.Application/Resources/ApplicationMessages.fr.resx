@@ -229,4 +229,7 @@
   <data name="LdapSecurityUnknown" xml:space="preserve">
     <value>'{0}' n'est pas un mode de sécurité de connexion. Utilisez Ldaps, StartTls ou None.</value>
   </data>
+  <data name="BindPasswordRequiredForPlainLdap" xml:space="preserve">
+    <value>Saisissez de nouveau le mot de passe de liaison pour passer cet annuaire en LDAP non chiffré. Sans chiffrement, le mot de passe enregistré traverserait le réseau lisible par quiconque se trouve sur le chemin.</value>
+  </data>
 </root>

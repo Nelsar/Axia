@@ -287,7 +287,7 @@ export const zh: Record<MessageKey, string> = {
   "providers.failoverHosts": "备用主机（以逗号分隔）",
   "providers.bindUser": "Bind 用户",
   "providers.bindPassword": "Bind 密码",
-  "providers.bindPasswordKeep": "Bind 密码（留空则保持不变；更改主机、端口或故障转移主机时必须填写）",
+  "providers.bindPasswordKeep": "Bind 密码（留空则保持不变；更改主机、端口或故障转移主机，或关闭加密时必须填写）",
   "providers.searchFilter": "用户搜索过滤器",
   "providers.pageSize": "搜索分页大小",
   "providers.active": "启用",

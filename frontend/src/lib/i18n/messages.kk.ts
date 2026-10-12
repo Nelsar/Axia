@@ -287,7 +287,7 @@ export const kk: Record<MessageKey, string> = {
   "providers.failoverHosts": "Қосалқы хосттар (үтір арқылы)",
   "providers.bindUser": "Bind пайдаланушысы",
   "providers.bindPassword": "Bind құпия сөзі",
-  "providers.bindPasswordKeep": "Bind құпия сөзі (өзгертпеу үшін бос қалдырыңыз; хост, порт немесе резервтік хосттар өзгерсе, міндетті)",
+  "providers.bindPasswordKeep": "Bind құпия сөзі (өзгертпеу үшін бос қалдырыңыз; хост, порт немесе резервтік хосттар өзгерсе не шифрлау өшірілсе, міндетті)",
   "providers.searchFilter": "Пайдаланушыларды іздеу сүзгісі",
   "providers.pageSize": "Іздеу беттерінің өлшемі",
   "providers.active": "Белсенді",

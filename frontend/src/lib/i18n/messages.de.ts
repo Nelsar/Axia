@@ -287,7 +287,7 @@ export const de: Record<MessageKey, string> = {
   "providers.failoverHosts": "Ausweich-Hosts (durch Komma getrennt)",
   "providers.bindUser": "Bind-Benutzer",
   "providers.bindPassword": "Bind-Passwort",
-  "providers.bindPasswordKeep": "Bind-Passwort (leer lassen, um es beizubehalten; erforderlich, wenn Host, Port oder Failover-Hosts geändert werden)",
+  "providers.bindPasswordKeep": "Bind-Passwort (leer lassen, um es beizubehalten; erforderlich, wenn Host, Port oder Failover-Hosts geändert werden oder die Verschlüsselung abgeschaltet wird)",
   "providers.searchFilter": "Suchfilter für Benutzer",
   "providers.pageSize": "Seitengröße der Suche",
   "providers.active": "Aktiv",

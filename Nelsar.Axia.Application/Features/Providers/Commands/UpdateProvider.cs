@@ -75,6 +75,7 @@ internal sealed class UpdateProviderCommandHandler : IRequestHandler<UpdateProvi
         // password took a ternary: the copy started blank, so the old value had to be carried
         // over explicitly or it was erased. Here, not rotating the credential simply leaves it.
         var port = LdapPort.Create(request.Port);
+        var security = ProviderSecurity.Parse(request.Security, whenOmitted: existing.Security);
 
         // Checked before anything changes, against where the provider points now. Keeping the
         // stored password while moving the provider somewhere new would have this server send
@@ -87,12 +88,13 @@ internal sealed class UpdateProviderCommandHandler : IRequestHandler<UpdateProvi
         if (keepsStoredPassword && existing.WouldReachNewEndpoint(request.Host, port, request.FailoverHosts))
             throw new DomainValidationException(ApplicationMessages.BindPasswordRequiredForNewEndpoint());
 
+        // The same password to the same host, but readable on the way: whoever can watch the
+        // network gets it as surely as a host of the caller's choosing would.
+        if (keepsStoredPassword && existing.WouldDropEncryption(security))
+            throw new DomainValidationException(ApplicationMessages.BindPasswordRequiredForPlainLdap());
+
         existing.Rename(request.Name);
-        existing.PointAt(
-            request.Host,
-            port,
-            ProviderSecurity.Parse(request.Security, whenOmitted: existing.Security),
-            request.FailoverHosts);
+        existing.PointAt(request.Host, port, security, request.FailoverHosts);
         existing.ChangeType(request.ProviderType);
         existing.UseSearchRoot(request.BaseDn);
         existing.UseAdminAccount(request.AdminUsername);

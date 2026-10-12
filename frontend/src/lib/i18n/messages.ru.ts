@@ -301,7 +301,7 @@ export const ru: Record<MessageKey, string> = {
   "providers.failoverHosts": "Резервные хосты (через запятую)",
   "providers.bindUser": "Bind-пользователь",
   "providers.bindPassword": "Bind-пароль",
-  "providers.bindPasswordKeep": "Bind-пароль (оставьте пустым — не менять; обязателен при смене хоста, порта или резервных хостов)",
+  "providers.bindPasswordKeep": "Bind-пароль (оставьте пустым — не менять; обязателен при смене хоста, порта или резервных хостов, а также при отключении шифрования)",
   "providers.searchFilter": "Фильтр поиска пользователей",
   "providers.pageSize": "Размер страницы поиска",
   "providers.active": "Активен",

@@ -229,4 +229,7 @@
   <data name="LdapSecurityUnknown" xml:space="preserve">
     <value>'{0}' 不是有效的连接安全模式。请使用 Ldaps、StartTls 或 None。</value>
   </data>
+  <data name="BindPasswordRequiredForPlainLdap" xml:space="preserve">
+    <value>要将此目录切换为未加密的 LDAP，请重新输入绑定密码。没有加密时，已保存的密码会以明文穿过网络，途中任何人都能读取。</value>
+  </data>
 </root>

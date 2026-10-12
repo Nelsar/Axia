@@ -229,4 +229,7 @@
   <data name="LdapSecurityUnknown" xml:space="preserve">
     <value>'{0}' ليس وضعًا لأمان الاتصال. استخدم Ldaps أو StartTls أو None.</value>
   </data>
+  <data name="BindPasswordRequiredForPlainLdap" xml:space="preserve">
+    <value>أدخل كلمة مرور الربط مرة أخرى لتحويل هذا الدليل إلى LDAP غير مشفّر. فبدون التشفير ستعبر كلمة المرور المحفوظة الشبكة مقروءةً لكل من على المسار.</value>
+  </data>
 </root>
