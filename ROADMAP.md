@@ -6,7 +6,7 @@ deploying, are in [Not in scope yet](README.md#not-in-scope-yet) and
 [SECURITY.md](SECURITY.md#known-limitations).
 
 This file is direction, not a schedule. Work is tracked in the
-[issue tracker](https://github.com/Nurlan-Turkpenbay/Axia/issues), which is also the place to say which
+[issue tracker](https://github.com/Nelsar/Axia/issues), which is also the place to say which
 of it matters to you.
 
 ## Next

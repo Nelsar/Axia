@@ -7,8 +7,8 @@
 
 # Nelsar.Axia — open-source web console and REST API for Active Directory and LDAP
 
-[![CI](https://github.com/Nurlan-Turkpenbay/Axia/actions/workflows/ci.yml/badge.svg)](https://github.com/Nurlan-Turkpenbay/Axia/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/Nurlan-Turkpenbay/Axia/actions/workflows/codeql.yml/badge.svg)](https://github.com/Nurlan-Turkpenbay/Axia/actions/workflows/codeql.yml)
+[![CI](https://github.com/Nelsar/Axia/actions/workflows/ci.yml/badge.svg)](https://github.com/Nelsar/Axia/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/Nelsar/Axia/actions/workflows/codeql.yml/badge.svg)](https://github.com/Nelsar/Axia/actions/workflows/codeql.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4.svg)](https://dotnet.microsoft.com/)
 [![React + TypeScript](https://img.shields.io/badge/console-React%20%2B%20TypeScript-3178C6.svg)](frontend/)
@@ -99,7 +99,7 @@ The fastest way to see it working: the API, the console and an OpenLDAP with dem
 Docker. It needs Docker with Compose v2 and nothing else.
 
 ```bash
-git clone https://github.com/Nurlan-Turkpenbay/Axia.git
+git clone https://github.com/Nelsar/Axia.git
 cd Axia
 docker compose up --build
 ```
