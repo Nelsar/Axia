@@ -1,0 +1,43 @@
+name: Feature request
+description: Something the console or the API should do and does not.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        [ROADMAP.md](https://github.com/Nelsar/Nelsar.Axia/blob/main/ROADMAP.md) lists what is
+        already planned. If it is there, saying here that it matters to you, and why, still helps
+        decide the order.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you are trying to do
+      description: >-
+        The task rather than the solution: who does it, how often, and what it takes today. "Our
+        helpdesk resets forty passwords a week and has to ask an administrator each time" says more
+        than "add a button".
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would help
+      description: How you imagine it working, in the console, the API or both.
+
+  - type: dropdown
+    id: directory
+    attributes:
+      label: Directory
+      options:
+        - Active Directory
+        - OpenLDAP
+        - Both
+        - Another LDAP server (say which above)
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you do instead today
+      description: A script, another tool, a manual step — whatever covers it now, if anything.

@@ -390,7 +390,8 @@ What comes next is in [ROADMAP.md](ROADMAP.md).
 Small contributions are the useful ones here — a safer default, a failure that reports itself
 badly, a translation that reads wrong to someone who speaks the language. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for how to run what CI runs, and for the conventions that are
-enforced by tests rather than by review.
+enforced by tests rather than by review. Everyone taking part is asked to follow the
+[code of conduct](CODE_OF_CONDUCT.md).
 
 Found something exploitable? Please report it privately rather than in an issue —
 [SECURITY.md](SECURITY.md#reporting-a-vulnerability) says how, and sets out what the project does

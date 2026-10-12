@@ -77,7 +77,7 @@ named is the one that will tell you.
 - **Secrets stay out of the log.** `SensitivePropertyRedactor` redacts properties whose names read
   like a secret, including a bare `key`. If you add a log property that carries one, the name
   should trip that list rather than be an exception to it.
-- **Behaviour changes come with a test that fails without them.** 545 tests exist mostly because
+- **Behaviour changes come with a test that fails without them.** The tests exist mostly because
   things that fail quietly — authorisation, directory isolation, what reaches a sink, translation
   completeness — are the things worth pinning. A useful habit: break your own fix on purpose and
   check that the test notices.
@@ -107,4 +107,5 @@ it will look correct to you and wrong to half the supported languages.
 ## Being civil
 
 Disagree about the code as much as you like. Be decent to the person. Maintainers will edit or
-remove anything that makes this an unpleasant place to be, and will say so when they do.
+remove anything that makes this an unpleasant place to be, and will say so when they do. The
+[code of conduct](CODE_OF_CONDUCT.md) says the same at more length, and where to report it.
