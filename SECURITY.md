@@ -100,10 +100,12 @@ them before deploying.
   often unreachable from where the API runs. A revoked certificate that still chains and names the
   host is accepted.
 - **A token cannot be revoked.** Sessions are bearer JWTs valid until they expire, 60 minutes by
-  default; there is no sign-out, no refresh and no deny list. Removing an account from a group
-  takes effect on the next request, because permissions are resolved per request — but disabling
-  the account entirely does not end a session already issued. Shorten `Jwt:ExpiresInMinutes` where
-  that matters.
+  default; there is no sign-out, no refresh and no deny list. What the directory says is read on
+  every request (cached for 30 seconds), so removing an account from a group, deleting it, or
+  switching it off — disabled or expired in Active Directory, locked by an administrator through
+  OpenLDAP's password policy, login-disabled in eDirectory — takes effect within 30 seconds. A
+  lockout after failed sign-ins does not end a session, on purpose: anyone could cause one. A
+  stolen token stays usable until it expires; shorten `Jwt:ExpiresInMinutes` where that matters.
 - **`Jwt:Key` and `Encryption:Key` are read from configuration**, so their protection is the
   deployment's: environment variables, a mounted secret, a vault. The API refuses to start when
   either is missing, malformed, too short or the example placeholder. There is no key rotation

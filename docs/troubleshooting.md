@@ -157,7 +157,8 @@ Organizational units pages themselves work.
   the user to the group (`sudo usermod -aG docker $USER`, then log in again).
 - **Data changes do not appear**: LDIF files load only on the first start of an empty directory:
   `down -v`, then `up`.
-- **A disabled account signs in**: OpenLDAP does not enforce `userAccountControl`.
+- **A disabled account binds with `ldapsearch` but cannot sign in**: expected. OpenLDAP does not act
+  on `userAccountControl`; the API reads it and refuses the account.
 - More in [Local test directory](local-directory.md#where-it-differs-from-real-active-directory).
 
 ## Tests

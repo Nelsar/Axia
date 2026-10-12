@@ -32,4 +32,13 @@ public sealed class LdapUserInfo
     /// breaks the application or hands its rights to whoever chose the new password.
     /// </summary>
     public bool IsServiceAccount { get; init; }
+
+    /// <summary>
+    /// The directory has switched the account off: disabled or expired in Active Directory,
+    /// locked by an administrator through OpenLDAP's password policy, login-disabled in
+    /// eDirectory. Such an account cannot sign in, and a session it already holds ends — see
+    /// PermissionResolver. It can still be found, read and changed by others, which is how an
+    /// administrator deletes it or switches it back on.
+    /// </summary>
+    public bool IsDisabled { get; init; }
 }

@@ -59,7 +59,7 @@ log line that names the setting and the fix. See [What stops startup](#what-stop
 | `Jwt:Key` | none, **required** | HMAC-SHA256 signing key for bearer tokens. At least 32 bytes (UTF-8). Generate with `openssl rand -base64 48`. |
 | `Jwt:Issuer` | `Nelsar.Axia.Api` | Written into each token and required on the way back. |
 | `Jwt:Audience` | `Nelsar.Axia.Api` | Same, for the audience claim. |
-| `Jwt:ExpiresInMinutes` | `60` | Token lifetime. Tokens cannot be revoked, so this is the longest a session outlives a disabled account. |
+| `Jwt:ExpiresInMinutes` | `60` | Token lifetime. Tokens cannot be revoked, so this is how long a stolen one stays usable. Switching the account off in the directory ends its session sooner, within 30 seconds (see [Access control](access-control.md#sessions-and-tokens)). |
 
 Refused at startup: missing key, a key containing `CHANGE_ME` (the published placeholder), a key
 under 32 bytes, an empty `Issuer` or `Audience`, a lifetime under one minute.

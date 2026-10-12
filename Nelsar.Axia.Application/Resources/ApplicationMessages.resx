@@ -276,4 +276,8 @@
     <value>A group in the directory still lists this login as a member, so a new account with it would join that group. Remove the login from the group, or choose a different address.</value>
     <comment>Creating an account whose login a posixGroup still lists in memberUid; the account would join that group.</comment>
   </data>
+  <data name="SessionAccountDisabled" xml:space="preserve">
+    <value>Your account has been disabled in the directory, so this session has ended. Ask an administrator to enable it.</value>
+    <comment>The signed-in account was disabled, expired or locked by an administrator in the directory; its session ends.</comment>
+  </data>
 </root>

@@ -235,4 +235,7 @@
   <data name="LoginStillNamedByGroup" xml:space="preserve">
     <value>Un grupo del directorio todavía incluye este inicio de sesión como miembro, así que una cuenta nueva con él se uniría a ese grupo. Quite el inicio de sesión del grupo o elija otra dirección.</value>
   </data>
+  <data name="SessionAccountDisabled" xml:space="preserve">
+    <value>Su cuenta se ha deshabilitado en el directorio, por lo que esta sesión ha terminado. Pida a un administrador que la habilite.</value>
+  </data>
 </root>

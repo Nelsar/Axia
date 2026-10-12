@@ -7,6 +7,17 @@ configuration or the API in ways that need action on upgrade; its entry says wha
 
 How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
+## [Unreleased]
+
+### Security
+
+- An account switched off in the directory loses its session within 30 seconds, instead of keeping
+  it until the token expires: disabled or expired in Active Directory, locked by an administrator
+  through OpenLDAP's password policy, or login-disabled in eDirectory. It can no longer sign in
+  either, including against a directory that does not enforce those flags itself. A lockout after
+  failed sign-ins does not count, so that nobody can end someone else's session by mistyping their
+  password.
+
 ## [0.1.0] - 2026-10-12
 
 The first public release.

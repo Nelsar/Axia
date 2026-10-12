@@ -235,4 +235,7 @@
   <data name="LoginStillNamedByGroup" xml:space="preserve">
     <value>لا تزال مجموعة في الدليل تُدرج اسم الدخول هذا عضوًا فيها، لذا سينضم إليها أي حساب جديد يحمله. أزل اسم الدخول من المجموعة أو اختر عنوانًا مختلفًا.</value>
   </data>
+  <data name="SessionAccountDisabled" xml:space="preserve">
+    <value>تم تعطيل حسابك في الدليل، ولذلك انتهت هذه الجلسة. اطلب من المسؤول تفعيله.</value>
+  </data>
 </root>

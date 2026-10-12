@@ -377,8 +377,9 @@ Said plainly, so nobody discovers it after deploying:
 
 - **Directory certificates are not checked for revocation.** A revoked certificate that still
   chains and names the host is accepted. See [SECURITY.md](SECURITY.md#known-limitations).
-- **A session cannot be ended.** Tokens are bearer JWTs valid until they expire, 60 minutes by
-  default, with no sign-out and no deny list.
+- **A session cannot be ended from the application.** Tokens are bearer JWTs valid until they
+  expire, 60 minutes by default, with no sign-out and no deny list. Disabling the account in the
+  directory does end it, within 30 seconds.
 - **Password policy, account lockout and group membership editing from the user screen** are not
   implemented.
 - The `ActiveDirectory` provider is Windows-only and manages fewer object types than

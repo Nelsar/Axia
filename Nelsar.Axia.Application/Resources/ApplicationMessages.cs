@@ -185,6 +185,9 @@ public static class ApplicationMessages
     /// </summary>
     public static string SessionEntryGone() => Get(nameof(SessionEntryGone));
 
+    /// <summary>The caller's own account; telling them it was switched off gives nothing away.</summary>
+    public static string SessionAccountDisabled() => Get(nameof(SessionAccountDisabled));
+
     public static string EmailAlreadyInUse() => Get(nameof(EmailAlreadyInUse));
 
     /// <summary>

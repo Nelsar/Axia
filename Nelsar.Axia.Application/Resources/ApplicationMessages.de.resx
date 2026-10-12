@@ -235,4 +235,7 @@
   <data name="LoginStillNamedByGroup" xml:space="preserve">
     <value>Eine Gruppe im Verzeichnis führt diesen Anmeldenamen noch als Mitglied, daher würde ein neues Konto mit ihm dieser Gruppe beitreten. Entfernen Sie den Anmeldenamen aus der Gruppe oder wählen Sie eine andere Adresse.</value>
   </data>
+  <data name="SessionAccountDisabled" xml:space="preserve">
+    <value>Ihr Konto wurde im Verzeichnis deaktiviert, daher wurde diese Sitzung beendet. Bitten Sie einen Administrator, es wieder zu aktivieren.</value>
+  </data>
 </root>

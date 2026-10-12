@@ -111,9 +111,10 @@ Any of these accounts can sign in by `sAMAccountName`, `userPrincipalName` or `m
 
 The point is to exercise the application, not to emulate AD. Things that behave differently:
 
-- **`userAccountControl` is not enforced.** OpenLDAP stores the flag but does not act on it, so a
-  disabled account still binds, and signs in to the application, which leaves that check to the
-  directory. Active Directory refuses the bind.
+- **`userAccountControl` is not enforced by the directory.** OpenLDAP stores the flag but does not
+  act on it, so a disabled account still binds. The application reads the flag itself, so the
+  account is still refused (`401`) and loses any session it has; Active Directory refuses the
+  bind before that.
 - **Computers carry `sn`.** OpenLDAP's `person` class requires it, AD's does not. Because of
   this, **creating a computer through the API fails against this directory** (`502`, "The directory
   rejected the creation of the entry"): the API writes AD's attribute set, which has no `sn`.
