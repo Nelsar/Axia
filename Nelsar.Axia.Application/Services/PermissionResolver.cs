@@ -43,11 +43,23 @@ internal class PermissionResolver : IPermissionResolver
     public async Task<IReadOnlySet<string>> ResolveAsync(
         string distinguishedName,
         Guid? providerId,
-        CancellationToken cancellationToken = default) =>
-        (await AssessEntryAsync(distinguishedName, providerId, cancellationToken))?.Permissions
-        // The session names an entry that is not there any more. Nothing it could be granted is
-        // safe to guess at, and a fresh sign-in is what would find the account under its new DN.
-        ?? throw new NotAuthenticatedException(ApplicationMessages.SessionEntryGone());
+        CancellationToken cancellationToken = default)
+    {
+        var assessment = await AssessEntryAsync(distinguishedName, providerId, cancellationToken)
+            // The session names an entry that is not there any more. Nothing it could be granted
+            // is safe to guess at, and a fresh sign-in is what would find the account under its
+            // new DN.
+            ?? throw new NotAuthenticatedException(ApplicationMessages.SessionEntryGone());
+
+        // Switched off in the directory after the token was issued. The token stays valid until
+        // it expires, so this is where disabling an account ends its session: within CacheTtl,
+        // on whichever request comes next. Only here, for the caller — as the target of someone
+        // else's request the same entry is assessed as usual.
+        if (assessment.IsDisabled)
+            throw new NotAuthenticatedException(ApplicationMessages.SessionAccountDisabled());
+
+        return assessment.Permissions;
+    }
 
     public async Task<EntryAssessment?> AssessEntryAsync(
         string distinguishedName,
@@ -78,7 +90,8 @@ internal class PermissionResolver : IPermissionResolver
         var assessment = new EntryAssessment(
             permissions,
             IsProtected: entry.IsPrivileged || entry.Groups.Any(_protection.Protects),
-            IsServiceAccount: entry.IsServiceAccount);
+            IsServiceAccount: entry.IsServiceAccount,
+            IsDisabled: entry.IsDisabled);
 
         _cache.Set(cacheKey, assessment, CacheTtl);
         return assessment;

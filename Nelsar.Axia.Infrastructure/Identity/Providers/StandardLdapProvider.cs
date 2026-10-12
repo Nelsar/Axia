@@ -41,9 +41,14 @@ internal class StandardLdapProvider : ILdapProvider
     // Covers both OpenLDAP/eDirectory (uid) and AD (sAMAccountName/userPrincipalName)
     // login attributes so MapEntry can resolve a username regardless of directory type.
     // objectClass tells an account from a computer or a contact (see IsAccount); adminCount is
-    // how Active Directory marks the privileged (see LdapUserInfo.IsPrivileged).
+    // how Active Directory marks the privileged (see LdapUserInfo.IsPrivileged); the last four
+    // say whether the directory has switched the account off (see IsSwitchedOff).
+    // pwdAccountLockedTime is operational, so it comes back only when asked for by name.
     private static readonly string[] RequestedUserAttributes =
-        ["cn", "displayName", "mail", "uid", "sAMAccountName", "userPrincipalName", "memberOf", "objectClass", "adminCount"];
+    [
+        "cn", "displayName", "mail", "uid", "sAMAccountName", "userPrincipalName", "memberOf", "objectClass", "adminCount",
+        "userAccountControl", "accountExpires", "pwdAccountLockedTime", "loginDisabled"
+    ];
 
     /// <summary>
     /// Structural classes that derive from person in Active Directory without being a person's
@@ -1513,7 +1518,8 @@ internal class StandardLdapProvider : ILdapProvider
             Email = Get(attrs, "mail"),
             Groups = namedBy is null ? memberOf : MergeGroups(memberOf, namedBy),
             IsPrivileged = IsMarkedPrivileged(attrs),
-            IsServiceAccount = IsServiceAccount(entry.Dn, attrs)
+            IsServiceAccount = IsServiceAccount(entry.Dn, attrs),
+            IsDisabled = IsSwitchedOff(attrs, DateTimeOffset.UtcNow)
         };
     }
 
@@ -1654,6 +1660,45 @@ internal class StandardLdapProvider : ILdapProvider
     /// <summary>adminCount=1: Active Directory's own mark on protected accounts and groups.</summary>
     private static bool IsMarkedPrivileged(LdapAttributeSet attrs) =>
         int.TryParse(Get(attrs, "adminCount"), out var count) && count > 0;
+
+    /// <summary>
+    /// The value OpenLDAP's password policy writes to pwdAccountLockedTime for a lock that only an
+    /// administrator lifts, as opposed to the time of a lockout that expires on its own.
+    /// </summary>
+    private const string PermanentLockTime = "000001010000Z";
+
+    /// <summary>
+    /// Whether the directory has switched the account off, in any of the ways the directories this
+    /// provider speaks to record it:
+    /// <list type="bullet">
+    /// <item>Active Directory: the ACCOUNTDISABLE bit of userAccountControl, or an accountExpires
+    /// in the past (0 and the largest value both mean "never").</item>
+    /// <item>OpenLDAP with the password policy overlay: pwdAccountLockedTime set to
+    /// <see cref="PermanentLockTime"/>, an administrator's lock.</item>
+    /// <item>eDirectory: loginDisabled TRUE.</item>
+    /// </list>
+    /// A lockout that follows failed sign-ins is deliberately not counted, in either directory:
+    /// anyone can cause one by mistyping a password often enough, and counting it would let them
+    /// end its owner's session at will. It still stops a new sign-in, at the bind.
+    /// </summary>
+    internal static bool IsSwitchedOff(LdapAttributeSet attrs, DateTimeOffset now)
+    {
+        if (int.TryParse(Get(attrs, "userAccountControl"), out var flags) && (flags & AccountDisabledFlag) != 0)
+            return true;
+
+        if (long.TryParse(Get(attrs, "accountExpires"), out var expires)
+            && expires > 0
+            && expires < DateTime.MaxValue.ToFileTimeUtc()
+            && DateTime.FromFileTimeUtc(expires) <= now.UtcDateTime)
+        {
+            return true;
+        }
+
+        if (string.Equals(Get(attrs, "pwdAccountLockedTime").Trim(), PermanentLockTime, StringComparison.Ordinal))
+            return true;
+
+        return string.Equals(Get(attrs, "loginDisabled").Trim(), "TRUE", StringComparison.OrdinalIgnoreCase);
+    }
 
     /// <summary>
     /// Whether the entry is the account this provider binds as. The bind name may be written as a

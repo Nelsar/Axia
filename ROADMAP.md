@@ -14,7 +14,8 @@ of it matters to you.
 What stands between the MVP and running it comfortably in production, roughly in order.
 
 - **Ending a session.** Sign-out, short-lived tokens with refresh, or a deny list. Today a token is
-  valid until it expires, and disabling an account does not end one already issued.
+  valid until it expires unless the account is switched off in the directory, so a stolen one stays
+  usable for its lifetime.
 - **Two-factor authentication for password sign-in.** TOTP with recovery codes, required by role —
   at least for roles that can reset passwords or change groups, since one password is all such an
   account needs today. A password alone earns a short-lived challenge, never a token; secrets are

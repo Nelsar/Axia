@@ -155,8 +155,14 @@ detail.
 - It carries the entry's DN and the directory. Permissions are **not** in it; they are re-read for
   each request (30-second cache).
 - Removing someone from a mapped group takes effect within 30 seconds.
-- Disabling or deleting the account in the directory does **not** end a session already issued.
-  There is no server-side sign-out or revocation. Shorten the lifetime where this matters.
+- Deleting the account, or switching it off in the directory, ends its session within 30 seconds:
+  the next request is answered `401`. Switched off means disabled or expired in Active Directory
+  (`userAccountControl`, `accountExpires`), locked by an administrator through OpenLDAP's password
+  policy (`pwdAccountLockedTime` of `000001010000Z`), or `loginDisabled` in eDirectory.
+- A lockout after failed sign-ins does **not** end a session, on purpose: anyone can cause one by
+  mistyping a password. It stops a new sign-in at the bind.
+- There is no server-side sign-out or revocation, so a stolen token stays usable until it expires.
+  Shorten the lifetime where this matters.
 - Tokens issued by builds before DN-bound sessions lack the DN and are refused; signing in again
   issues a new one.
 

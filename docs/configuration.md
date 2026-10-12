@@ -59,7 +59,7 @@ log line that names the setting and the fix. See [What stops startup](#what-stop
 | `Jwt:Key` | none, **required** | HMAC-SHA256 signing key for bearer tokens. At least 32 bytes (UTF-8). Generate with `openssl rand -base64 48`. |
 | `Jwt:Issuer` | `Nelsar.Axia.Api` | Written into each token and required on the way back. |
 | `Jwt:Audience` | `Nelsar.Axia.Api` | Same, for the audience claim. |
-| `Jwt:ExpiresInMinutes` | `60` | Token lifetime. Tokens cannot be revoked, so this is the longest a session outlives a disabled account. |
+| `Jwt:ExpiresInMinutes` | `60` | Token lifetime. Tokens cannot be revoked, so this is how long a stolen one stays usable. Switching the account off in the directory ends its session sooner, within 30 seconds (see [Access control](access-control.md#sessions-and-tokens)). |
 
 Refused at startup: missing key, a key containing `CHANGE_ME` (the published placeholder), a key
 under 32 bytes, an empty `Issuer` or `Audience`, a lifetime under one minute.
@@ -94,6 +94,8 @@ The default directory, used by every request that does not name another one.
 | `Ldap:UserSearchFilter` | `(&(objectClass=person)(\|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))` | How a login typed at sign-in is looked up, tried first. `{0}` is replaced by the escaped login. The default covers OpenLDAP (`uid`), AD (`sAMAccountName`, `userPrincipalName`) and e-mail. When it finds nothing, the API also tries `mail`, `userPrincipalName`, `sAMAccountName` and `uid` on their own (see [Directories](directories.md#accounts)), so narrowing this filter does not by itself stop people signing in by those. |
 | `Ldap:ProviderType` | `StandardLdap` | `StandardLdap` (any OS, any LDAP v3 directory) or `ActiveDirectory` (Windows only; refused at startup elsewhere; no group management). |
 | `Ldap:UserSearchPageSize` | `500` | Page size for directory-wide listings (RFC 2696 paged results). Keep it at or below the server's own limit (AD: `MaxPageSize`, 1000 by default). |
+| `Ldap:ConnectTimeoutSeconds` | `10` | How long to wait for a directory to accept a connection, the TLS handshake included. 1 to 300; anything else stops startup. Applies to every directory, including those in the database; an `Ldap:Providers:{id}` section may set its own. |
+| `Ldap:OperationTimeoutSeconds` | `30` | How long to wait for a directory to answer any one operation — a bind, a page of a search, a write — and the time limit each search hands to the server. 1 to 300. Same scope as above. A directory that does not answer in time is reported as unavailable (`502`). |
 
 ### `Ldap:Providers:{id}`
 

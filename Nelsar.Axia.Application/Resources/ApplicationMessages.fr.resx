@@ -235,4 +235,7 @@
   <data name="LoginStillNamedByGroup" xml:space="preserve">
     <value>Un groupe de l'annuaire liste encore cet identifiant parmi ses membres : un nouveau compte qui le porte rejoindrait ce groupe. Retirez l'identifiant du groupe ou choisissez une autre adresse.</value>
   </data>
+  <data name="SessionAccountDisabled" xml:space="preserve">
+    <value>Votre compte a été désactivé dans l'annuaire, cette session a donc pris fin. Demandez à un administrateur de le réactiver.</value>
+  </data>
 </root>

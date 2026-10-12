@@ -159,7 +159,11 @@
         "AdminUsername": "cn=admin,dc=example,dc=org",
         "AdminPassword": "CHANGE_ME",
         "UserSearchFilter": "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))",
-        "ProviderType": "StandardLdap"
+        "ProviderType": "StandardLdap",
+        // How long to wait for a directory to accept a connection, and to answer any one operation.
+        // Every directory uses these, those in the database included. 1 to 300 seconds.
+        "ConnectTimeoutSeconds": 10,
+        "OperationTimeoutSeconds": 30
     },
     "Jwt": {
         "Key": "CHANGE_ME_AT_LEAST_32_CHARACTERS_LONG",

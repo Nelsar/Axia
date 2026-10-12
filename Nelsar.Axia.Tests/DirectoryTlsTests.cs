@@ -205,8 +205,13 @@ public sealed class DirectoryTlsTests : IDisposable
             var stream = client.GetStream();
             var buffer = new byte[4096];
 
-            // The extended request: 30 len 02 01 <id> 77 ... — the reply has to carry its id.
+            // First the read of the root DSE that shows the directory is answering: 30 len 02 01
+            // <id> 63 ... A SearchResultDone, success, with the same id.
             var read = await stream.ReadAsync(buffer);
+            await stream.WriteAsync(new byte[] { 0x30, 0x0c, 0x02, 0x01, buffer[4], 0x65, 0x07, 0x0a, 0x01, 0x00, 0x04, 0x00, 0x04, 0x00 });
+
+            // Then the extended request: 30 len 02 01 <id> 77 ... — the reply has to carry its id.
+            read = await stream.ReadAsync(buffer);
             var messageId = buffer[4];
             // ExtendedResponse, resultCode protocolError (2), empty matchedDN and message.
             await stream.WriteAsync(new byte[] { 0x30, 0x0c, 0x02, 0x01, messageId, 0x78, 0x07, 0x0a, 0x01, 0x02, 0x04, 0x00, 0x04, 0x00 });

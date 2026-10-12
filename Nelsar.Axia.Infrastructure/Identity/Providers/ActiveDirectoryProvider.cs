@@ -136,7 +136,8 @@ internal class ActiveDirectoryProvider : ILdapProvider
                     .Select(group => string.IsNullOrWhiteSpace(group.DistinguishedName) ? group.Name : group.DistinguishedName)
                     .ToArray(),
                 IsPrivileged = entry.IsPrivileged,
-                IsServiceAccount = entry.IsServiceAccount
+                IsServiceAccount = entry.IsServiceAccount,
+                IsDisabled = entry.IsDisabled
             };
         }
         catch (Exception ex)
@@ -315,7 +316,12 @@ internal class ActiveDirectoryProvider : ILdapProvider
         Email = user.EmailAddress ?? string.Empty,
         Groups = [],
         IsPrivileged = AdminCount(user) > 0,
-        IsServiceAccount = IsBindAccount(user)
+        IsServiceAccount = IsBindAccount(user),
+
+        // The same two Active Directory states StandardLdapProvider.IsSwitchedOff reads from
+        // userAccountControl and accountExpires; UserPrincipal reports both, the expiry in UTC.
+        IsDisabled = user.Enabled == false
+                     || user.AccountExpirationDate is { } expires && expires <= DateTime.UtcNow
     };
 
     /// <summary>adminCount, which UserPrincipal does not surface; SDProp's mark on the protected.</summary>

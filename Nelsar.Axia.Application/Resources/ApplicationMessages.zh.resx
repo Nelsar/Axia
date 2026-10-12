@@ -235,4 +235,7 @@
   <data name="LoginStillNamedByGroup" xml:space="preserve">
     <value>目录中的某个组仍将此登录名列为成员，因此使用该登录名的新帐户会自动加入该组。请将该登录名从组中移除，或选择其他地址。</value>
   </data>
+  <data name="SessionAccountDisabled" xml:space="preserve">
+    <value>您的帐户已在目录中被禁用，因此此会话已结束。请联系管理员启用该帐户。</value>
+  </data>
 </root>
