@@ -77,7 +77,7 @@ named is the one that will tell you.
 - **Secrets stay out of the log.** `SensitivePropertyRedactor` redacts properties whose names read
   like a secret, including a bare `key`. If you add a log property that carries one, the name
   should trip that list rather than be an exception to it.
-- **Behaviour changes come with a test that fails without them.** 545 tests exist mostly because
+- **Behaviour changes come with a test that fails without them.** The tests exist mostly because
   things that fail quietly — authorisation, directory isolation, what reaches a sink, translation
   completeness — are the things worth pinning. A useful habit: break your own fix on purpose and
   check that the test notices.
@@ -107,4 +107,29 @@ it will look correct to you and wrong to half the supported languages.
 ## Being civil
 
 Disagree about the code as much as you like. Be decent to the person. Maintainers will edit or
-remove anything that makes this an unpleasant place to be, and will say so when they do.
+remove anything that makes this an unpleasant place to be, and will say so when they do. The
+[code of conduct](CODE_OF_CONDUCT.md) says the same at more length, and where to report it.
+
+## Releasing
+
+For maintainers. Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html), and
+the version is written in two places: `Directory.Build.props`, which every .NET project inherits,
+and `frontend/package.json`.
+
+1. In `CHANGELOG.md`, give the section being released its version and date —
+   `## [x.y.z] - YYYY-MM-DD` — and add its link at the bottom.
+2. Set the same version in `Directory.Build.props`, and in the console with
+   `npm version x.y.z --no-git-tag-version` in `frontend/`, which updates the lockfile too.
+3. Merge that as a pull request, with CI green.
+4. Tag the merge commit on `main` and push the tag:
+
+   ```bash
+   git tag -a vx.y.z -m "Nelsar.Axia x.y.z"
+   git push origin vx.y.z
+   ```
+
+5. Publish the release from the tag, with that version's changelog section as its notes:
+
+   ```bash
+   gh release create vx.y.z --verify-tag --title "Nelsar.Axia x.y.z" --notes-file notes.md
+   ```

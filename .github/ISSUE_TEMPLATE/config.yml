@@ -1,0 +1,10 @@
+# Every issue goes through one of the forms next to this file, so that a report arrives with the
+# version and the directory it is about — and with a reminder to take real names out first.
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/Nelsar/Nelsar.Axia/security/advisories/new
+    about: Privately, through GitHub. Please do not open a public issue for something exploitable.
+  - name: Documentation
+    url: https://github.com/Nelsar/Nelsar.Axia/tree/main/docs
+    about: Installation, configuration, directories, access control and troubleshooting.

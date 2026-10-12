@@ -1,0 +1,108 @@
+name: Bug report
+description: Something does not work the way the documentation says it should.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report it.
+
+        **Before you paste anything**, take out host names, domains, logins, e-mail addresses and
+        passwords, and use `example.com`-style values instead. An issue is public, and so is its
+        edit history.
+
+        Something exploitable belongs in a
+        [private report](https://github.com/Nelsar/Nelsar.Axia/security/advisories/new), not here.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: A release tag, or the commit you built from (`git rev-parse --short HEAD`).
+      placeholder: v0.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: How it runs
+      options:
+        - Docker quick start (docker compose)
+        - Own container deployment
+        - From source (dotnet run, npm run dev)
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: directory
+    attributes:
+      label: Directory
+      options:
+        - Active Directory
+        - OpenLDAP
+        - Another LDAP server (say which below)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Provider type
+      options:
+        - StandardLdap
+        - ActiveDirectory
+
+  - type: dropdown
+    id: security
+    attributes:
+      label: Connection security
+      options:
+        - Ldaps
+        - StartTls
+        - None
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: >-
+        What you did, step by step, and what you saw. For an API call, the request, the HTTP status
+        and the response body.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+
+  - type: input
+    id: correlation-id
+    attributes:
+      label: Correlation id
+      description: >-
+        The `X-Correlation-ID` of the failed request, if you have it — the console shows it with
+        the error. It is what matches the request to its lines in the API's log.
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: API log lines
+      description: >-
+        The lines around the failure. The API masks logins in its own log, but a line can still name
+        hosts, groups and units — check before pasting.
+      render: text
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I have taken host names, domains, logins, addresses and passwords out of everything above.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

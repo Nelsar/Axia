@@ -12,6 +12,8 @@ COPY Nelsar.Axia.Application/Nelsar.Axia.Application.csproj Nelsar.Axia.Applicat
 COPY Nelsar.Axia.Infrastructure/Nelsar.Axia.Infrastructure.csproj Nelsar.Axia.Infrastructure/
 COPY Nelsar.Axia.Domain/Nelsar.Axia.Domain.csproj Nelsar.Axia.Domain/
 COPY Nelsar.Axia.Contracts/Nelsar.Axia.Contracts.csproj Nelsar.Axia.Contracts/
+# The version every project inherits. Left out, the image would build as 1.0.0, silently.
+COPY Directory.Build.props ./
 RUN dotnet restore Nelsar.Axia.Api/Nelsar.Axia.Api.csproj
 
 COPY Nelsar.Axia.Api/ Nelsar.Axia.Api/
