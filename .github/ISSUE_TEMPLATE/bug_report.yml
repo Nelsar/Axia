@@ -12,7 +12,7 @@ body:
         edit history.
 
         Something exploitable belongs in a
-        [private report](https://github.com/Nelsar/Nelsar.Axia/security/advisories/new), not here.
+        [private report](https://github.com/Nurlan-Turkpenbay/Axia/security/advisories/new), not here.
 
   - type: input
     id: version

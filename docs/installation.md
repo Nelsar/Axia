@@ -74,8 +74,8 @@ The API makes no other outbound connections.
 Needs Docker with Compose v2 and nothing else.
 
 ```bash
-git clone https://github.com/Nelsar/Nelsar.Axia.git
-cd Nelsar.Axia
+git clone https://github.com/Nurlan-Turkpenbay/Axia.git
+cd Axia
 docker compose up --build
 ```
 
@@ -113,8 +113,8 @@ directory on your machine, use path 3.
 ### 1. Get the code and restore
 
 ```bash
-git clone https://github.com/Nelsar/Nelsar.Axia.git
-cd Nelsar.Axia
+git clone https://github.com/Nurlan-Turkpenbay/Axia.git
+cd Axia
 dotnet restore
 npm --prefix frontend ci
 ```
