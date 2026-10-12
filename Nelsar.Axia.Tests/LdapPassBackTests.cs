@@ -62,6 +62,66 @@ public class LdapPassBackTests
         new(provider.Id, provider.Name, host, provider.Port.Value, null, provider.ProviderType, true,
             failoverHosts, provider.BaseDn, "cn=svc,dc=corp,dc=local", password, Filter, 500);
 
+    private static UpdateProviderCommand Secure(Provider provider, string security, string? password) =>
+        new(provider.Id, provider.Name, provider.Host, provider.Port.Value, security, provider.ProviderType, true,
+            provider.FailoverHosts, provider.BaseDn, "cn=svc,dc=corp,dc=local", password, Filter, 500);
+
+    [Theory]
+    [InlineData(LdapSecurity.Ldaps, LdapSecurity.None, true)]
+    [InlineData(LdapSecurity.StartTls, LdapSecurity.None, true)]
+    [InlineData(LdapSecurity.None, LdapSecurity.None, false)]      // already plain: nothing new is exposed
+    [InlineData(LdapSecurity.None, LdapSecurity.Ldaps, false)]     // turning encryption on
+    [InlineData(LdapSecurity.Ldaps, LdapSecurity.StartTls, false)] // one encrypted mode for the other
+    [InlineData(LdapSecurity.StartTls, LdapSecurity.Ldaps, false)]
+    public void WouldDropEncryption_IsAboutWhetherThePasswordWouldTravelInClearText(
+        LdapSecurity from, LdapSecurity to, bool expected)
+    {
+        // A port no mode contradicts, so that every pair here is one the provider can be moved between.
+        var provider = TestProvider.Create(port: 10636, security: from);
+
+        Assert.Equal(expected, provider.WouldDropEncryption(to));
+    }
+
+    [Fact]
+    public async Task TurningEncryptionOff_WithoutThePassword_IsRefused_AndNothingIsSaved()
+    {
+        // Same host, same port, so nothing for WouldReachNewEndpoint to see — and the stored
+        // password would still have gone out on the next bind, readable by anyone on the path.
+        var provider = TestProvider.Create(host: "dc01.corp.local", port: 389, security: LdapSecurity.StartTls,
+            encryptedAdminPassword: "enc:ServiceAccountSecret");
+        var (sender, repo) = Pipeline(provider);
+
+        await Assert.ThrowsAsync<DomainValidationException>(
+            () => sender.Send(Secure(provider, "None", password: null)));
+
+        repo.Verify(x => x.UpdateAsync(It.IsAny<Provider>()), Times.Never);
+        Assert.Equal(LdapSecurity.StartTls, provider.Security);
+    }
+
+    [Fact]
+    public async Task TurningEncryptionOff_WithThePassword_GoesThrough()
+    {
+        var provider = TestProvider.Create(host: "dc01.corp.local", port: 389, security: LdapSecurity.StartTls,
+            encryptedAdminPassword: "enc:Old");
+        var (sender, _) = Pipeline(provider);
+
+        await sender.Send(Secure(provider, "None", password: "New"));
+
+        Assert.Equal(LdapSecurity.None, provider.Security);
+    }
+
+    [Fact]
+    public async Task TurningEncryptionOn_NeedsNoPassword()
+    {
+        var provider = TestProvider.Create(host: "dc01.corp.local", port: 389, security: LdapSecurity.None,
+            encryptedAdminPassword: "enc:ServiceAccountSecret");
+        var (sender, _) = Pipeline(provider);
+
+        await sender.Send(Secure(provider, "StartTls", password: null));
+
+        Assert.Equal(LdapSecurity.StartTls, provider.Security);
+    }
+
     [Fact]
     public async Task MovingAProviderToANewHost_WithoutItsPassword_IsRefused_AndNothingIsSaved()
     {

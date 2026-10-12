@@ -167,6 +167,17 @@ public class Provider
         return Endpoints(host, port.Value, failoverHosts).Any(endpoint => !current.Contains(endpoint));
     }
 
+    /// <summary>
+    /// Whether <paramref name="security"/> would have the provider send its bind password in clear
+    /// text where today it does not.
+    ///
+    /// The same pass-back as <see cref="WouldReachNewEndpoint"/>, to a different listener: the
+    /// host stays, the encryption goes, and the stored password crosses the network readable by
+    /// anyone on the path. Swapping one encrypted mode for the other does not count.
+    /// </summary>
+    public bool WouldDropEncryption(LdapSecurity security) =>
+        security == LdapSecurity.None && Security != LdapSecurity.None;
+
     /// <summary>Split the way DefaultLdapProviderFactory splits them when it connects.</summary>
     private static HashSet<string> Endpoints(string? host, int port, string? failoverHosts) =>
         new[] { host }

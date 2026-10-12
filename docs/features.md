@@ -59,7 +59,9 @@ values are flagged; values of credential attributes (passwords, LAPS) are withhe
 
 **Create** takes name, e-mail and password and writes an `inetOrgPerson` at
 `uid=<local part>,<BaseDn>`; see [what is written](directories.md#new-accounts), including the
-Active Directory caveat. An e-mail already in use is a `409`.
+Active Directory caveat. An e-mail already in use is a `409`, and so is a login that another entry
+already has or that a `posixGroup` still lists as a member (see
+[group membership](directories.md#group-membership)).
 
 **Edit** changes `displayName`, `mail` and/or the password. The login (RDN, `uid`) does not change
 with the e-mail. A new e-mail must not belong to another account.
@@ -155,8 +157,11 @@ Paste one record per line in `rawText`, give a regular expression with named gro
 - `transliterate` maps Cyrillic, including Kazakh letters, to Latin (`Щербак` → `Shcherbak`,
   `Қанат` → `Qanat`).
 - Results are trimmed, lower-cased and de-duplicated.
-- The regex has a 500 ms timeout per line; lines that time out or do not match are skipped.
+- The regex has a 500 ms timeout per line; lines that time out or do not match are skipped. Over
+  the whole text it has 2 seconds, after which the request is refused with `400`.
 - `maxItems`: 1 to 10,000 (default 50).
+- Lengths: `pattern` and `usernameTemplate` up to 256 characters, `regexPattern` up to 512,
+  `rawText` up to 1,000,000.
 - `checkConflicts` looks each login up in the directory. If the directory is unreachable, the
   request fails rather than answering "no conflicts".
 
@@ -226,7 +231,8 @@ security (`Ldaps`/`StartTls`/`None`), provider type, failover hosts, base DN, bi
 password (write-only; never returned), user search filter, page size, active.
 
 - The bind password is encrypted with `Encryption:Key` before it is stored.
-- Changing host, port or failover hosts requires the password again.
+- Changing host, port or failover hosts requires the password again, as does switching security
+  to `None`.
 - `GET /api/v1/providers/selectable` is **anonymous** (for the sign-in picker), returns only ids and
   names of active directories, and is rate-limited (`providers-selectable`, 30 per minute).
 - The console marks directories using `None` as *not encrypted*.

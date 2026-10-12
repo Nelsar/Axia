@@ -5,8 +5,8 @@ import type { BulkStatus } from "../../hooks/useBulkOperations";
 import { Badge, Card, ErrorBanner, InfoBanner, Spinner } from "../primitives";
 
 const EXAMPLE = `[
-  { "operation": "create", "email": "new.user@corp.example.ru", "name": "New User", "password": "P@ssw0rd1" },
-  { "operation": "update", "email": "existing@corp.example.ru", "name": "Updated Name" }
+  { "operation": "create", "email": "new.user@corp.example.com", "name": "New User", "password": "P@ssw0rd1" },
+  { "operation": "update", "email": "existing@corp.example.com", "name": "Updated Name" }
 ]`;
 
 export interface BulkPanelProps {

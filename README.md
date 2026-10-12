@@ -241,7 +241,8 @@ Passwords are set the way the directory hashes and checks them: `unicodePwd` in 
 as a plain `userPassword` attribute.
 
 Changing a directory's host, port or failover hosts requires entering its bind password again —
-otherwise the stored one would be sent to whatever server the new address points at.
+otherwise the stored one would be sent to whatever server the new address points at. So does
+switching its security to `None`, which would otherwise send the stored password unencrypted.
 
 > **Upgrading from a build before DN role mappings:** set `RoleMappings:GroupDns:Admin` (and the
 > other roles you use) before starting the new build — mappings by group name no longer grant

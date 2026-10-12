@@ -106,7 +106,9 @@ with a 2-second TCP connect probe. The first that answers is used. The answer is
 seconds; a failure is cached for 5 seconds, so a dead directory is not probed on every request.
 
 Changing a directory's host, port or failover hosts **requires entering its bind password again**.
-Otherwise the stored password would be sent to whatever the new address points at.
+Otherwise the stored password would be sent to whatever the new address points at. Switching its
+security to `None` requires it too: the stored password would otherwise cross the network
+unencrypted. Moving between `Ldaps` and `StartTls`, or turning encryption on, does not.
 
 Directories created before LDAPS existed were set to `None` by the `AddProviderSecurity`
 migration so that they kept working. The console marks them *not encrypted*.
@@ -142,6 +144,11 @@ Membership, for roles and for display, is read from both sides, so a directory w
 | any | the account's own `memberOf` | group DN |
 
 **Nested groups are not followed.** Map the group an account is directly in.
+
+`memberUid` names a login, not an entry, and it stays in the group after the account is deleted.
+Creating an account whose login a `posixGroup` still lists is therefore refused with `409`, since
+the new account would join that group — and hold its role — the moment it signed in. Remove the
+login from the group first, or use a different address.
 
 ### Listings
 

@@ -147,7 +147,7 @@ public class ObservabilityTests
     {
         // The case a top-level name check misses entirely: nobody logs {Password}, they log the
         // whole settings object during an outage and the bind password rides along inside it.
-        var settings = new { Server = "ldap.example.kz", AdminUsername = "svc-bind", AdminPassword = "not-a-real-password" };
+        var settings = new { Server = "ldap.example.org", AdminUsername = "svc-bind", AdminPassword = "not-a-real-password" };
 
         var captured = WriteAndCapture(logger => logger.Information("connecting with {@Settings}", settings));
 
@@ -156,7 +156,7 @@ public class ObservabilityTests
 
         Assert.Equal(SensitivePropertyRedactor.Redacted, members["AdminPassword"]);
         // The rest of the object still has to be worth logging.
-        Assert.Equal("ldap.example.kz", members["Server"]);
+        Assert.Equal("ldap.example.org", members["Server"]);
         Assert.Equal("svc-bind", members["AdminUsername"]);
     }
 

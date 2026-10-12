@@ -91,4 +91,7 @@
   <data name="LdapSecurityContradictsPort" xml:space="preserve">
     <value>מצב אבטחת החיבור {0} לא יכול לעבוד בפורט {1}: השתמשו בפורט {2} או במצב אחר.</value>
   </data>
+  <data name="PatternRegexTooSlow" xml:space="preserve">
+    <value>הביטוי הרגולרי לוקח יותר מדי זמן על הטקסט הזה. פשטו אותו — חזרה מקוננת כמו (a+)+ היא הסיבה הנפוצה — או הדביקו פחות שורות.</value>
+  </data>
 </root>

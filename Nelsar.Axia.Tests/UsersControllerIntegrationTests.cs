@@ -230,6 +230,31 @@ public class UsersControllerIntegrationTests
         Assert.Contains("node-01", result.Items);
     }
 
+    [Theory]
+    [InlineData("pattern")]
+    [InlineData("regex")]
+    public async Task Generate_RefusesInputLongerThanAPreviewNeeds(string field)
+    {
+        // No stub: GenerateUserPatternsQueryValidator refuses it in the pipeline, before the
+        // generator sees any of it.
+        using var factory = new ApiTestFactory(_ => { });
+
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TestAuth.GenerateToken(UserRoles.Admin));
+        var request = field == "pattern"
+            ? new PatternGeneratorRequest { Pattern = new string('x', GenerateUserPatternsQuery.MaximumPatternLength + 1), MaxItems = 10 }
+            : new PatternGeneratorRequest
+            {
+                RawText = "Ivanov Ivan",
+                RegexPattern = new string('a', GenerateUserPatternsQuery.MaximumRegexLength + 1),
+                MaxItems = 10
+            };
+
+        var response = await client.PostAsJsonAsync("/api/v1/users/generate", request);
+
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     [Fact]
     public async Task Search_ReturnsPagedUsersFromManagementService()
     {

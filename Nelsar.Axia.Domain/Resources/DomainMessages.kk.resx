@@ -91,4 +91,7 @@
   <data name="LdapSecurityContradictsPort" xml:space="preserve">
     <value>{0} қосылымды қорғау режимі {1} портында жұмыс істей алмайды: {2} портын немесе басқа режимді қолданыңыз.</value>
   </data>
+  <data name="PatternRegexTooSlow" xml:space="preserve">
+    <value>Тұрақты өрнек бұл мәтінде тым ұзақ орындалады. Оны жеңілдетіңіз — әдетте себебі (a+)+ сияқты кірістірілген қайталау — немесе азырақ жол қойыңыз.</value>
+  </data>
 </root>

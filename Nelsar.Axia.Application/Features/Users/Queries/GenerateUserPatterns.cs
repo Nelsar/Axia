@@ -9,6 +9,7 @@ using Nelsar.Axia.Application.Resources;
 using Nelsar.Axia.Contracts.Common;
 using Nelsar.Axia.Contracts.Responses;
 using Nelsar.Axia.Domain.Authorization;
+using Nelsar.Axia.Domain.Resources;
 using Nelsar.Axia.Domain.Services;
 
 namespace Nelsar.Axia.Application.Features.Users.Queries;
@@ -31,14 +32,23 @@ internal sealed record GenerateUserPatternsQuery(
     /// <summary>
     /// The most logins one preview may produce.
     ///
-    /// <c>MaxItems</c> is the only thing bounding the generator: a mask expands lazily through
-    /// <c>Enumerable.Range</c> and is cut by <c>Take(MaxItems)</c> at the end, so
+    /// <c>MaxItems</c> is what bounds a mask's output: it expands lazily and is cut by
+    /// <c>Take(MaxItems)</c> at the end, so
     /// <c>{ Pattern = "user{1..2000000000}", MaxItems = int.MaxValue }</c> is a two-line request
     /// that asks the server to materialise two billion strings. Ten thousand is well past any
     /// real preview — an operator reads these before committing to a bulk create — and small
     /// enough that the worst case is a large response rather than an exhausted process.
     /// </summary>
     public const int MaximumItems = 10_000;
+
+    // Far past anything typed into the preview, and short enough that what a request costs to
+    // parse is decided here rather than by how much text its sender was willing to upload.
+    public const int MaximumPatternLength = 256;
+    public const int MaximumRegexLength = 512;
+    public const int MaximumTemplateLength = 256;
+
+    /// <summary>About ten thousand pasted lines of a hundred characters each.</summary>
+    public const int MaximumRawTextLength = 1_000_000;
 
     /// <inheritdoc />
     public string RequiredPermission => Permissions.UsersGenerate;
@@ -66,6 +76,26 @@ internal sealed class GenerateUserPatternsQueryValidator : AbstractValidator<Gen
             .InclusiveBetween(1, GenerateUserPatternsQuery.MaximumItems)
             .WithMessage(_ => ApplicationMessages.GeneratedItemLimitOutOfRange(
                 1, GenerateUserPatternsQuery.MaximumItems));
+
+        RuleFor(q => q.Pattern)
+            .MaximumLength(GenerateUserPatternsQuery.MaximumPatternLength)
+            .WithMessage(_ => DomainMessages.ValueTooLong(
+                nameof(GenerateUserPatternsQuery.Pattern), GenerateUserPatternsQuery.MaximumPatternLength));
+
+        RuleFor(q => q.RegexPattern)
+            .MaximumLength(GenerateUserPatternsQuery.MaximumRegexLength)
+            .WithMessage(_ => DomainMessages.ValueTooLong(
+                nameof(GenerateUserPatternsQuery.RegexPattern), GenerateUserPatternsQuery.MaximumRegexLength));
+
+        RuleFor(q => q.UsernameTemplate)
+            .MaximumLength(GenerateUserPatternsQuery.MaximumTemplateLength)
+            .WithMessage(_ => DomainMessages.ValueTooLong(
+                nameof(GenerateUserPatternsQuery.UsernameTemplate), GenerateUserPatternsQuery.MaximumTemplateLength));
+
+        RuleFor(q => q.RawText)
+            .MaximumLength(GenerateUserPatternsQuery.MaximumRawTextLength)
+            .WithMessage(_ => DomainMessages.ValueTooLong(
+                nameof(GenerateUserPatternsQuery.RawText), GenerateUserPatternsQuery.MaximumRawTextLength));
     }
 }
 

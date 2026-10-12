@@ -16,5 +16,6 @@ Third-party components, with their own licenses:
   Novell.Directory.Ldap.NETStandard  MIT
   Microsoft .NET libraries           MIT
   React, Vite, TypeScript            MIT
+  IBM Plex Sans, IBM Plex Mono       OFL-1.1 (fonts, bundled into the console via Fontsource)
 
 Each remains under the terms of its own license; nothing here modifies them.

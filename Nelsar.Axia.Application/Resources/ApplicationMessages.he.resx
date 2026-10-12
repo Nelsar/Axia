@@ -229,4 +229,10 @@
   <data name="LdapSecurityUnknown" xml:space="preserve">
     <value>'{0}' אינו מצב אבטחת חיבור. השתמשו ב-Ldaps, ב-StartTls או ב-None.</value>
   </data>
+  <data name="BindPasswordRequiredForPlainLdap" xml:space="preserve">
+    <value>יש להזין שוב את סיסמת הקישור כדי להעביר את הספרייה הזו ל-LDAP לא מוצפן. ללא הצפנה הסיסמה השמורה תעבור ברשת כשהיא קריאה לכל מי שנמצא בדרך.</value>
+  </data>
+  <data name="LoginStillNamedByGroup" xml:space="preserve">
+    <value>קבוצה בספרייה עדיין מונה את שם הכניסה הזה כחבר, ולכן חשבון חדש עם שם זה יצטרף לקבוצה. הסירו את שם הכניסה מהקבוצה או בחרו כתובת אחרת.</value>
+  </data>
 </root>

@@ -95,8 +95,8 @@
     // mappings are ignored unless AllowMappingsByName is true, which reopens exactly that hole.
     "RoleMappings": {
         "GroupDns": {
-            "Admin": "cn=Administrators,ou=groups,dc=nelsar,dc=kz",
-            "UserCreator": "cn=UserCreators,ou=groups,dc=nelsar,dc=kz"
+            "Admin": "cn=Administrators,ou=groups,dc=example,dc=org",
+            "UserCreator": "cn=UserCreators,ou=groups,dc=example,dc=org"
         },
         "AllowMappingsByName": false
     },
@@ -107,7 +107,7 @@
     // administrator of the directory itself. The account in Ldap:AdminUsername is never changeable
     // through the application, by anyone.
     "DirectoryProtection": {
-        "ProtectedGroups": [ "cn=Administrators,ou=groups,dc=nelsar,dc=kz" ]
+        "ProtectedGroups": [ "cn=Administrators,ou=groups,dc=example,dc=org" ]
     },
 
     // Which websites may call this API from a browser. Empty means loopback only, which is
@@ -155,8 +155,8 @@
         "Server": "openldap",
         "Security": "Ldaps",
         "Port": 636,
-        "BaseDn": "dc=nelsar,dc=kz",
-        "AdminUsername": "cn=admin,dc=nelsar,dc=kz",
+        "BaseDn": "dc=example,dc=org",
+        "AdminUsername": "cn=admin,dc=example,dc=org",
         "AdminPassword": "CHANGE_ME",
         "UserSearchFilter": "(&(objectClass=person)(|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))",
         "ProviderType": "StandardLdap"

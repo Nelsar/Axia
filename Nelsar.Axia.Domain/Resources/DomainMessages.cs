@@ -76,6 +76,10 @@ public static class DomainMessages
     public static string PermissionUnknown(string value) =>
         Format(nameof(PermissionUnknown), value);
 
+    /// <summary>Says what to change, since the pattern is what the caller controls.</summary>
+    public static string PatternRegexTooSlow() =>
+        Get(nameof(PatternRegexTooSlow));
+
     // A missing entry returns the key rather than throwing: a gap in a translation should show
     // up as an odd-looking string, not take down the request that hit it.
     private static string Get(string key) =>

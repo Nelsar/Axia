@@ -91,4 +91,7 @@
   <data name="LdapSecurityContradictsPort" xml:space="preserve">
     <value>لا يمكن أن يعمل وضع أمان الاتصال {0} على المنفذ {1}: استخدم المنفذ {2} أو وضعًا آخر.</value>
   </data>
+  <data name="PatternRegexTooSlow" xml:space="preserve">
+    <value>يستغرق التعبير النمطي وقتًا طويلًا جدًا على هذا النص. بسّطه — فالتكرار المتداخل مثل (a+)+ هو السبب المعتاد — أو الصق أسطرًا أقل.</value>
+  </data>
 </root>
