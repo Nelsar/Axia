@@ -50,6 +50,30 @@ public class LdapSettings
     /// </summary>
     public int UserSearchPageSize { get; set; } = 500;
 
+    public const int DefaultConnectTimeoutSeconds = 10;
+    public const int DefaultOperationTimeoutSeconds = 30;
+
+    /// <summary>The bounds both timeouts are held to; see LdapSettingsRules.</summary>
+    public const int MinimumTimeoutSeconds = 1;
+    public const int MaximumTimeoutSeconds = 300;
+
+    /// <summary>
+    /// How long to wait for a connection to the directory, the TLS handshake included.
+    ///
+    /// Directory calls run on request threads. Without a limit, a directory that accepted the
+    /// connection and then said nothing — a hung server, a firewall dropping packets — kept each
+    /// of those threads for as long as the operating system's TCP timeouts allowed, and enough
+    /// such requests left the API unable to answer anyone.
+    /// </summary>
+    public int ConnectTimeoutSeconds { get; set; } = DefaultConnectTimeoutSeconds;
+
+    /// <summary>
+    /// How long to wait for the directory to answer any one operation: a bind, one page of a
+    /// search, a write. Also handed to the server as the time limit of each search, so that it
+    /// stops working on one nobody is waiting for any more.
+    /// </summary>
+    public int OperationTimeoutSeconds { get; set; } = DefaultOperationTimeoutSeconds;
+
     /// <summary>The port to connect to: <see cref="Port"/>, or the standard one for the mode.</summary>
     public int ResolvedPort => Port ?? LdapSecurityPorts.StandardPortFor(Security);
 

@@ -74,7 +74,12 @@ public class LdapConnectionFactory
         if (_settings.Security == LdapSecurity.Ldaps)
             options.UseSsl();
 
-        var conn = new LdapConnection(options);
+        var conn = new LdapConnection(options)
+        {
+            ConnectionTimeout = _settings.ConnectTimeoutSeconds * 1000
+        };
+        LimitOperations(conn);
+
         try
         {
             conn.Connect(_settings.Server, port);
@@ -84,7 +89,15 @@ public class LdapConnectionFactory
                 case LdapSecurity.StartTls:
                     try
                     {
-                        conn.StartTls();
+                        StartTlsWithinLimit(conn);
+                    }
+                    catch (LdapException ex) when (ex.ResultCode == LdapException.LdapTimeout)
+                    {
+                        _logger.LogError(
+                            "Directory {Endpoint} accepted the connection but did not answer within {Seconds} seconds, "
+                            + "so StartTLS was not attempted and nothing else was sent on it.",
+                            endpoint, _settings.OperationTimeoutSeconds);
+                        throw;
                     }
                     catch (LdapException ex) when (!validator.Rejected)
                     {
@@ -118,6 +131,54 @@ public class LdapConnectionFactory
             conn.Dispose();
             throw;
         }
+    }
+
+    /// <summary>
+    /// Bounds every operation on the connection: the client gives up waiting after
+    /// OperationTimeoutSeconds with LdapException.LdapTimeout, and each search asks the server to
+    /// stop at the same point. Set through the search constraints because handing those to
+    /// Constraints sets the base limits and the search limits together; searches that clone them
+    /// to add a paging control keep both.
+    /// </summary>
+    private void LimitOperations(LdapConnection conn)
+    {
+        var constraints = conn.SearchConstraints;
+        constraints.TimeLimit = _settings.OperationTimeoutSeconds * 1000;
+        constraints.ServerTimeLimit = _settings.OperationTimeoutSeconds;
+        conn.Constraints = constraints;
+    }
+
+    /// <summary>
+    /// StartTLS, on a directory that has first shown it is answering.
+    ///
+    /// LdapConnection.StartTls cannot be given up on. While it waits for the server's answer it
+    /// holds the connection's write lock, and both the time limit — which abandons the operation —
+    /// and closing the connection need that lock, so a directory that accepted the connection and
+    /// never answered held the request thread indefinitely. LDAPS and plain LDAP gave up after a
+    /// second in the same test.
+    ///
+    /// So the directory is asked something first that does keep to the limit: a base read of the
+    /// root DSE, requesting no attributes. Any answer will do, a refusal included — it shows there
+    /// is a server there. No answer ends in LdapException.LdapTimeout with the lock free, and the
+    /// connection closes normally. Nothing is sent but the read: the root DSE is public, and the
+    /// credentials only follow the TLS upgrade.
+    /// </summary>
+    /// <exception cref="LdapException">The directory did not answer in time
+    /// (<see cref="LdapException.LdapTimeout"/>), or refused StartTLS.</exception>
+    private static void StartTlsWithinLimit(LdapConnection conn)
+    {
+        try
+        {
+            var rootDse = conn.Search(string.Empty, LdapConnection.ScopeBase, "(objectClass=*)", ["1.1"], false);
+            while (rootDse.HasMore())
+                rootDse.Next();
+        }
+        catch (LdapException ex) when (ex.ResultCode != LdapException.LdapTimeout)
+        {
+            // An answer, if not the one asked for.
+        }
+
+        conn.StartTls();
     }
 
     private void WarnPlaintextOnce(string endpoint)

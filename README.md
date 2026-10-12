@@ -275,6 +275,7 @@ container through the environment or a mounted file.
 | `Ldap:Security` | `Ldaps` | How the connection to the directory is protected: `Ldaps`, `StartTls`, or `None` — plain LDAP, which sends every password unencrypted. |
 | `Ldap:Port` | `636`; `389` for `StartTls` and `None` | Leave unset for the mode's standard port. LDAPS on 389, or plain LDAP on 636, stops the API at startup. |
 | `Ldap:TrustedCaCertificatePath` | — | A PEM or DER file with a CA — or a self-signed directory's own certificate — to trust besides the system store. The certificate must still name the host; verification cannot be turned off. Applies to `StandardLdap` directories, including those in the database. |
+| `Ldap:ConnectTimeoutSeconds` / `Ldap:OperationTimeoutSeconds` | `10` / `30` | How long to wait for a directory to accept a connection (TLS handshake included), and to answer any one operation. Between 1 and 300. Apply to every directory, including those in the database. |
 | `Ldap:*` | — | The rest of the default directory: host, base DN, bind account, search filter. |
 | `Jwt:Key` / `Jwt:ExpiresInMinutes` | — / `60` | Token signing key and lifetime. Required: at least 32 bytes, not the example placeholder. A lifetime below one minute stops startup. |
 | `Jwt:Issuer` / `Jwt:Audience` | `Nelsar.Axia.Api` | Written into every token and required of it on the way back. Set them to name the deployment; set to empty, they stop startup. |

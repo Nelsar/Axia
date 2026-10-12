@@ -177,6 +177,13 @@ internal class DefaultLdapProviderFactory : ILdapProviderFactory
 
         var settings = section.Get<LdapSettings>() ?? new LdapSettings();
         settings.TrustedCaCertificatePath ??= HostTrustedCaCertificatePath;
+
+        // The host's timeouts unless this section sets its own. Bound as it is, an unset key would
+        // otherwise read as the class default and quietly ignore what the Ldap section says.
+        if (section[nameof(LdapSettings.ConnectTimeoutSeconds)] is null)
+            settings.ConnectTimeoutSeconds = HostConnectTimeoutSeconds;
+        if (section[nameof(LdapSettings.OperationTimeoutSeconds)] is null)
+            settings.OperationTimeoutSeconds = HostOperationTimeoutSeconds;
         var servers = section.GetValue<string>("Servers") ?? settings.Server;
 
         // Checked here rather than at startup because these sections are only read when a
@@ -232,8 +239,10 @@ internal class DefaultLdapProviderFactory : ILdapProviderFactory
             Server = dbProvider.Host,
             Port = dbProvider.Port.Value,
             Security = dbProvider.Security,
-            // A row has no CA of its own; the host's is the one there is.
+            // A row has no CA of its own; the host's is the one there is. Nor timeouts.
             TrustedCaCertificatePath = HostTrustedCaCertificatePath,
+            ConnectTimeoutSeconds = HostConnectTimeoutSeconds,
+            OperationTimeoutSeconds = HostOperationTimeoutSeconds,
             BaseDn = dbProvider.BaseDn,
             AdminUsername = dbProvider.AdminUsername,
             AdminPassword = bindPassword,
@@ -358,6 +367,14 @@ internal class DefaultLdapProviderFactory : ILdapProviderFactory
 
     /// <summary>The host-wide CA for directories that do not name one of their own.</summary>
     private string? HostTrustedCaCertificatePath => _configuration["Ldap:TrustedCaCertificatePath"];
+
+    // The host-wide timeouts, for the same directories. The Ldap section is validated at startup,
+    // so whatever these read has already been held to its bounds.
+    private int HostConnectTimeoutSeconds =>
+        _configuration.GetValue("Ldap:ConnectTimeoutSeconds", LdapSettings.DefaultConnectTimeoutSeconds);
+
+    private int HostOperationTimeoutSeconds =>
+        _configuration.GetValue("Ldap:OperationTimeoutSeconds", LdapSettings.DefaultOperationTimeoutSeconds);
 
     private static string[] SplitHosts(string? hosts) =>
         (hosts ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);

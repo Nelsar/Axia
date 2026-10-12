@@ -33,6 +33,21 @@ internal static class LdapSettingsRules
             }
         }
 
+        // Shared by every directory as well, so checked before the early return below. Zero is
+        // refused rather than read as "no limit": no limit is exactly what these exist to prevent.
+        foreach (var (key, value) in new[]
+                 {
+                     (nameof(LdapSettings.ConnectTimeoutSeconds), settings.ConnectTimeoutSeconds),
+                     (nameof(LdapSettings.OperationTimeoutSeconds), settings.OperationTimeoutSeconds)
+                 })
+        {
+            if (value is < LdapSettings.MinimumTimeoutSeconds or > LdapSettings.MaximumTimeoutSeconds)
+            {
+                return $"{section}:{key} is {value}; it must be between {LdapSettings.MinimumTimeoutSeconds} "
+                       + $"and {LdapSettings.MaximumTimeoutSeconds} seconds.";
+            }
+        }
+
         // No server, no default directory to connect to: nothing below can go wrong yet.
         if (string.IsNullOrWhiteSpace(settings.Server))
             return null;

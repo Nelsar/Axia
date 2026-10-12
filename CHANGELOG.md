@@ -17,6 +17,14 @@ How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
   either, including against a directory that does not enforce those flags itself. A lockout after
   failed sign-ins does not count, so that nobody can end someone else's session by mistyping their
   password.
+- Directory calls give up instead of waiting indefinitely: a directory that accepts the connection
+  and then does not answer is reported as unavailable after `Ldap:OperationTimeoutSeconds`, so it
+  can no longer tie up the API's request threads. This includes StartTLS, which the LDAP library
+  could not time out on its own.
+
+### Added
+
+- `Ldap:ConnectTimeoutSeconds` (10) and `Ldap:OperationTimeoutSeconds` (30).
 
 ## [0.1.0] - 2026-10-12
 

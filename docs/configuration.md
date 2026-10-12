@@ -94,6 +94,8 @@ The default directory, used by every request that does not name another one.
 | `Ldap:UserSearchFilter` | `(&(objectClass=person)(\|(uid={0})(sAMAccountName={0})(userPrincipalName={0})(mail={0})))` | How a login typed at sign-in is looked up, tried first. `{0}` is replaced by the escaped login. The default covers OpenLDAP (`uid`), AD (`sAMAccountName`, `userPrincipalName`) and e-mail. When it finds nothing, the API also tries `mail`, `userPrincipalName`, `sAMAccountName` and `uid` on their own (see [Directories](directories.md#accounts)), so narrowing this filter does not by itself stop people signing in by those. |
 | `Ldap:ProviderType` | `StandardLdap` | `StandardLdap` (any OS, any LDAP v3 directory) or `ActiveDirectory` (Windows only; refused at startup elsewhere; no group management). |
 | `Ldap:UserSearchPageSize` | `500` | Page size for directory-wide listings (RFC 2696 paged results). Keep it at or below the server's own limit (AD: `MaxPageSize`, 1000 by default). |
+| `Ldap:ConnectTimeoutSeconds` | `10` | How long to wait for a directory to accept a connection, the TLS handshake included. 1 to 300; anything else stops startup. Applies to every directory, including those in the database; an `Ldap:Providers:{id}` section may set its own. |
+| `Ldap:OperationTimeoutSeconds` | `30` | How long to wait for a directory to answer any one operation — a bind, a page of a search, a write — and the time limit each search hands to the server. 1 to 300. Same scope as above. A directory that does not answer in time is reported as unavailable (`502`). |
 
 ### `Ldap:Providers:{id}`
 
