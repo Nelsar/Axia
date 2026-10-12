@@ -91,4 +91,7 @@
   <data name="LdapSecurityContradictsPort" xml:space="preserve">
     <value>连接安全模式 {0} 无法在端口 {1} 上工作：请使用端口 {2}，或选择其他模式。</value>
   </data>
+  <data name="PatternRegexTooSlow" xml:space="preserve">
+    <value>该正则表达式处理此文本耗时过长。请简化它（常见原因是 (a+)+ 这类嵌套重复），或粘贴更少的行。</value>
+  </data>
 </root>

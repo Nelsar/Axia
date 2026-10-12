@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Nelsar.Axia.Domain.Exceptions;
 using Nelsar.Axia.Domain.Services;
 
 namespace Nelsar.Axia.Tests;
@@ -165,5 +167,60 @@ public class UserPatternGeneratorTests
         });
 
         Assert.Equal("ivan.ivanov", Assert.Single(result));
+    }
+
+    [Fact]
+    public async Task Generate_Finishes_WhenARangeSpansEveryInt()
+    {
+        // Counted as an int, {-2147483648..2147483647} holds 2^32 values, which wraps to 0. The
+        // range came out empty, the whole product with it, and Take(MaxItems) walked four
+        // quintillion combinations of the other two ranges looking for an item: one request held
+        // a thread for good. Run elsewhere so that a regression fails here instead of hanging.
+        var generating = Task.Run(() => UserPatternGenerator.Generate(new UserPatternSpec
+        {
+            Pattern = "u{1..2000000000}{1..2000000000}{-2147483648..2147483647}",
+            MaxItems = 3
+        }));
+
+        var first = await Task.WhenAny(generating, Task.Delay(TimeSpan.FromSeconds(10)));
+        Assert.True(first == generating, "The mask was still expanding after 10 seconds.");
+
+        var result = await generating;
+        Assert.Equal(3, result.Count);
+        Assert.EndsWith("-2147483648", result[0]);
+    }
+
+    [Fact]
+    public void Generate_ExpandsARangeOneShortOfEveryInt_InsteadOfThrowing()
+    {
+        // One short of 2^32 wraps to -1, which Enumerable.Range threw on — answered with a 500.
+        var result = UserPatternGenerator.Generate(new UserPatternSpec
+        {
+            Pattern = "{-2147483648..2147483646}",
+            MaxItems = 2
+        });
+
+        Assert.Equal(["-2147483648", "-2147483647"], result);
+    }
+
+    [Fact]
+    public void Generate_RefusesARegex_ThatOutrunsItsBudgetOverThePastedText()
+    {
+        // Each line on its own times out and is skipped. Before the budget that repeated once per
+        // line, for as many lines as were pasted: here fifty half-second timeouts.
+        var line = new string('a', 40) + "!";
+        var text = string.Join('\n', Enumerable.Repeat(line, 50));
+        var elapsed = Stopwatch.StartNew();
+
+        Assert.Throws<DomainValidationException>(() => UserPatternGenerator.Generate(new UserPatternSpec
+        {
+            RawText = text,
+            RegexPattern = "^(a+)+$",
+            MaxItems = 10
+        }));
+
+        // The budget, plus the line already running when it ran out.
+        Assert.True(elapsed.Elapsed < UserPatternGenerator.RegexTimeBudget + TimeSpan.FromSeconds(3),
+            $"Took {elapsed.Elapsed}.");
     }
 }

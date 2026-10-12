@@ -91,4 +91,7 @@
   <data name="LdapSecurityContradictsPort" xml:space="preserve">
     <value>Le mode de sécurité de connexion {0} ne peut pas fonctionner sur le port {1} : utilisez le port {2} ou un autre mode.</value>
   </data>
+  <data name="PatternRegexTooSlow" xml:space="preserve">
+    <value>L'expression régulière prend trop de temps sur ce texte. Simplifiez-la (des répétitions imbriquées comme (a+)+ en sont la cause habituelle) ou collez moins de lignes.</value>
+  </data>
 </root>

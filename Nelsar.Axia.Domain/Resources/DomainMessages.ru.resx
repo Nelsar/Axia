@@ -91,4 +91,7 @@
   <data name="LdapSecurityContradictsPort" xml:space="preserve">
     <value>Режим защиты подключения {0} не может работать на порту {1}: используйте порт {2} или другой режим.</value>
   </data>
+  <data name="PatternRegexTooSlow" xml:space="preserve">
+    <value>Регулярное выражение обрабатывает этот текст слишком долго. Упростите его — обычно причина во вложенных повторениях вроде (a+)+ — или вставьте меньше строк.</value>
+  </data>
 </root>

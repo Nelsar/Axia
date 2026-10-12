@@ -155,8 +155,11 @@ Paste one record per line in `rawText`, give a regular expression with named gro
 - `transliterate` maps Cyrillic, including Kazakh letters, to Latin (`Щербак` → `Shcherbak`,
   `Қанат` → `Qanat`).
 - Results are trimmed, lower-cased and de-duplicated.
-- The regex has a 500 ms timeout per line; lines that time out or do not match are skipped.
+- The regex has a 500 ms timeout per line; lines that time out or do not match are skipped. Over
+  the whole text it has 2 seconds, after which the request is refused with `400`.
 - `maxItems`: 1 to 10,000 (default 50).
+- Lengths: `pattern` and `usernameTemplate` up to 256 characters, `regexPattern` up to 512,
+  `rawText` up to 1,000,000.
 - `checkConflicts` looks each login up in the directory. If the directory is unreachable, the
   request fails rather than answering "no conflicts".
 

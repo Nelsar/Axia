@@ -1,5 +1,9 @@
+using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using Nelsar.Axia.Domain.Exceptions;
+using Nelsar.Axia.Domain.Resources;
 
 namespace Nelsar.Axia.Domain.Services;
 
@@ -25,11 +29,21 @@ public static class UserPatternGenerator
     };
 
     /// <summary>
+    /// How long a regex may spend on the whole of the pasted text. Each line already has its own
+    /// timeout, but a line that times out is only skipped, so a pattern that backtracks on every
+    /// line took that timeout once per line — hours, for a paste of a few thousand lines.
+    /// </summary>
+    public static readonly TimeSpan RegexTimeBudget = TimeSpan.FromSeconds(2);
+
+    /// <summary>
     /// Expands the spec into normalised candidate logins: trimmed, lower-cased,
     /// de-duplicated and capped at <see cref="UserPatternSpec.MaxItems"/>.
     /// Returns an empty list for input the generator cannot make sense of
     /// (blank mask, invalid regex) rather than throwing.
     /// </summary>
+    /// <exception cref="DomainValidationException">
+    /// The regex took longer than <see cref="RegexTimeBudget"/> over the pasted text.
+    /// </exception>
     public static IReadOnlyList<string> Generate(UserPatternSpec spec)
     {
         ArgumentNullException.ThrowIfNull(spec);
@@ -88,11 +102,17 @@ public static class UserPatternGenerator
         var groupNames = regex.GetGroupNames().Where(n => !int.TryParse(n, out _)).ToArray();
         var results = new List<string>();
         var lines = rawText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        var elapsed = Stopwatch.StartNew();
 
         foreach (var line in lines)
         {
             if (results.Count >= maxItems)
                 break;
+
+            // Refused rather than cut short: a preview that silently stopped halfway would look
+            // like the whole list, and it is read to decide what to create.
+            if (elapsed.Elapsed > RegexTimeBudget)
+                throw new DomainValidationException(DomainMessages.PatternRegexTooSlow());
 
             Match match;
             try
@@ -129,9 +149,9 @@ public static class UserPatternGenerator
             return Array.Empty<string>();
 
         var tokens = new List<IEnumerable<string>>();
-        var current = string.Empty;
+        var current = new StringBuilder();
         var activeRange = false;
-        var rangeBuilder = string.Empty;
+        var rangeBuilder = new StringBuilder();
 
         foreach (var ch in pattern)
         {
@@ -140,34 +160,41 @@ public static class UserPatternGenerator
                 if (activeRange)
                     return Array.Empty<string>();
 
-                if (!string.IsNullOrEmpty(current))
+                if (current.Length > 0)
                 {
-                    tokens.Add(new[] { current });
-                    current = string.Empty;
+                    tokens.Add(new[] { current.ToString() });
+                    current.Clear();
                 }
                 activeRange = true;
-                rangeBuilder = string.Empty;
+                rangeBuilder.Clear();
                 continue;
             }
 
             if (ch == '}' && activeRange)
             {
                 activeRange = false;
-                tokens.Add(ParseRange(rangeBuilder));
+                tokens.Add(ParseRange(rangeBuilder.ToString()));
                 continue;
             }
 
             if (activeRange)
             {
-                rangeBuilder += ch;
+                rangeBuilder.Append(ch);
                 continue;
             }
 
-            current += ch;
+            current.Append(ch);
         }
 
-        if (!string.IsNullOrEmpty(current))
-            tokens.Add(new[] { current });
+        if (current.Length > 0)
+            tokens.Add(new[] { current.ToString() });
+
+        // Take(maxItems) below is what bounds the work, and it can only do that while every part
+        // yields something: one empty part leaves the product empty, and Take then walks every
+        // combination of the others looking for an item that never comes. ParseRange does not
+        // produce one, and this keeps it that way.
+        if (tokens.Any(part => !part.Any()))
+            return Array.Empty<string>();
 
         var combinations = tokens.Aggregate(
             new[] { string.Empty }.AsEnumerable(),
@@ -189,8 +216,8 @@ public static class UserPatternGenerator
             var width = Math.Max(left.Length, right.Length);
             if (leftNum <= rightNum)
             {
-                return Enumerable.Range(leftNum, rightNum - leftNum + 1)
-                    .Select(value => value.ToString().PadLeft(width, '0'));
+                return Numbers(leftNum, rightNum)
+                    .Select(value => value.ToString(CultureInfo.InvariantCulture).PadLeft(width, '0'));
             }
         }
 
@@ -206,5 +233,19 @@ public static class UserPatternGenerator
         }
 
         return new[] { "{" + rangeExpression + "}" };
+    }
+
+    /// <summary>
+    /// Every whole number from <paramref name="first"/> to <paramref name="last"/>, lazily.
+    ///
+    /// Counted in long rather than handed to Enumerable.Range, whose count is an int: the count of
+    /// {-2147483648..2147483647} is 2^32, which wraps to 0 — an empty range, with the consequence
+    /// described in ExpandPattern — and one short of that wraps to -1, which Enumerable.Range
+    /// throws on, answering the request with a 500.
+    /// </summary>
+    private static IEnumerable<long> Numbers(long first, long last)
+    {
+        for (var value = first; value <= last; value++)
+            yield return value;
     }
 }
