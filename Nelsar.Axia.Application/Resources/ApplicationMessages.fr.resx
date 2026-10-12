@@ -232,4 +232,7 @@
   <data name="BindPasswordRequiredForPlainLdap" xml:space="preserve">
     <value>Saisissez de nouveau le mot de passe de liaison pour passer cet annuaire en LDAP non chiffré. Sans chiffrement, le mot de passe enregistré traverserait le réseau lisible par quiconque se trouve sur le chemin.</value>
   </data>
+  <data name="LoginStillNamedByGroup" xml:space="preserve">
+    <value>Un groupe de l'annuaire liste encore cet identifiant parmi ses membres : un nouveau compte qui le porte rejoindrait ce groupe. Retirez l'identifiant du groupe ou choisissez une autre adresse.</value>
+  </data>
 </root>

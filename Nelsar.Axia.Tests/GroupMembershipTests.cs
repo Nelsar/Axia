@@ -64,6 +64,26 @@ public class GroupMembershipTests
     }
 
     [Fact]
+    public void ANewLogin_IsCheckedAgainstPosixGroupsThatNameIt_AsWellAsAgainstEntries()
+    {
+        // memberUid outlives the account it named. Without the second clause a new account could
+        // take a deleted administrator's login and sign in as a member of their posixGroup.
+        var filter = StandardLdapProvider.LoginClaimFilter("ivan.petrov");
+
+        Assert.Equal("(|(uid=ivan.petrov)(&(objectClass=posixGroup)(memberUid=ivan.petrov)))", filter);
+    }
+
+    [Fact]
+    public void ANewLoginWithFilterCharactersInIt_IsEscaped()
+    {
+        // Unescaped, "*" would turn the check into a substring match and refuse logins that
+        // nothing claims; ")" would end it early.
+        var filter = StandardLdapProvider.LoginClaimFilter("ivan*)(uid=*");
+
+        Assert.Equal(@"(|(uid=ivan\2a\29\28uid=\2a)(&(objectClass=posixGroup)(memberUid=ivan\2a\29\28uid=\2a)))", filter);
+    }
+
+    [Fact]
     public void GroupsOnlyTheSearchFound_AreKept()
     {
         // The case this exists for: no memberOf at all.

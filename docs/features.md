@@ -59,7 +59,9 @@ values are flagged; values of credential attributes (passwords, LAPS) are withhe
 
 **Create** takes name, e-mail and password and writes an `inetOrgPerson` at
 `uid=<local part>,<BaseDn>`; see [what is written](directories.md#new-accounts), including the
-Active Directory caveat. An e-mail already in use is a `409`.
+Active Directory caveat. An e-mail already in use is a `409`, and so is a login that another entry
+already has or that a `posixGroup` still lists as a member (see
+[group membership](directories.md#group-membership)).
 
 **Edit** changes `displayName`, `mail` and/or the password. The login (RDN, `uid`) does not change
 with the e-mail. A new e-mail must not belong to another account.

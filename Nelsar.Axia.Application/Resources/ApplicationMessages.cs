@@ -197,6 +197,12 @@ public static class ApplicationMessages
     /// <summary>The same advice for the same reason as the message above; see Provider.WouldDropEncryption.</summary>
     public static string BindPasswordRequiredForPlainLdap() => Get(nameof(BindPasswordRequiredForPlainLdap));
 
+    /// <summary>
+    /// Does not name the group: it is a fact about the directory the caller may not be allowed to
+    /// read. The DN goes to the log, where an administrator can find it.
+    /// </summary>
+    public static string LoginStillNamedByGroup() => Get(nameof(LoginStillNamedByGroup));
+
     public static string RoleUnknown(string roleName) => Format(nameof(RoleUnknown), roleName);
 
     /// <summary>Points at what to do instead — a different mapping — because that is the real

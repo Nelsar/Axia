@@ -145,6 +145,11 @@ Membership, for roles and for display, is read from both sides, so a directory w
 
 **Nested groups are not followed.** Map the group an account is directly in.
 
+`memberUid` names a login, not an entry, and it stays in the group after the account is deleted.
+Creating an account whose login a `posixGroup` still lists is therefore refused with `409`, since
+the new account would join that group — and hold its role — the moment it signed in. Remove the
+login from the group first, or use a different address.
+
 ### Listings
 
 Directory-wide listings (all users, groups, units, computers) use RFC 2696 paged results, page size

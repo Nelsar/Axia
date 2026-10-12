@@ -343,6 +343,8 @@ internal class StandardLdapProvider : ILdapProvider
 
         using var conn = ConnectOrThrow();
 
+        EnsureLoginIsUnclaimed(conn, uid);
+
         try
         {
             conn.Add(new LdapEntry(dn, attrs));
@@ -1564,6 +1566,61 @@ internal class StandardLdapProvider : ILdapProvider
                 : $"(&(objectClass=posixGroup)(memberUid={EscapeLdapFilterValue(uid)}))")
             + ")";
     }
+
+    /// <summary>
+    /// Refuses a login that something in the directory already answers to, before the entry that
+    /// would carry it exists.
+    ///
+    /// Another entry with the same uid leaves the login naming two accounts, and sign-in takes
+    /// whichever the directory returns first. A posixGroup listing it in memberUid is the sharper
+    /// case. That membership is by name rather than by entry — see GroupMembershipFilter — and the
+    /// name stays in the group after the account it belonged to is deleted. A new account given
+    /// it was counted a member the moment it signed in, and held whatever role the group is mapped
+    /// to, an administrator's included: granted by someone who was only allowed to create
+    /// accounts, or, with self-registration on, by nobody at all. So the login is refused until
+    /// the group stops naming it.
+    /// </summary>
+    /// <exception cref="DomainConflictException">An entry has the uid, or a posixGroup names it.</exception>
+    /// <exception cref="DirectoryUnavailableException">The directory could not be asked.</exception>
+    private void EnsureLoginIsUnclaimed(LdapConnection conn, string uid)
+    {
+        var claimants = new List<LdapEntry>();
+        try
+        {
+            var results = conn.Search(_settings.BaseDn, LdapConnection.ScopeSub, LoginClaimFilter(uid), ["objectClass"], false);
+            while (NextEntryOrNull(results) is { } claimant)
+                claimants.Add(claimant);
+        }
+        catch (LdapException ex)
+        {
+            _logger.LogError(ex, "Could not check whether login {Login} is free.", LogMask.Login(uid));
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectorySearchFailed(), ex);
+        }
+
+        if (claimants.FirstOrDefault(IsPosixGroup) is { } group)
+        {
+            _logger.LogWarning("Refused to create {Login}: posixGroup {Group} still lists it in memberUid.",
+                LogMask.Login(uid), group.Dn);
+            throw new DomainConflictException(ApplicationMessages.LoginStillNamedByGroup());
+        }
+
+        if (claimants.Count > 0)
+            throw new DomainConflictException(ApplicationMessages.UserAlreadyExistsInDirectory());
+    }
+
+    /// <summary>
+    /// Every entry that already answers to a login: one that carries it as its uid, or a
+    /// posixGroup that names it as a member. Escaped like the filters above.
+    /// </summary>
+    internal static string LoginClaimFilter(string uid)
+    {
+        var escaped = EscapeLdapFilterValue(uid);
+        return $"(|(uid={escaped})(&(objectClass=posixGroup)(memberUid={escaped})))";
+    }
+
+    private static bool IsPosixGroup(LdapEntry entry) =>
+        entry.GetAttributeSet().TryGetValue("objectClass", out var classes)
+        && (classes.StringValueArray ?? []).Contains("posixGroup", StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// memberOf and the searched groups as one list, each group once. The same group can be

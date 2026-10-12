@@ -232,4 +232,7 @@
   <data name="BindPasswordRequiredForPlainLdap" xml:space="preserve">
     <value>Geben Sie das Bind-Passwort erneut ein, um dieses Verzeichnis auf unverschlüsseltes LDAP umzustellen. Ohne Verschlüsselung würde das gespeicherte Passwort für jeden auf dem Netzwerkweg lesbar übertragen.</value>
   </data>
+  <data name="LoginStillNamedByGroup" xml:space="preserve">
+    <value>Eine Gruppe im Verzeichnis führt diesen Anmeldenamen noch als Mitglied, daher würde ein neues Konto mit ihm dieser Gruppe beitreten. Entfernen Sie den Anmeldenamen aus der Gruppe oder wählen Sie eine andere Adresse.</value>
+  </data>
 </root>

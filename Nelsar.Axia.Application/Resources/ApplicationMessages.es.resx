@@ -232,4 +232,7 @@
   <data name="BindPasswordRequiredForPlainLdap" xml:space="preserve">
     <value>Vuelva a introducir la contraseña de enlace para cambiar este directorio a LDAP sin cifrar. Sin cifrado, la contraseña guardada cruzaría la red legible para cualquiera en el camino.</value>
   </data>
+  <data name="LoginStillNamedByGroup" xml:space="preserve">
+    <value>Un grupo del directorio todavía incluye este inicio de sesión como miembro, así que una cuenta nueva con él se uniría a ese grupo. Quite el inicio de sesión del grupo o elija otra dirección.</value>
+  </data>
 </root>
