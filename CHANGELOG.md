@@ -50,4 +50,4 @@ Read before deploying: [SECURITY.md](SECURITY.md#known-limitations) and
 [Not in scope yet](README.md#not-in-scope-yet). Above all, a session cannot be ended before its
 token expires, and directory certificates are not checked for revocation.
 
-[0.1.0]: https://github.com/Nurlan-Turkpenbay/Axia/releases/tag/v0.1.0
+[0.1.0]: https://github.com/Nelsar/Axia/releases/tag/v0.1.0
