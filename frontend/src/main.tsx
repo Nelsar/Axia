@@ -1,3 +1,13 @@
+// The console's typefaces, bundled rather than fetched from Google Fonts: that sent every
+// administrator's browser to Google on each visit, which a privacy review asks about and a
+// network with no way out cannot do at all. Each file carries every script the family covers,
+// Cyrillic with Kazakh letters included; the browser downloads only the ones a page uses.
+import "@fontsource/ibm-plex-sans/400.css";
+import "@fontsource/ibm-plex-sans/500.css";
+import "@fontsource/ibm-plex-sans/600.css";
+import "@fontsource/ibm-plex-sans/700.css";
+import "@fontsource/ibm-plex-mono/400.css";
+import "@fontsource/ibm-plex-mono/500.css";
 import { createRoot } from "react-dom/client";
 import type { ReactElement } from "react";
 import type { Root } from "react-dom/client";
