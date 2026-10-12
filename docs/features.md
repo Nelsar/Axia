@@ -203,7 +203,9 @@ Paste one record per line in `rawText`, give a regular expression with named gro
 | Delete | `orgunits.manage` | `DELETE /api/v1/organizational-units/{id}` |
 
 - A flat list (name, DN, parent DN, description), not a tree.
-- The parent can be any container, including ones not in the list (`CN=Users`, the base DN).
+- The parent can be any container inside the base DN, including ones not in the list (the base DN
+  itself, or AD's `CN=Users` when the base DN is the domain). A parent outside it is `400`; the
+  same goes for groups and computers, created or moved.
 - Deleting a unit that still contains entries is refused by the directory: `409`. Nothing is
   deleted recursively.
 - The `id` is derived from the DN, so it changes on rename or move.

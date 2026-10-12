@@ -292,4 +292,8 @@
     <value>Too many bulk jobs are waiting to run. Try again in a little while.</value>
     <comment>The queue of bulk jobs is full; the request may be retried later (sent with Retry-After).</comment>
   </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>The parent must be {0} or inside it: that is the part of the directory this application manages.</value>
+    <comment>{0} = the directory's base DN. A unit, group or computer was to be created in or moved to a parent outside it.</comment>
+  </data>
 </root>

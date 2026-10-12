@@ -119,6 +119,34 @@ public sealed class DistinguishedName : IEquatable<DistinguishedName>
     }
 
     /// <summary>
+    /// Whether this entry is <paramref name="container"/> itself or anywhere beneath it.
+    ///
+    /// Compared component by component, ignoring case and the spacing around separators, rather
+    /// than as text: "OU=Finance,DC=example,DC=org" ends with "nce,DC=example,DC=org" too, and
+    /// "OU=Finance, DC=Example,DC=org" names the same place as it.
+    /// </summary>
+    public bool IsWithin(DistinguishedName container)
+    {
+        ArgumentNullException.ThrowIfNull(container);
+
+        var own = SplitComponents(Value).Select(NormalizeComponent).ToList();
+        var theirs = SplitComponents(container.Value).Select(NormalizeComponent).ToList();
+
+        return theirs.Count > 0
+               && theirs.Count <= own.Count
+               && own.Skip(own.Count - theirs.Count).SequenceEqual(theirs, StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>"OU = Finance" as "OU=Finance": the spacing around '=' is not part of either side.</summary>
+    private static string NormalizeComponent(string component)
+    {
+        var separator = component.IndexOf('=');
+        return separator < 0
+            ? component.Trim()
+            : $"{component[..separator].Trim()}={component[(separator + 1)..].Trim()}";
+    }
+
+    /// <summary>
     /// Splits on commas that actually separate components, ignoring those escaped as "\,"
     /// inside a value. Directory entries really do contain commas in their names, and a naive
     /// Split(',') turns one such entry into two nonexistent ones.

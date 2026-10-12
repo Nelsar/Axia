@@ -247,4 +247,7 @@
   <data name="BulkQueueFull" xml:space="preserve">
     <value>Es warten zu viele Massenaufträge auf ihre Ausführung. Versuchen Sie es in Kürze erneut.</value>
   </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>Das übergeordnete Objekt muss {0} sein oder darin liegen: Das ist der Teil des Verzeichnisses, den diese Anwendung verwaltet.</value>
+  </data>
 </root>

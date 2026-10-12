@@ -247,4 +247,7 @@
   <data name="BulkQueueFull" xml:space="preserve">
     <value>等待运行的批量任务过多。请稍后再试。</value>
   </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>父级必须是 {0} 或位于其内：这是本应用程序管理的目录部分。</value>
+  </data>
 </root>

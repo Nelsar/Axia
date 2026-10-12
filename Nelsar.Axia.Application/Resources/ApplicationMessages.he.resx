@@ -247,4 +247,7 @@
   <data name="BulkQueueFull" xml:space="preserve">
     <value>יותר מדי משימות אצווה ממתינות להרצה. נסו שוב בעוד זמן קצר.</value>
   </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>ההורה חייב להיות {0} או בתוכו: זהו החלק בספרייה שהיישום הזה מנהל.</value>
+  </data>
 </root>

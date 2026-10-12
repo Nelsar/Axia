@@ -247,4 +247,7 @@
   <data name="BulkQueueFull" xml:space="preserve">
     <value>Trop de traitements par lot attendent d'être exécutés. Réessayez dans un moment.</value>
   </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>Le parent doit être {0} ou se trouver à l'intérieur : c'est la partie de l'annuaire que gère cette application.</value>
+  </data>
 </root>

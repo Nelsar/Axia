@@ -247,4 +247,7 @@
   <data name="BulkQueueFull" xml:space="preserve">
     <value>هناك عدد كبير جدًا من المهام المجمعة في انتظار التشغيل. حاول مرة أخرى بعد قليل.</value>
   </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>يجب أن يكون الأصل {0} أو داخله: فهذا هو جزء الدليل الذي يديره هذا التطبيق.</value>
+  </data>
 </root>

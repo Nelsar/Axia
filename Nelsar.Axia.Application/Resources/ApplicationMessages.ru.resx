@@ -251,4 +251,7 @@
   <data name="BulkQueueFull" xml:space="preserve">
     <value>В очереди слишком много пакетных задач. Повторите попытку чуть позже.</value>
   </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>Родитель должен быть {0} или находиться внутри него: это та часть каталога, которой управляет приложение.</value>
+  </data>
 </root>

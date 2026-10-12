@@ -26,6 +26,10 @@ How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
   queued job's status and results can only be read by the account that queued it, in the same
   directory; before, anyone holding `users.bulk` could read any job by its id.
 
+- Units, groups and computers can only be created in, or moved to, a parent inside the base DN.
+  The parent used to be whatever DN the request named, so anyone allowed to manage them could
+  write one anywhere the bind account could.
+
 ### Added
 
 - `Ldap:ConnectTimeoutSeconds` (10) and `Ldap:OperationTimeoutSeconds` (30).

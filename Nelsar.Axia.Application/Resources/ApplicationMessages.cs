@@ -40,6 +40,9 @@ public static class ApplicationMessages
 
     public static string BulkQueueFull() => Get(nameof(BulkQueueFull));
 
+    /// <summary>Names the base DN: it is configuration the caller has to work within, not a secret.</summary>
+    public static string ParentOutsideBaseDn(string baseDn) => Format(nameof(ParentOutsideBaseDn), baseDn);
+
     public static string PatternRequired() => Get(nameof(PatternRequired));
 
     /// <summary>

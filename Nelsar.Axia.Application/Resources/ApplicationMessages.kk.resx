@@ -247,4 +247,7 @@
   <data name="BulkQueueFull" xml:space="preserve">
     <value>Орындалуын күтіп тұрған топтамалық тапсырмалар тым көп. Біраздан кейін қайталап көріңіз.</value>
   </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>Аталық нысан {0} немесе оның ішінде болуы керек: каталогтың бұл қолданба басқаратын бөлігі осы.</value>
+  </data>
 </root>

@@ -247,4 +247,7 @@
   <data name="BulkQueueFull" xml:space="preserve">
     <value>Hay demasiados trabajos masivos esperando para ejecutarse. Vuelva a intentarlo dentro de un rato.</value>
   </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>El elemento primario debe ser {0} o estar dentro de él: es la parte del directorio que administra esta aplicación.</value>
+  </data>
 </root>
