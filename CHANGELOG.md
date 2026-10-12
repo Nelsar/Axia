@@ -7,7 +7,7 @@ configuration or the API in ways that need action on upgrade; its entry says wha
 
 How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
-## [0.1.0] - not yet released
+## [0.1.0] - 2026-10-12
 
 The first public release.
 
