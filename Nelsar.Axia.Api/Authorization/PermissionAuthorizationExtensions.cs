@@ -21,6 +21,9 @@ public static class PermissionAuthorizationExtensions
         // for the lifetime of the process.
         services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
+        // A route's refusal goes in the audit trail like a use case's does; see the handler.
+        services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuditingAuthorizationResultHandler>();
+
         // The same principal, offered to the Application layer so its use cases can run their own
         // permission check instead of trusting that a route attribute was remembered. Replaces the
         // fail-closed default AddApplicationLayer registers.
