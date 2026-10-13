@@ -1,6 +1,6 @@
 import { createContext, useContext, useId, useMemo, useState } from "react";
 import { t } from "../lib/i18n";
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 
 /**
  * Compound components: <Tabs> holds the selected tab in context, and <Tabs.List>/<Tabs.Tab>/

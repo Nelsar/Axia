@@ -5,6 +5,7 @@ import type { UserPermissions } from "../../hooks/usePermissions";
 import { Modal } from "../Modal";
 import { Badge, Card, ErrorBanner, Mono, Muted, Spinner } from "../primitives";
 import { roleTone } from "./userFormatting";
+import type { JSX } from "react";
 
 export interface UserDetailDialogProps {
   user: UserDto;

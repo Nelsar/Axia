@@ -1,4 +1,4 @@
-import type { ChangeEvent, FormEvent } from "react";
+import type { ChangeEvent, FormEvent, JSX } from "react";
 import { t } from "../../lib/i18n";
 import { USER_ROLES, isUserRole } from "../../api/dto";
 import type { ProviderDto } from "../../api/dto";

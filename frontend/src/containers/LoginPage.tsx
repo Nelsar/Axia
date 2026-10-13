@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, type JSX } from "react";
 import { t } from "../lib/i18n";
 import { api } from "../api";
 import { setSession } from "../lib/auth";

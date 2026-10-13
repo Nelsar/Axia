@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import { useAppShell } from "../hooks/useAppShell";
 import { ShellView } from "../components/shell/ShellView";
 

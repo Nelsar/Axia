@@ -1,4 +1,4 @@
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, JSX } from "react";
 import { LANGUAGES, applyLanguage, readLanguage, t, writeLanguage } from "../lib/i18n";
 import { navigate } from "../lib/router";
 

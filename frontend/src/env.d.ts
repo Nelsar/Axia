@@ -13,3 +13,11 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+/**
+ * Stylesheets imported for their side effect — the bundled fonts in main.tsx, which Vite turns
+ * into stylesheet links. TypeScript 6 and later refuse a side-effect import whose module they
+ * cannot resolve to declarations, and vite/client's, which would cover these, are not loaded here
+ * ("types": [] in tsconfig.json).
+ */
+declare module "*.css";

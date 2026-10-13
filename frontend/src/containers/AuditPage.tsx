@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type JSX } from "react";
 import { t } from "../lib/i18n";
 import { api } from "../api";
 import type { AuditEventDto, PagedResponse } from "../api/dto";

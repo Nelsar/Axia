@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { t } from "../lib/i18n";
 import { createPortal } from "react-dom";
-import type { CSSProperties, MouseEvent, ReactNode } from "react";
+import type { CSSProperties, JSX, MouseEvent, ReactNode } from "react";
 
 /**
  * The modal as a compound component: <Modal> is responsible only for the overlay, the portal,

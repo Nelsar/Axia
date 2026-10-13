@@ -1,4 +1,4 @@
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, JSX } from "react";
 import { t } from "../../lib/i18n";
 import type { PatternGeneratorResponse } from "../../api/dto";
 import type { GeneratorFormValues, GeneratorStatus } from "../../hooks/useUsernameGenerator";

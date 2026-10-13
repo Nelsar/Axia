@@ -1,4 +1,4 @@
-import type { ChangeEvent, CSSProperties, FormEvent } from "react";
+import type { ChangeEvent, CSSProperties, FormEvent, JSX } from "react";
 import { t } from "../../lib/i18n";
 import type { LdapSecurity, ProviderType } from "../../api/dto";
 import type { FormErrors } from "../../hooks/useEntityForm";

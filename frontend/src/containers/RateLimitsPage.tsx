@@ -5,6 +5,7 @@ import { useCollection } from "../hooks/useCollection";
 import { RateLimitsView } from "../components/rateLimits/RateLimitsView";
 import { NewPolicyFormContainer } from "./NewPolicyFormContainer";
 import { PolicyCardContainer } from "./PolicyCardContainer";
+import type { JSX } from "react";
 
 const loadPolicies = (): Promise<RateLimitSettingsDto[]> => api.rateLimits.getAll();
 

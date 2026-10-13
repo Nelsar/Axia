@@ -5,6 +5,7 @@ import { DataTable } from "../DataTable";
 import type { Column } from "../DataTable";
 import { PageHeader } from "../PageHeader";
 import { Card, ErrorBanner, LoadMore, Spinner } from "../primitives";
+import type { JSX } from "react";
 
 export interface AuditViewProps {
   status: ListStatus;

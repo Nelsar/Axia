@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import { useBulkOperations } from "../hooks/useBulkOperations";
 import { useUserDialogs } from "../hooks/useUserDialogs";
 import { useUsernameGenerator } from "../hooks/useUsernameGenerator";

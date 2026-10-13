@@ -1,5 +1,5 @@
 import { useId } from "react";
-import type { ChangeEvent, ReactNode } from "react";
+import type { ChangeEvent, JSX, ReactNode } from "react";
 import { FormHint } from "../primitives";
 
 /**

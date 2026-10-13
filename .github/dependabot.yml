@@ -26,6 +26,14 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      # Proposed one at a time, each of these failed `npm ci` on a peer dependency: @types/react 19
+      # beside @types/react-dom 18, Vite 8 beside a plugin that supports Vite 7 at most. They are
+      # one upgrade each, and come as one pull request.
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
+      vite:
+        patterns: ["vite", "@vitejs/*"]
 
   # Actions are pinned to major tags here, so these updates are the ones that matter: a tag moves
   # under you silently, and a major bump does not.

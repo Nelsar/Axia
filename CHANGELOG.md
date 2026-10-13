@@ -41,6 +41,11 @@ How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
 - `Ldap:ConnectTimeoutSeconds` (10) and `Ldap:OperationTimeoutSeconds` (30).
 
+### Changed
+
+- The console is built with React 19, Vite 8 and TypeScript 7, and CI builds it on Node 22. Building
+  it from source now needs Node 20.19 or later, 22 recommended.
+
 ## [0.1.0] - 2026-10-12
 
 The first public release.

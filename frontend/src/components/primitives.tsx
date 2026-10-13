@@ -1,4 +1,4 @@
-import type { ChangeEvent, CSSProperties, ReactNode } from "react";
+import type { ChangeEvent, CSSProperties, JSX, ReactNode } from "react";
 import { t } from "../lib/i18n";
 
 /**

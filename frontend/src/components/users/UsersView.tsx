@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import { t } from "../../lib/i18n";
 import type { UserPermissions } from "../../hooks/usePermissions";
 import { PageHeader } from "../PageHeader";

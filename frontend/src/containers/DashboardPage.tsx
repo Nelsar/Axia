@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type JSX } from "react";
 import { getCurrentUser } from "../lib/auth";
 import type { SessionUser } from "../lib/auth";
 import { useDashboardData } from "../hooks/useDashboardData";

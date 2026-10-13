@@ -1,4 +1,4 @@
-import type { ChangeEvent, CSSProperties, FormEvent } from "react";
+import type { ChangeEvent, CSSProperties, FormEvent, JSX } from "react";
 import { t } from "../../lib/i18n";
 import type { PolicyFormValues } from "../../containers/PolicyCardContainer";
 import { Badge, Card, ErrorBanner } from "../primitives";

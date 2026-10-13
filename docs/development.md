@@ -70,7 +70,7 @@ attribute names, password write mode, paging.
 
 ### Frontend
 
-React 18 + TypeScript (strict) + Vite. Logic in hooks, markup in presentational components,
+React 19 + TypeScript (strict) + Vite. Logic in hooks, markup in presentational components,
 wiring in containers. DTOs in `src/api/dto.ts` mirror `Nelsar.Axia.Contracts` by hand.
 Details: [frontend/README.md](../frontend/README.md).
 
