@@ -20,7 +20,9 @@ build into `dist/`), `npm run preview` (serve what `build` produced).
 
 On the sign-in screen, expand **API address** and give it the base URL of `Nelsar.Axia.Api`. The
 default is `http://localhost:5063`, the `http` profile's port in
-`Nelsar.Axia.Api/Properties/launchSettings.json`.
+`Nelsar.Axia.Api/Properties/launchSettings.json`. A build made with `VITE_API_SAME_ORIGIN=true`, as
+the Docker image is, has no such field and ignores any address stored by an earlier one: it calls
+the API on the origin it was loaded from, and its Content-Security-Policy allows nothing else.
 
 The API admits a browser on any loopback port by default, so 5500 needs no configuration on that
 side; a console served from anywhere else has to be named in `Cors:AllowedOrigins`. See

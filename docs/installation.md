@@ -226,7 +226,8 @@ npm --prefix frontend run dev
 
 Open <http://localhost:5500>. The console calls the API at `http://localhost:5063` by default; the
 sign-in screen has an **API address** field to change it. The API admits browsers on any loopback
-port without configuration.
+port without configuration. The field exists on the development server only: the Docker image's
+console always calls the API on its own origin.
 
 ### 8. Sign in
 

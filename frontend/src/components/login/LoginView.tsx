@@ -187,19 +187,21 @@ export function LoginView({
           </Tabs.Panel>
         </Tabs>
 
-        <details style={{ marginTop: "20px" }}>
-          <summary style={{ fontSize: "12.5px", color: "var(--text-faint)", cursor: "pointer" }}>{t("login.apiUrl")}</summary>
-          <div className="form-row" style={{ marginTop: "10px" }}>
-            <input
-              type="text"
-              value={apiUrl.value}
-              placeholder={apiUrl.placeholder}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => apiUrl.setValue(event.target.value)}
-              onBlur={apiUrl.saveIfChanged}
-            />
-            <FormHint>{t("login.apiUrlHint")}</FormHint>
-          </div>
-        </details>
+        {apiUrl.editable && (
+          <details style={{ marginTop: "20px" }}>
+            <summary style={{ fontSize: "12.5px", color: "var(--text-faint)", cursor: "pointer" }}>{t("login.apiUrl")}</summary>
+            <div className="form-row" style={{ marginTop: "10px" }}>
+              <input
+                type="text"
+                value={apiUrl.value}
+                placeholder={apiUrl.placeholder}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => apiUrl.setValue(event.target.value)}
+                onBlur={apiUrl.saveIfChanged}
+              />
+              <FormHint>{t("login.apiUrlHint")}</FormHint>
+            </div>
+          </details>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { t } from "../lib/i18n";
-import { getApiBaseUrl, getDefaultApiBaseUrl, setApiBaseUrl } from "../lib/config";
+import { API_ADDRESS_IS_FIXED, getApiBaseUrl, getDefaultApiBaseUrl, setApiBaseUrl } from "../lib/config";
 import { toast } from "../lib/ui";
 
 export interface ApiBaseUrlState {
@@ -8,6 +8,8 @@ export interface ApiBaseUrlState {
   setValue: (value: string) => void;
   saveIfChanged: () => void;
   placeholder: string;
+  /** False where the build decides the address; see API_ADDRESS_IS_FIXED. */
+  editable: boolean;
 }
 
 /** The backend address is edited on the sign-in screen and lives in localStorage. */
@@ -24,5 +26,5 @@ export function useApiBaseUrl(): ApiBaseUrlState {
     toast(t("login.apiUrlSaved"), { type: "success" });
   }, [value]);
 
-  return { value, setValue, saveIfChanged, placeholder: getDefaultApiBaseUrl() };
+  return { value, setValue, saveIfChanged, placeholder: getDefaultApiBaseUrl(), editable: !API_ADDRESS_IS_FIXED };
 }

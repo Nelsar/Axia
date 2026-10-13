@@ -304,7 +304,7 @@ container it is served by nginx on port 8080.
 
 | Screen | Shows | Needs |
 | --- | --- | --- |
-| Sign-in | login, password, directory picker, API address, language | — |
+| Sign-in | login, password, directory picker, language; an API address field on the development server only | — |
 | Dashboard | counts (users, directories, role mappings, groups, units), recent audit events; tiles the role cannot see say so | any |
 | Users | search, create, edit, delete, raw attributes; *Bulk operations* tab with the generator | `users.read` and up |
 | Groups | list, search, create, edit, members, delete | `groups.read` |
