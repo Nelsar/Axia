@@ -45,7 +45,7 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - uses: github/codeql-action/init@v3
+      - uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
@@ -53,6 +53,6 @@ jobs:
           # out directory accounts, and the extra queries cost CI minutes rather than accuracy.
           queries: security-and-quality
 
-      - uses: github/codeql-action/analyze@v3
+      - uses: github/codeql-action/analyze@v4
         with:
           category: /language:${{ matrix.language }}
