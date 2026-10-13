@@ -1,6 +1,7 @@
 import type { UserDto } from "../api/dto";
 import type { UserPermissions } from "../hooks/usePermissions";
 import { useUserAttributes } from "../hooks/useUserAttributes";
+import { useUserDetails } from "../hooks/useUserDetails";
 import { UserDetailDialog } from "../components/users/UserDetailDialog";
 import type { JSX } from "react";
 
@@ -12,7 +13,7 @@ export interface UserDetailDialogContainerProps {
   onClose: () => void;
 }
 
-/** The detail card’s container: it wires up the lazy attribute load; everything else passes straight through. */
+/** The detail card’s container: it reads the account itself, and wires up the lazy attribute load. */
 export function UserDetailDialogContainer({
   user,
   perms,
@@ -20,11 +21,14 @@ export function UserDetailDialogContainer({
   onDelete,
   onClose,
 }: UserDetailDialogContainerProps): JSX.Element {
+  const details = useUserDetails(user);
   const attributes = useUserAttributes(user.id);
 
   return (
     <UserDetailDialog
-      user={user}
+      user={details.user}
+      groupsStatus={details.status}
+      groupsError={details.error}
       perms={perms}
       attributes={attributes}
       onLoadAttributes={() => void attributes.load()}

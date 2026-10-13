@@ -1,6 +1,7 @@
 import type { DirectoryAttributeDto, UserDto } from "../../api/dto";
 import { t } from "../../lib/i18n";
 import type { UserAttributesState } from "../../hooks/useUserAttributes";
+import type { UserDetailsStatus } from "../../hooks/useUserDetails";
 import type { UserPermissions } from "../../hooks/usePermissions";
 import { Modal } from "../Modal";
 import { Badge, Card, ErrorBanner, Mono, Muted, Spinner } from "../primitives";
@@ -9,6 +10,9 @@ import type { JSX } from "react";
 
 export interface UserDetailDialogProps {
   user: UserDto;
+  /** Whether the account's own read has answered: until it has, the groups are not known yet. */
+  groupsStatus: UserDetailsStatus;
+  groupsError: string | null;
   perms: UserPermissions;
   attributes: UserAttributesState;
   onLoadAttributes: () => void;
@@ -27,7 +31,19 @@ function EmailCell({ user }: { user: UserDto }): JSX.Element {
 
 // An empty list means "membership was not reported", not "in no groups": in OpenLDAP memberOf is
 // only populated when the memberof overlay is enabled. Passing one off as the other is not on.
-function GroupsCell({ user }: { user: UserDto }): JSX.Element {
+// Nor is saying either before the account's own read has answered: the row the card opened
+// from carries no groups at all.
+function GroupsCell({
+  user,
+  status,
+  error,
+}: {
+  user: UserDto;
+  status: UserDetailsStatus;
+  error: string | null;
+}): JSX.Element {
+  if (status === "loading") return <Spinner />;
+  if (status === "error") return <Muted>{error}</Muted>;
   if (user.groups.length === 0) return <Muted>{t("users.noGroupsReported")}</Muted>;
   return (
     <>
@@ -96,6 +112,8 @@ function AttributesTable({ attributes }: { attributes: readonly DirectoryAttribu
 /** The user card: everything it shows arrives as props — including the attributes' state. */
 export function UserDetailDialog({
   user,
+  groupsStatus,
+  groupsError,
   perms,
   attributes,
   onLoadAttributes,
@@ -123,7 +141,7 @@ export function UserDetailDialog({
           </div>
           <div className="k">{t("nav.groups")}</div>
           <div>
-            <GroupsCell user={user} />
+            <GroupsCell user={user} status={groupsStatus} error={groupsError} />
           </div>
           <div className="k">Id</div>
           <div className="cell-mono" style={{ fontSize: "11.5px" }}>
