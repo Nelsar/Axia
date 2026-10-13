@@ -1,12 +1,16 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Nelsar.Axia.Api.Authorization;
 using Nelsar.Axia.Api.Configuration;
+using Nelsar.Axia.Api.Middleware;
 using Nelsar.Axia.Api.Resources;
 using Microsoft.AspNetCore.RateLimiting;
 using Nelsar.Axia.Contracts.Modules;
 using Nelsar.Axia.Contracts.Requests;
 using Nelsar.Axia.Contracts.Common;
 using Nelsar.Axia.Contracts.Responses;
+using Nelsar.Axia.Infrastructure.RateLimiting;
 
 namespace Nelsar.Axia.Api.Controllers;
 
@@ -18,11 +22,19 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthModule _auth;
     private readonly AuthOptions _options;
+    private readonly SignInThrottle _throttle;
+    private readonly IRateLimitSettingsProvider _rateLimits;
 
-    public AuthController(IAuthModule auth, IOptions<AuthOptions> options)
+    public AuthController(
+        IAuthModule auth,
+        IOptions<AuthOptions> options,
+        SignInThrottle throttle,
+        IRateLimitSettingsProvider rateLimits)
     {
         _auth = auth;
         _options = options.Value;
+        _throttle = throttle;
+        _rateLimits = rateLimits;
     }
 
     /// <summary>
@@ -57,10 +69,25 @@ public class AuthController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
+        // Per account, on top of the per-address limit the attribute applies; see SignInThrottle.
+        var directory = HttpContext.Items[ProviderHeaderMiddleware.ItemsKey] as string;
+        var limits = _rateLimits.GetSettings(SignInThrottle.PolicyName);
+        if (_throttle.Blocked(request.Email, directory, limits) is { } wait)
+        {
+            Response.Headers.RetryAfter = ((int)Math.Ceiling(wait.TotalSeconds)).ToString(CultureInfo.InvariantCulture);
+            return StatusCode(StatusCodes.Status429TooManyRequests, new { message = ApiMessages.TooManyRequests() });
+        }
+
         var response = await _auth.LoginAsync(request);
         if (response == null)
+        {
+            // Refused credentials only. A directory that could not be asked throws instead, and
+            // an outage is not counted against the people trying to sign in through it.
+            _throttle.RecordFailure(request.Email, directory, limits);
             return Unauthorized(new { message = ApiMessages.InvalidCredentials() });
+        }
 
+        _throttle.Reset(request.Email, directory);
         return Ok(response);
     }
 }

@@ -29,6 +29,8 @@ Tokens last `Jwt:ExpiresInMinutes` (60). There is no refresh; sign in again on `
 | `X-LDAP-Provider-Id: <id>` | request | Which directory. At sign-in: where to check the password. Afterwards: optional, and must match the directory the token was issued for. |
 | `Accept-Language: ru` | request | Language of messages in responses: `en`, `ru`, `kk`, `de`, `es`, `fr`, `zh`, `ar`, `he`. |
 | `X-Correlation-ID` | request & response | Request id. Sent back on every response; if you send one (short, alphanumeric), it is used. Quote it when reporting a problem; every log line of the request carries it. |
+| `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` | response | On every response, errors and refusals included: nothing the API answers is to be cached, sniffed, framed or rendered. There is no `Server` header. |
+| `Retry-After` | response | On `429` and `503`: seconds until the request will be taken. |
 
 ### Paging
 
@@ -82,7 +84,7 @@ validation problem details (`errors` per field) instead.
 | `403` | Signed in, but lacking the permission, or the target is protected. Does not say which permission. |
 | `404` | No such entry (or the id is stale after a rename). |
 | `409` | Conflict with the directory's state: already exists, unit not empty, address in use. |
-| `429` | Rate limit. |
+| `429` | Rate limit. `Retry-After` says when the window reopens. |
 | `501` | Not supported by this provider (groups on `ActiveDirectory`). |
 | `502` | The directory: unreachable, misconfigured, or it refused the operation. |
 | `503` | The bulk job queue is full. Nothing was queued; `Retry-After` says when to send it again. |

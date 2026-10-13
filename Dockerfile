@@ -28,6 +28,14 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app .
 
+# Not as root. A process holding the directory's bind password and the token signing key has no
+# use for root, and anything that took it over would have had the container's. $APP_UID is the
+# unprivileged user the .NET images ship (1654). The two places the API writes — the SQLite
+# database under /data and the file logs under /app/logs — are created here and given to it, so
+# that a named volume mounted on either starts out owned by that user too.
+RUN mkdir -p /data /app/logs && chown "$APP_UID" /data /app/logs
+USER $APP_UID
+
 # Base image sets ASPNETCORE_HTTP_PORTS=8080 by default; exposed here for documentation.
 EXPOSE 8080
 

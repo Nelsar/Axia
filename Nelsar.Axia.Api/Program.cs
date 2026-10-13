@@ -94,11 +94,24 @@ try
     // Rate limiting: partitioned per client IP, limits are read from IRateLimitSettingsProvider
     // (DB-backed, cached) each time a new partition/window is created, so an admin can retune
     // via /api/v1/rate-limit-settings without a redeploy or restart.
+    // Failed sign-ins per account; see SignInThrottle. Singleton, because its counts live in the
+    // process for as long as their window.
+    builder.Services.AddSingleton(TimeProvider.System);
+    builder.Services.AddSingleton<SignInThrottle>();
+
     builder.Services.AddRateLimiter(options =>
     {
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         options.OnRejected = (context, token) =>
         {
+            // When the window reopens, which the limiter knows. Without it a client has only the
+            // choice of hammering or guessing.
+            if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+            {
+                context.HttpContext.Response.Headers.RetryAfter =
+                    ((int)Math.Ceiling(retryAfter.TotalSeconds)).ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
+
             context.HttpContext.Response.ContentType = "application/json";
             return new ValueTask(context.HttpContext.Response.WriteAsJsonAsync(
                 new { message = ApiMessages.TooManyRequests() }, token));
@@ -208,6 +221,9 @@ try
         }
     });
 
+    // "Server: Kestrel" told anyone who asked what they were talking to, and nothing else.
+    builder.WebHost.ConfigureKestrel(kestrel => kestrel.AddServerHeader = false);
+
     var app = builder.Build();
 
     if (!app.Environment.IsEnvironment("Testing"))
@@ -227,6 +243,10 @@ try
     // for the rest of the pipeline, and GlobalExceptionHandler logs from inside that scope, so
     // the log line explaining a 500 carries the same id the caller was handed back.
     app.UseAxiaObservability();
+
+    // Ahead of everything that can answer, the exception handler and the rate limiter included,
+    // so that no response leaves without these.
+    app.UseMiddleware<SecurityHeadersMiddleware>();
 
     app.UseExceptionHandler();
 

@@ -25,7 +25,6 @@ How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
   and at most 10 jobs waiting in the queue — a full queue answers `503` with `Retry-After`. A
   queued job's status and results can only be read by the account that queued it, in the same
   directory; before, anyone holding `users.bulk` could read any job by its id.
-
 - Organizational units and computers are held to the same rule as accounts and groups: nobody
   acts on something more powerful than they are. Renaming or moving a unit is judged by what it
   holds — a group mapped to a role the caller lacks, anything privileged in the directory, or the
@@ -36,15 +35,37 @@ How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 - Units, groups and computers can only be created in, or moved to, a parent inside the base DN.
   The parent used to be whatever DN the request named, so anyone allowed to manage them could
   write one anywhere the bind account could.
+- Failed sign-ins are limited per account as well as per client address: after 5 in 15 minutes,
+  from any number of addresses, the account's attempts are refused with `429` until the window
+  ends, without being passed to the directory, so guesses spread over many addresses no longer
+  count towards its lockout there. A successful sign-in clears the count. The limits are the new
+  `auth-login-account` row on the Rate limiting page.
+- The console's image sends a Content-Security-Policy that allows nothing but its own origin, along
+  with `Cross-Origin-Opener-Policy`, `Permissions-Policy` and `Strict-Transport-Security`. A script
+  injected into the page, from another site or written inline, does not run.
+- Where the console is served with the API — built with `VITE_API_SAME_ORIGIN=true`, as the image
+  is — its sign-in screen no longer offers to change the API address, and an address saved in the
+  browser earlier is ignored. A link that set one could send the next sign-in, password included,
+  to someone else's server.
+- Every API response says `Cache-Control: no-store`, so a session token, directory entries or the
+  audit trail are kept by no cache, together with `X-Content-Type-Options`, `X-Frame-Options`,
+  `Referrer-Policy` and a Content-Security-Policy. The `Server` header is no longer sent.
+- The API's container runs as the .NET images' unprivileged user, uid 1654, instead of root.
 
 ### Added
 
 - `Ldap:ConnectTimeoutSeconds` (10) and `Ldap:OperationTimeoutSeconds` (30).
+- A rate-limited request is answered with `Retry-After`.
 
 ### Changed
 
 - The console is built with React 19, Vite 8 and TypeScript 7, and CI builds it on Node 22. Building
   it from source now needs Node 20.19 or later, 22 recommended.
+- **On upgrade:** the API no longer runs as root, so whatever it writes to — `/data` and
+  `/app/logs` — has to belong to uid 1654. Volumes created by 0.1.0 and host directories belong to
+  root; hand them over before starting the new image:
+  `sudo chown -R 1654 /srv/nelsar-axia/data /srv/nelsar-axia/logs`, with your own paths. The quick
+  start's `init` container does this for its own volumes.
 
 ## [0.1.0] - 2026-10-12
 

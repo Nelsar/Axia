@@ -53,6 +53,11 @@ public static class DbInitializer
             // Sign-in attempts per client address, on /api/v1/auth/login and /api/v1/auth/register.
             ("auth-login", 5, 60),
 
+            // Failed sign-ins per account, from any address: 5 in 15 minutes, then refused until
+            // the window ends. Below the usual directory lockout thresholds, so that guesses made
+            // through the application do not lock the account in the directory. See SignInThrottle.
+            ("auth-login-account", 5, 900),
+
             // The anonymous directory picker on /api/v1/providers/selectable. Looser than
             // sign-in because it is read once per page load and carries no credential to guess,
             // but still bounded: it is unauthenticated, and an unbounded unauthenticated read is

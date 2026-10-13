@@ -14,6 +14,13 @@
 
 set -eu
 
+# The API runs as the .NET images' unprivileged user, and has to read its keys and write its
+# database. Earlier versions ran it as root, so volumes they created are root's; this brings them
+# along on every start, before the early exit below.
+api_uid=1654
+chown -R "$api_uid" /api-data
+if [ -f /api-secrets/api.env ]; then chown "$api_uid" /api-secrets/api.env; fi
+
 if [ -f /api-secrets/api.env ] && [ -f /ldap-certs/ldap.crt ]; then
     echo "Quick start keys and certificates already exist; leaving them as they are."
     exit 0
@@ -42,6 +49,7 @@ umask 077
     printf 'Jwt__Key=%s\n' "$(openssl rand -base64 48 | tr -d '\n')"
     printf 'Encryption__Key=%s\n' "$(openssl rand -base64 32 | tr -d '\n')"
 } > /api-secrets/api.env
+chown "$api_uid" /api-secrets/api.env
 
 cd /
 rm -rf "$work"
