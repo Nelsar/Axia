@@ -62,7 +62,8 @@ Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
 - **Role mappings** — directory groups map to application roles, globally or per directory.
 - **Audit log** — every sign-in, and every attempt to change a directory or this application's
   settings, permitted or refused, with who made it.
-- **Rate limiting** — per client address, retunable through the API without a restart.
+- **Rate limiting** — per client address, and failed sign-ins per account as well, retunable
+  through the API without a restart.
 - **Nine interface languages**, including Arabic and Hebrew with a mirrored layout.
 
 Active Directory and OpenLDAP are both supported. The `StandardLdap` provider speaks standard LDAP

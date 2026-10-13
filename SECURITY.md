@@ -120,7 +120,10 @@ them before deploying.
   every configured directory unusable until they are re-entered (reported as such, rather than as
   a crash).
 - **No password policy, no account lockout.** Password rules are whatever the directory enforces.
-  The rate limiter slows repeated sign-in attempts per client address; it does not lock an account.
+  Sign-in attempts are rate-limited per client address, and failed ones per account: after 5 in
+  15 minutes the account's attempts are refused until the window ends, without reaching the
+  directory. Nothing is locked beyond that window, and the application does not lock the account in
+  the directory.
 - **The audit trail is in the same database as everything else**, writable by the same process, so
   it records what happened rather than proving it to someone who does not trust the host.
 

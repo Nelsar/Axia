@@ -20,7 +20,7 @@ reference.
 
 ## Signing in
 
-`POST /api/v1/auth/login` · no permission · rate-limited (`auth-login`, 5 per minute per address)
+`POST /api/v1/auth/login` · no permission · rate-limited (`auth-login`, 5 per minute per address; `auth-login-account`, 5 failed per 15 minutes per account)
 
 - Field `email` takes any login: `uid`, `sAMAccountName`, `userPrincipalName` or e-mail. How it is
   looked up: [Directories → Accounts](directories.md#accounts).

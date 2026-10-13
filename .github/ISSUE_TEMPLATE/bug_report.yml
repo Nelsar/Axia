@@ -19,7 +19,7 @@ body:
     attributes:
       label: Version
       description: A release tag, or the commit you built from (`git rev-parse --short HEAD`).
-      placeholder: v0.1.0
+      placeholder: v0.2.0
     validations:
       required: true
 

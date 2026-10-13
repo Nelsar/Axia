@@ -7,7 +7,11 @@ configuration or the API in ways that need action on upgrade; its entry says wha
 
 How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
-## [Unreleased]
+## [0.2.0] - 2026-10-13
+
+Hardening after the first release, and fixes to the console. **Upgrading from 0.1.0 takes one
+step:** the API's container no longer runs as root, so its volumes have to be handed to uid 1654
+before the new image starts — see *Changed*.
 
 ### Security
 
@@ -124,4 +128,5 @@ Read before deploying: [SECURITY.md](SECURITY.md#known-limitations) and
 [Not in scope yet](README.md#not-in-scope-yet). Above all, a session cannot be ended before its
 token expires, and directory certificates are not checked for revocation.
 
+[0.2.0]: https://github.com/Nelsar/Axia/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Nelsar/Axia/releases/tag/v0.1.0

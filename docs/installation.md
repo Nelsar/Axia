@@ -19,7 +19,7 @@ Production is a separate page: [Production deployment](production.md).
 | --- | --- | --- | --- |
 | Docker Engine with Compose v2 | **yes** | — | **yes** |
 | .NET SDK 10 | — | **yes** | **yes** |
-| Node.js 20+ and npm | — | **yes** | **yes** |
+| Node.js 22 (or 20.19+) and npm | — | **yes** | **yes** |
 | An LDAP / AD server you can reach | — | **yes** | — (provided) |
 | OpenLDAP client tools (`ldapsearch`, `ldapadd`) | — | optional | optional, for poking at it |
 | Python 3 | — | — | only to regenerate test data |
