@@ -87,7 +87,7 @@ Another API instance is running (`ss -ltnp | grep 5063`), or the console's 8080/
 | --- | --- |
 | `401` | Wrong password, or no account matches the login. Both look the same on purpose. Check the login with `ldapsearch` using the search filter. |
 | `401` or `502` for every account | Check the bind account (`Ldap:AdminUsername`/`AdminPassword`): the login is looked up with it before the user's own bind. The log has the directory's error. |
-| `429` "Too many requests" | `auth-login` limit: 5 per minute per address. Wait, or raise it under *Rate limiting*. Behind a proxy not listed in `ReverseProxy`, everyone shares one bucket. |
+| `429` "Too many requests" | `auth-login` limit: 5 per minute per address. Or `auth-login-account`: 5 failed sign-ins to this account in 15 minutes, from anywhere. Wait for `Retry-After`, or raise the limit under *Rate limiting*. Behind a proxy not listed in `ReverseProxy`, everyone shares one address bucket. |
 | `502` "…no server configured" | `Ldap:Server` is empty and the request named no directory. |
 | `502` unreachable | Network, firewall, wrong host/port, or the TLS handshake failed. |
 | `400` about the directory | `X-LDAP-Provider-Id` names an unknown or inactive directory. |
