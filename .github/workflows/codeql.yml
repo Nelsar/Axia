@@ -36,7 +36,7 @@ jobs:
           - language: javascript-typescript
             build-mode: none
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # autobuild shells out to `dotnet build`, which needs the SDK this solution targets; the
       # runner image's preinstalled version is not something to rely on.

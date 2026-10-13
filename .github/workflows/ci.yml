@@ -27,7 +27,7 @@ jobs:
     name: API — build and test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-dotnet@v4
         with:
@@ -52,7 +52,7 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
@@ -71,7 +71,7 @@ jobs:
     name: Quick start — compose up and sign in
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The README's first command, run as written. It catches what no other job builds: both
       # Dockerfiles, the nginx proxy, the generated certificate and keys, the demo directory and
@@ -106,7 +106,7 @@ jobs:
     name: Dependencies — known vulnerabilities
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-dotnet@v4
         with:
