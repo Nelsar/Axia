@@ -95,6 +95,16 @@ The API refuses to start with a missing, short or placeholder key.
 
 Mount both as volumes. The image does not declare them.
 
+The API runs as the .NET images' unprivileged user, uid **1654**, not as root. A named volume on
+either path starts out owned by it. A host directory, or a volume created by a version that ran as
+root, has to be handed over first:
+
+```bash
+sudo chown -R 1654 /srv/nelsar-axia/data /srv/nelsar-axia/logs
+```
+
+The quick start's `init` container does this for its own volumes on every start.
+
 ## Reverse proxy and TLS
 
 Any proxy works. The rules:

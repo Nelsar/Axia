@@ -22,6 +22,8 @@ services:
       - ./deploy/quickstart/init.sh:/init.sh:ro
       - ldap-certs:/ldap-certs
       - api-secrets:/api-secrets
+      # Only to hand it to the API's user; see the script.
+      - api-data:/api-data
 
   openldap:
     image: osixia/openldap:1.5.0
