@@ -32,7 +32,7 @@ docker build -t nelsar-axia-console:$(git rev-parse --short HEAD) frontend
 | Image | Base | Listens | Notes |
 | --- | --- | --- | --- |
 | API | `mcr.microsoft.com/dotnet/aspnet:10.0` | `8080` | `ASPNETCORE_ENVIRONMENT` defaults to Production. No `appsettings.json` inside; configure through the environment or a mounted file. |
-| Console | `nginxinc/nginx-unprivileged:1.27-alpine` | `8080` | Built with `VITE_API_SAME_ORIGIN=true`: it calls the API on its own origin. Its [`nginx.conf`](../frontend/nginx.conf) proxies `/api/` to `http://api:8080` and sends `X-Content-Type-Options`, `Referrer-Policy` and `X-Frame-Options: DENY`. |
+| Console | `nginxinc/nginx-unprivileged:1.27-alpine` | `8080` | Built with `VITE_API_SAME_ORIGIN=true`: it calls the API on its own origin. Its [`nginx.conf`](../frontend/nginx.conf) proxies `/api/` to `http://api:8080` and sends a `Content-Security-Policy` that admits nothing but its own origin (no inline script, no script, style, font or API from elsewhere), `X-Frame-Options: DENY`, `X-Content-Type-Options`, `Referrer-Policy`, `Cross-Origin-Opener-Policy`, `Permissions-Policy` and `Strict-Transport-Security` (effective once TLS is terminated in front). |
 
 There are no published images or releases yet; build from a commit you have reviewed.
 
