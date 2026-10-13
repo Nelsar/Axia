@@ -202,11 +202,13 @@ button { font-family: inherit; }
   font-weight: 600;
 }
 
+/* Two rows: who is signed in, then the controls. On one row the avatar, theme toggle, language
+   picker and sign-out left the name no width at all, and it was drawn underneath the toggle. */
 .sidebar__footer {
   margin-top: auto;
   padding: 14px 16px;
   border-top: 1px solid var(--border);
-  display: flex; align-items: center; gap: 10px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
 }
 .sidebar__avatar {
   width: 32px; height: 32px; border-radius: 50%;
@@ -215,7 +217,11 @@ button { font-family: inherit; }
   display: flex; align-items: center; justify-content: center;
   flex: 0 0 auto;
 }
-.sidebar__user { flex: 1; min-width: 0; }
+/* The rest of the first row, beside the 32px avatar and its 10px gap; the controls wrap below. */
+.sidebar__user { flex: 1 1 calc(100% - 42px); min-width: 0; }
+/* The second row: theme, language, sign-out. The picker takes what the two buttons leave rather
+   than the full width a select is otherwise given, which put each button on a row of its own. */
+.sidebar__footer .language-picker { flex: 1 1 0; min-width: 0; width: auto; }
 .sidebar__user-name { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sidebar__user-role { font-size: 11.5px; color: var(--text-faint); }
 .icon-btn {
@@ -323,6 +329,9 @@ table.data-table td { padding: 12px 16px; border-bottom: 1px solid var(--border)
 table.data-table tbody tr:hover { background: var(--bg-hover); }
 table.data-table tbody tr.clickable { cursor: pointer; }
 .cell-muted { color: var(--text-faint); }
+/* Free text that may hold long unbroken tokens (ids, exception names): it wraps inside its column
+   instead of widening the table past its card. */
+.cell-wrap { overflow-wrap: anywhere; min-width: 12em; }
 .cell-mono { font-family: var(--font-mono); font-size: 12.5px; color: var(--text-muted); }
 
 /* A list of DNs (group members) — long DNs wrap rather than stretching the modal. */

@@ -67,6 +67,20 @@ How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
   `sudo chown -R 1654 /srv/nelsar-axia/data /srv/nelsar-axia/logs`, with your own paths. The quick
   start's `init` container does this for its own volumes.
 
+### Fixed
+
+- An attempt to change something that an endpoint refused for want of a permission is recorded in
+  the audit trail, as a failure, with who made it and the permission it needed. Only refusals made
+  inside a use case were recorded before, so the commonest one — a permission not held at all —
+  left no trace.
+- An account's detail view shows its groups. In a directory without `memberOf` it showed none,
+  for accounts that were members, whenever the full listing had been read first.
+- An account opened from a search shows its login and DN, which read "—".
+- The dashboard counts groups and organizational units again; it asked for a page larger than the
+  API serves and showed "API unavailable" for both.
+- The audit log's details wrap inside the table instead of running past its edge, and the
+  signed-in user's name in the sidebar is no longer drawn under the theme toggle.
+
 ## [0.1.0] - 2026-10-12
 
 The first public release.

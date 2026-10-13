@@ -36,6 +36,12 @@ export { ApiError } from "./client";
 
 const DEFAULT_PAGE_SIZE = 50;
 
+/**
+ * The largest page the API serves: PagingRules.MaximumPageSize. A larger one is refused with 400
+ * rather than cut down, so a caller that wants "as many as possible" must ask for exactly this.
+ */
+export const MAX_PAGE_SIZE = 200;
+
 /** Every directory listing takes the same page parameters. */
 interface PageQuery {
   filter?: string | undefined;

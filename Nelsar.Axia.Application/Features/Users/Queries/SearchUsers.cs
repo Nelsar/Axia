@@ -81,13 +81,19 @@ internal sealed class SearchUsersQueryHandler : IRequestHandler<SearchUsersQuery
     /// (mail-or-login, Dn, Username). Unifying them would change the ids search hands out, which
     /// clients hold in URLs. Worth doing, but as its own change with its own test — not smuggled
     /// in under a refactor.
+    ///
+    /// The login and the DN are carried, as the listing carries them. Without them a row opened
+    /// in the console's detail view showed "—" for both, though nothing about them is withheld:
+    /// the same caller reads them from GET /users/{id}.
     /// </summary>
     private static UserDto Map(LdapUserInfo entry) => new()
     {
         Id = DeterministicIdFactory.BuildUserId(entry.Email, entry.Dn, entry.DisplayName),
         Email = string.IsNullOrWhiteSpace(entry.Email) ? entry.DisplayName : entry.Email,
+        Username = entry.Username,
         Name = string.IsNullOrWhiteSpace(entry.DisplayName) ? entry.Email : entry.DisplayName,
-        Role = UserRoles.User
+        Role = UserRoles.User,
+        Dn = entry.Dn
     };
 
     private static string BuildLdapUserSearchFilter(string query)

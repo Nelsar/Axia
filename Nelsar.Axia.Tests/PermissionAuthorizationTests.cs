@@ -165,6 +165,49 @@ public class PermissionAuthorizationTests
     }
 
     [Fact]
+    public async Task AChangeRefusedByTheEndpoint_IsInTheAuditTrail()
+    {
+        // The route's own [Authorize(Policy)] refuses before any use case runs, so AuditBehaviour
+        // never saw it: the commonest refusal of all — a permission not held — left no trace.
+        using var factory = FactoryForMemberOf("UserEditors");
+        var client = SignedIn(factory, "editor-only@example.com");
+
+        var response = await client.PostAsJsonAsync("/api/v1/users", new UserCreateRequest
+        {
+            Email = "newuser@example.com",
+            Name = "New User",
+            Password = "Password123!"
+        });
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        var entry = Assert.Single(AuditTrail(factory));
+        Assert.False(entry.Success);
+        Assert.Equal("Users.Create", entry.Action);
+        Assert.Equal("editor-only@example.com", entry.Actor);
+        Assert.Contains("POST /api/v1/users", entry.Details);
+        Assert.Contains($"requires {Permissions.UsersCreate}", entry.Details);
+    }
+
+    [Fact]
+    public async Task AReadRefusedByTheEndpoint_IsNotAudited()
+    {
+        // Reads are not audited anywhere else either; a refused one is no different.
+        using var factory = FactoryForMemberOf("UserEditors");
+        var client = SignedIn(factory, "editor-only@example.com");
+
+        var response = await client.GetAsync("/api/v1/audit-events");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Empty(AuditTrail(factory));
+    }
+
+    private static List<AuditEvent> AuditTrail(ApiTestFactory factory)
+    {
+        using var scope = factory.Services.CreateScope();
+        return [.. scope.ServiceProvider.GetRequiredService<AppDbContext>().AuditEvents];
+    }
+
+    [Fact]
     public async Task DirectoryOutageDuringAuthorisation_Fails502_NotForbidden()
     {
         var ldap = new Mock<ILdapService>();

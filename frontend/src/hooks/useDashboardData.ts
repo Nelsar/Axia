@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { api } from "../api";
+import { api, MAX_PAGE_SIZE } from "../api";
 import type {
   AuditEventDto,
   GroupDto,
@@ -16,7 +16,10 @@ import type { PageRequest } from "./usePagedList";
 // and a hasMore flag. So the counter here is the length of one deliberately large page, and
 // hasMore means the number shown is a lower bound rather than a total. The backend walks the
 // whole directory before paginating anyway, so a large pageSize adds it no work.
-export const DIRECTORY_COUNT_PAGE_SIZE = 1000;
+//
+// The largest page the API serves, and no larger: this was 1000, which the API refuses with 400,
+// so both counters read "API unavailable" against a directory that was answering perfectly well.
+export const DIRECTORY_COUNT_PAGE_SIZE = MAX_PAGE_SIZE;
 
 /**
  * A counter's result is a discriminated union: either a number with caveats, or a failure. That
