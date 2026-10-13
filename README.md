@@ -25,6 +25,8 @@ Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
 > not yet here is listed under [Not in scope yet](#not-in-scope-yet) — read it before deciding
 > whether this fits.
 
+![The users screen: every account with the role it signs in with](docs/screenshots/users.png)
+
 ## Who it is for
 
 - **IT administrators** who want to hand routine directory work — creating accounts, resetting
@@ -66,6 +68,15 @@ Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
 Active Directory and OpenLDAP are both supported. The `StandardLdap` provider speaks standard LDAP
 (RFC 4511) over LDAPS or StartTLS and works against AD, OpenLDAP and eDirectory alike; a Windows-only `ActiveDirectory`
 provider using `System.DirectoryServices` also exists but manages fewer object types.
+
+| | |
+| --- | --- |
+| ![Pattern generator: Cyrillic names transliterated into logins and checked against the directory](docs/screenshots/generator.png) | ![Audit log: changes made and attempts refused, with who made them](docs/screenshots/audit.png) |
+| **Pattern generator** — names transliterated into logins, each checked against the directory. | **Audit log** — changes and refused attempts, with who made them. |
+| ![Role mappings: directory groups mapped to the console's roles](docs/screenshots/role-mappings.png) | ![Groups under the base DN with their members](docs/screenshots/groups.png) |
+| **Role mappings** — which directory group grants which role. | **Groups** — the directory's groups and their members. |
+
+Every screenshot is of the [quick start](#quick-start) and its demo directory.
 
 ## Documentation
 
