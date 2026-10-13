@@ -263,15 +263,17 @@ Admin is fixed. See [Access control](access-control.md).
 
 `ratelimits.manage` · `/api/v1/rate-limit-settings` · console: *Rate limiting*
 
-Fixed-window limits per client address, retunable without a restart (picked up within 30 seconds).
+Fixed-window limits, retunable without a restart (picked up within 30 seconds): per client address,
+and for sign-in also per account.
 
 | Policy | Applies to | Default |
 | --- | --- | --- |
 | `auth-login` | `/api/v1/auth/login`, `/api/v1/auth/register` | 5 requests / 60 s |
 | `providers-selectable` | `/api/v1/providers/selectable` | 30 requests / 60 s |
+| `auth-login-account` | `/api/v1/auth/login`, per login and directory, from any address | 5 **failed** sign-ins / 900 s, then `429` with `Retry-After` until the window ends; a successful sign-in clears the count |
 
 Each has `permitLimit`, `windowSeconds`, `queueLimit` (requests held rather than refused, default
-0) and `enabled`. Over the limit: `429` with a message.
+0) and `enabled`. Over the limit: `429` with a message and `Retry-After`.
 
 The client address is the TCP peer, or the `X-Forwarded-For` value from a proxy listed in
 `ReverseProxy`. Behind an unlisted proxy, everyone shares one bucket.

@@ -94,6 +94,11 @@ try
     // Rate limiting: partitioned per client IP, limits are read from IRateLimitSettingsProvider
     // (DB-backed, cached) each time a new partition/window is created, so an admin can retune
     // via /api/v1/rate-limit-settings without a redeploy or restart.
+    // Failed sign-ins per account; see SignInThrottle. Singleton, because its counts live in the
+    // process for as long as their window.
+    builder.Services.AddSingleton(TimeProvider.System);
+    builder.Services.AddSingleton<SignInThrottle>();
+
     builder.Services.AddRateLimiter(options =>
     {
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
