@@ -238,4 +238,16 @@
   <data name="SessionAccountDisabled" xml:space="preserve">
     <value>Su cuenta se ha deshabilitado en el directorio, por lo que esta sesión ha terminado. Pida a un administrador que la habilite.</value>
   </data>
+  <data name="BulkRequestTooLarge" xml:space="preserve">
+    <value>Un lote masivo puede contener como máximo {0} filas. Divídalo en lotes más pequeños.</value>
+  </data>
+  <data name="BulkSynchronousRequestTooLarge" xml:space="preserve">
+    <value>Un lote que se procesa mientras espera puede contener como máximo {0} filas. Ponga en cola los lotes más grandes (POST /api/v1/users/bulk).</value>
+  </data>
+  <data name="BulkQueueFull" xml:space="preserve">
+    <value>Hay demasiados trabajos masivos esperando para ejecutarse. Vuelva a intentarlo dentro de un rato.</value>
+  </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>El elemento primario debe ser {0} o estar dentro de él: es la parte del directorio que administra esta aplicación.</value>
+  </data>
 </root>

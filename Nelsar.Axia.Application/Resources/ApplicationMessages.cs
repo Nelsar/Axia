@@ -32,6 +32,17 @@ public static class ApplicationMessages
     /// now a validator on the command, so its text has to be reachable from this layer.</summary>
     public static string BulkRequestEmpty() => Get(nameof(BulkRequestEmpty));
 
+    public static string BulkRequestTooLarge(int maximum) => Format(nameof(BulkRequestTooLarge), maximum);
+
+    /// <summary>Points at the queued endpoint, which is the answer to a batch too large to wait on.</summary>
+    public static string BulkSynchronousRequestTooLarge(int maximum) =>
+        Format(nameof(BulkSynchronousRequestTooLarge), maximum);
+
+    public static string BulkQueueFull() => Get(nameof(BulkQueueFull));
+
+    /// <summary>Names the base DN: it is configuration the caller has to work within, not a secret.</summary>
+    public static string ParentOutsideBaseDn(string baseDn) => Format(nameof(ParentOutsideBaseDn), baseDn);
+
     public static string PatternRequired() => Get(nameof(PatternRequired));
 
     /// <summary>

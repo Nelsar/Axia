@@ -70,6 +70,11 @@ internal sealed class UsersModule : IUsersModule
         CancellationToken cancellationToken = default) =>
         _sender.Send(new ProcessBulkUsersCommand(AsList(requests)), cancellationToken);
 
+    public Task<BulkOperationResponse<BulkUserResult>> ProcessQueuedBulkAsync(
+        IEnumerable<BulkUserRequest>? requests,
+        CancellationToken cancellationToken = default) =>
+        _sender.Send(new ProcessBulkUsersCommand(AsList(requests), Queued: true), cancellationToken);
+
     public Task<BulkOperationResponse<BulkUserResult>?> GetBulkJobStatusAsync(
         string jobId,
         CancellationToken cancellationToken = default) =>

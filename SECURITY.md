@@ -68,11 +68,16 @@ Inside that, the following are meant to hold, and a case where they do not is wo
   secrets — LAPS passwords among them — are withheld from the attributes view.
 - **A stored bind password is only sent where it was entered for.** Moving a directory to a new
   host, port or failover host requires the password again, and so does switching it to `None`.
+- **Writes stay inside the base DN.** New and moved units, groups and computers must have a parent
+  that is the base DN or beneath it; one outside is refused before the directory is asked.
 - **An operation cannot cross into another directory.** The directory is bound to the session at
   sign-in and carried in the token; a request naming a different one in `X-LDAP-Provider-Id` is
   refused rather than silently served from the default.
 - **A login cannot change the query it lands in.** Filters and distinguished names are escaped at
   the boundary, and the escaping is tested against the metacharacters that matter.
+- **A bulk job is its owner's.** Its results name every account in the batch and why each row
+  failed, so only the account that queued it, in the same directory, can read them. Batches and
+  the queue are bounded, so no caller can hold a request thread or the process's memory with one.
 - **Every change is attributable.** Every attempt to change a directory or this application's
   settings is written to the audit trail with the principal who made it — the signed-in caller, or
   for a queued bulk job the person who queued it — whether it was permitted or refused. A test

@@ -238,4 +238,16 @@
   <data name="SessionAccountDisabled" xml:space="preserve">
     <value>Тіркелгіңіз каталогта өшірілді, сондықтан бұл сеанс аяқталды. Оны қосуды әкімшіден сұраңыз.</value>
   </data>
+  <data name="BulkRequestTooLarge" xml:space="preserve">
+    <value>Топтама ең көбі {0} жолдан тұра алады. Оны кішірек топтамаларға бөліңіз.</value>
+  </data>
+  <data name="BulkSynchronousRequestTooLarge" xml:space="preserve">
+    <value>Күтіп тұрғанда өңделетін топтама ең көбі {0} жолдан тұра алады. Үлкенірек топтамаларды кезекке қойыңыз (POST /api/v1/users/bulk).</value>
+  </data>
+  <data name="BulkQueueFull" xml:space="preserve">
+    <value>Орындалуын күтіп тұрған топтамалық тапсырмалар тым көп. Біраздан кейін қайталап көріңіз.</value>
+  </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>Аталық нысан {0} немесе оның ішінде болуы керек: каталогтың бұл қолданба басқаратын бөлігі осы.</value>
+  </data>
 </root>

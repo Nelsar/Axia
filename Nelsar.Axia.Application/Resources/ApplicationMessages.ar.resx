@@ -238,4 +238,16 @@
   <data name="SessionAccountDisabled" xml:space="preserve">
     <value>تم تعطيل حسابك في الدليل، ولذلك انتهت هذه الجلسة. اطلب من المسؤول تفعيله.</value>
   </data>
+  <data name="BulkRequestTooLarge" xml:space="preserve">
+    <value>يمكن أن تحتوي الدفعة المجمعة على {0} صف كحد أقصى. قسّمها إلى دفعات أصغر.</value>
+  </data>
+  <data name="BulkSynchronousRequestTooLarge" xml:space="preserve">
+    <value>يمكن أن تحتوي الدفعة التي تُعالَج أثناء انتظارك على {0} صف كحد أقصى. ضع الدفعات الأكبر في قائمة الانتظار بدلًا من ذلك (POST /api/v1/users/bulk).</value>
+  </data>
+  <data name="BulkQueueFull" xml:space="preserve">
+    <value>هناك عدد كبير جدًا من المهام المجمعة في انتظار التشغيل. حاول مرة أخرى بعد قليل.</value>
+  </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>يجب أن يكون الأصل {0} أو داخله: فهذا هو جزء الدليل الذي يديره هذا التطبيق.</value>
+  </data>
 </root>

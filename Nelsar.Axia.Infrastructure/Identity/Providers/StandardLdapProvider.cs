@@ -612,6 +612,7 @@ internal class StandardLdapProvider : ILdapProvider
         // No parent means the directory root we are configured against, which is the only
         // container we can be sure exists.
         var parent = string.IsNullOrWhiteSpace(parentDn) ? _settings.BaseDn : parentDn.Trim();
+        EnsureInsideBase(parent);
         var dn = $"ou={DistinguishedName.EscapeRdnValue(unitName)},{parent}";
 
         var attrs = new LdapAttributeSet
@@ -653,6 +654,8 @@ internal class StandardLdapProvider : ILdapProvider
 
         var renamed = !string.Equals(targetName, current.Rdn, StringComparison.OrdinalIgnoreCase);
         var moved = !string.Equals(targetParent, current.Parent, StringComparison.OrdinalIgnoreCase);
+        if (moved)
+            EnsureInsideBase(targetParent);
 
         using var conn = ConnectOrThrow();
         var effectiveDn = current.Value;
@@ -851,6 +854,7 @@ internal class StandardLdapProvider : ILdapProvider
             throw new DomainValidationException(ApplicationMessages.GroupMembersRequired());
 
         var parent = string.IsNullOrWhiteSpace(parentDn) ? _settings.BaseDn : parentDn.Trim();
+        EnsureInsideBase(parent);
         var dn = $"cn={DistinguishedName.EscapeRdnValue(groupName)},{parent}";
 
         var attrs = new LdapAttributeSet
@@ -909,6 +913,8 @@ internal class StandardLdapProvider : ILdapProvider
 
         var renamed = !string.Equals(targetName, current.Rdn, StringComparison.OrdinalIgnoreCase);
         var moved = !string.Equals(targetParent, current.Parent, StringComparison.OrdinalIgnoreCase);
+        if (moved)
+            EnsureInsideBase(targetParent);
 
         using var conn = ConnectOrThrow();
         var effectiveDn = current.Value;
@@ -1085,6 +1091,7 @@ internal class StandardLdapProvider : ILdapProvider
             throw new DomainValidationException(ApplicationMessages.ComputerNameRequired());
 
         var parent = string.IsNullOrWhiteSpace(parentDn) ? _settings.BaseDn : parentDn.Trim();
+        EnsureInsideBase(parent);
         var dn = $"cn={DistinguishedName.EscapeRdnValue(computerName)},{parent}";
 
         var attrs = new LdapAttributeSet
@@ -1134,6 +1141,8 @@ internal class StandardLdapProvider : ILdapProvider
 
         var renamed = !string.Equals(targetName, current.Rdn, StringComparison.OrdinalIgnoreCase);
         var moved = !string.Equals(targetParent, current.Parent, StringComparison.OrdinalIgnoreCase);
+        if (moved)
+            EnsureInsideBase(targetParent);
 
         using var conn = ConnectOrThrow();
         var effectiveDn = current.Value;
@@ -1481,6 +1490,29 @@ internal class StandardLdapProvider : ILdapProvider
         {
             throw new DirectoryUnavailableException(ApplicationMessages.DirectoryUnreachable(), ex);
         }
+    }
+
+    /// <summary>
+    /// Refuses a parent outside the base DN, for an entry being created or moved.
+    ///
+    /// The base DN is the part of the directory this application is given to manage: everything
+    /// it lists and every id it hands out are inside it. Where a new unit, group or computer went,
+    /// though, was whatever DN the request named, so anyone allowed to manage them could write one
+    /// anywhere the bind account could write — into AD's built-in containers, or another team's
+    /// subtree. Checked before the directory is asked, so nothing is written.
+    ///
+    /// An empty base DN confines nothing: the whole directory is then the managed part.
+    /// </summary>
+    /// <exception cref="DomainValidationException">The parent is not the base DN or beneath it.</exception>
+    private void EnsureInsideBase(string parentDn)
+    {
+        if (!DistinguishedName.TryCreate(_settings.BaseDn, out var managed))
+            return;
+
+        if (DistinguishedName.TryCreate(parentDn, out var parent) && parent!.IsWithin(managed!))
+            return;
+
+        throw new DomainValidationException(ApplicationMessages.ParentOutsideBaseDn(managed!.Value));
     }
 
     private void EnsureWriteOperationsSupported()

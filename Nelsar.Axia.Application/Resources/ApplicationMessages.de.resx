@@ -238,4 +238,16 @@
   <data name="SessionAccountDisabled" xml:space="preserve">
     <value>Ihr Konto wurde im Verzeichnis deaktiviert, daher wurde diese Sitzung beendet. Bitten Sie einen Administrator, es wieder zu aktivieren.</value>
   </data>
+  <data name="BulkRequestTooLarge" xml:space="preserve">
+    <value>Ein Massenauftrag darf höchstens {0} Zeilen enthalten. Teilen Sie ihn in kleinere Aufträge auf.</value>
+  </data>
+  <data name="BulkSynchronousRequestTooLarge" xml:space="preserve">
+    <value>Ein Auftrag, der sofort verarbeitet wird, darf höchstens {0} Zeilen enthalten. Stellen Sie größere Aufträge stattdessen in die Warteschlange (POST /api/v1/users/bulk).</value>
+  </data>
+  <data name="BulkQueueFull" xml:space="preserve">
+    <value>Es warten zu viele Massenaufträge auf ihre Ausführung. Versuchen Sie es in Kürze erneut.</value>
+  </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>Das übergeordnete Objekt muss {0} sein oder darin liegen: Das ist der Teil des Verzeichnisses, den diese Anwendung verwaltet.</value>
+  </data>
 </root>

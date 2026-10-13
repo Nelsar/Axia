@@ -238,4 +238,16 @@
   <data name="SessionAccountDisabled" xml:space="preserve">
     <value>您的帐户已在目录中被禁用，因此此会话已结束。请联系管理员启用该帐户。</value>
   </data>
+  <data name="BulkRequestTooLarge" xml:space="preserve">
+    <value>批量任务最多只能包含 {0} 行。请将其拆分为更小的批次。</value>
+  </data>
+  <data name="BulkSynchronousRequestTooLarge" xml:space="preserve">
+    <value>在等待期间处理的批次最多只能包含 {0} 行。请改为将更大的批次加入队列（POST /api/v1/users/bulk）。</value>
+  </data>
+  <data name="BulkQueueFull" xml:space="preserve">
+    <value>等待运行的批量任务过多。请稍后再试。</value>
+  </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>父级必须是 {0} 或位于其内：这是本应用程序管理的目录部分。</value>
+  </data>
 </root>

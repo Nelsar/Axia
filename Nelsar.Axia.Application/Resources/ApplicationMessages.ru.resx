@@ -242,4 +242,16 @@
   <data name="SessionAccountDisabled" xml:space="preserve">
     <value>Ваша учётная запись отключена в каталоге, поэтому сеанс завершён. Попросите администратора включить её.</value>
   </data>
+  <data name="BulkRequestTooLarge" xml:space="preserve">
+    <value>Пакет может содержать не более {0} строк. Разбейте его на пакеты поменьше.</value>
+  </data>
+  <data name="BulkSynchronousRequestTooLarge" xml:space="preserve">
+    <value>Пакет, который обрабатывается, пока вы ждёте, может содержать не более {0} строк. Большие пакеты ставьте в очередь (POST /api/v1/users/bulk).</value>
+  </data>
+  <data name="BulkQueueFull" xml:space="preserve">
+    <value>В очереди слишком много пакетных задач. Повторите попытку чуть позже.</value>
+  </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>Родитель должен быть {0} или находиться внутри него: это та часть каталога, которой управляет приложение.</value>
+  </data>
 </root>

@@ -238,4 +238,16 @@
   <data name="SessionAccountDisabled" xml:space="preserve">
     <value>החשבון שלך הושבת בספרייה, ולכן ההפעלה הזו הסתיימה. בקשו ממנהל להפעיל אותו מחדש.</value>
   </data>
+  <data name="BulkRequestTooLarge" xml:space="preserve">
+    <value>אצווה יכולה להכיל לכל היותר {0} שורות. פצלו אותה לאצוות קטנות יותר.</value>
+  </data>
+  <data name="BulkSynchronousRequestTooLarge" xml:space="preserve">
+    <value>אצווה שמעובדת בזמן שאתם ממתינים יכולה להכיל לכל היותר {0} שורות. הכניסו אצוות גדולות יותר לתור במקום זאת (POST /api/v1/users/bulk).</value>
+  </data>
+  <data name="BulkQueueFull" xml:space="preserve">
+    <value>יותר מדי משימות אצווה ממתינות להרצה. נסו שוב בעוד זמן קצר.</value>
+  </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>ההורה חייב להיות {0} או בתוכו: זהו החלק בספרייה שהיישום הזה מנהל.</value>
+  </data>
 </root>

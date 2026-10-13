@@ -21,6 +21,14 @@ How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
   and then does not answer is reported as unavailable after `Ldap:OperationTimeoutSeconds`, so it
   can no longer tie up the API's request threads. This includes StartTLS, which the LDAP library
   could not time out on its own.
+- Bulk batches are bounded: 100 rows when processed while the caller waits, 10,000 when queued,
+  and at most 10 jobs waiting in the queue — a full queue answers `503` with `Retry-After`. A
+  queued job's status and results can only be read by the account that queued it, in the same
+  directory; before, anyone holding `users.bulk` could read any job by its id.
+
+- Units, groups and computers can only be created in, or moved to, a parent inside the base DN.
+  The parent used to be whatever DN the request named, so anyone allowed to manage them could
+  write one anywhere the bind account could.
 
 ### Added
 

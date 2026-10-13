@@ -126,7 +126,7 @@ public class BulkJobProviderRoutingTests
             var principal = sp.GetRequiredService<BackgroundPrincipal>();
 
             var users = new Mock<IUsersModule>();
-            users.Setup(x => x.ProcessBulkAsync(
+            users.Setup(x => x.ProcessQueuedBulkAsync(
                     It.IsAny<IEnumerable<BulkUserRequest>?>(), It.IsAny<CancellationToken>()))
                 .Callback(() => observed.TrySetResult((scope.ProviderId, principal)))
                 .ReturnsAsync(new BulkOperationResponse<BulkUserResult> { Items = Array.Empty<BulkUserResult>() });

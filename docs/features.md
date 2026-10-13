@@ -110,7 +110,12 @@ Behaviour:
 - **Every row is audited**, under the submitter's name, including password resets.
 - **Queued jobs live in memory.** They are lost if the API restarts, and they are not shared
   between instances. Job states: `pending`, `inprogress`, `completed`, `failed`.
-- An empty batch is `400`.
+- **Sizes.** A synchronous batch holds at most 100 rows, since the caller waits on it; a queued
+  one at most 10,000, as many logins as one generator preview. Larger, or empty, is `400`.
+- **The queue holds 10 jobs** besides the one running. A full queue answers `503` with
+  `Retry-After`; nothing is queued, so the same batch can simply be sent again.
+- **A job's status is its owner's.** Only the account that queued it, signed in to the same
+  directory, can read it; anyone else gets `404`, as for a job that does not exist.
 
 In the console: *Users → Bulk operations*, which accepts pasted rows and shows per-row results,
 polling queued jobs.
@@ -198,7 +203,9 @@ Paste one record per line in `rawText`, give a regular expression with named gro
 | Delete | `orgunits.manage` | `DELETE /api/v1/organizational-units/{id}` |
 
 - A flat list (name, DN, parent DN, description), not a tree.
-- The parent can be any container, including ones not in the list (`CN=Users`, the base DN).
+- The parent can be any container inside the base DN, including ones not in the list (the base DN
+  itself, or AD's `CN=Users` when the base DN is the domain). A parent outside it is `400`; the
+  same goes for groups and computers, created or moved.
 - Deleting a unit that still contains entries is refused by the directory: `409`. Nothing is
   deleted recursively.
 - The `id` is derived from the DN, so it changes on rename or move.

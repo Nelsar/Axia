@@ -238,4 +238,16 @@
   <data name="SessionAccountDisabled" xml:space="preserve">
     <value>Votre compte a été désactivé dans l'annuaire, cette session a donc pris fin. Demandez à un administrateur de le réactiver.</value>
   </data>
+  <data name="BulkRequestTooLarge" xml:space="preserve">
+    <value>Un lot peut contenir au plus {0} lignes. Divisez-le en lots plus petits.</value>
+  </data>
+  <data name="BulkSynchronousRequestTooLarge" xml:space="preserve">
+    <value>Un lot traité pendant que vous attendez peut contenir au plus {0} lignes. Mettez plutôt les lots plus grands en file d'attente (POST /api/v1/users/bulk).</value>
+  </data>
+  <data name="BulkQueueFull" xml:space="preserve">
+    <value>Trop de traitements par lot attendent d'être exécutés. Réessayez dans un moment.</value>
+  </data>
+  <data name="ParentOutsideBaseDn" xml:space="preserve">
+    <value>Le parent doit être {0} ou se trouver à l'intérieur : c'est la partie de l'annuaire que gère cette application.</value>
+  </data>
 </root>

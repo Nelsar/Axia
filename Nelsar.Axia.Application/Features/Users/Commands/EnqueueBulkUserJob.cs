@@ -36,6 +36,12 @@ internal sealed class EnqueueBulkUserJobCommandValidator : AbstractValidator<Enq
             .NotEmpty()
             .WithMessage(_ => ApplicationMessages.BulkRequestEmpty());
 
+        // The queued limit; see ProcessBulkUsersCommand.MaximumQueuedRows.
+        RuleFor(c => c.Requests)
+            .Must(rows => rows.Count <= ProcessBulkUsersCommand.MaximumQueuedRows)
+            .When(c => c.Requests is not null)
+            .WithMessage(_ => ApplicationMessages.BulkRequestTooLarge(ProcessBulkUsersCommand.MaximumQueuedRows));
+
         RuleForEach(c => c.Requests).NotNull();
     }
 }
@@ -75,8 +81,10 @@ internal sealed class EnqueueBulkUserJobCommandHandler : IRequestHandler<Enqueue
             RequestedByDn = _currentUser.DistinguishedName
         };
 
-        _bulkJobStore.Add(job);
+        // Queued before it is stored, so that a job the full queue refuses is not left behind as
+        // a pending one nobody will ever run.
         await _bulkJobQueue.EnqueueAsync(job, cancellationToken);
+        _bulkJobStore.Add(job);
         return job.Id;
     }
 }

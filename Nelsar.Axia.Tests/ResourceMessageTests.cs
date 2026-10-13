@@ -94,6 +94,7 @@ public class ResourceMessageTests
         [nameof(ApplicationMessages.RoleUnknown)] = "a role",
         [nameof(ApplicationMessages.RoleNotEditable)] = "a role",
         [nameof(ApplicationMessages.PermissionNotGrantable)] = "a permission",
+        [nameof(ApplicationMessages.ParentOutsideBaseDn)] = "the configured base DN",
     };
 
     [Theory]
