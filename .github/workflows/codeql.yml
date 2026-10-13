@@ -40,7 +40,7 @@ jobs:
 
       # autobuild shells out to `dotnet build`, which needs the SDK this solution targets; the
       # runner image's preinstalled version is not something to rely on.
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         if: matrix.language == 'csharp'
         with:
           dotnet-version: 10.0.x
