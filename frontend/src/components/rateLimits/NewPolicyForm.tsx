@@ -1,4 +1,4 @@
-import type { ChangeEvent, CSSProperties, FormEvent, HTMLInputTypeAttribute } from "react";
+import type { ChangeEvent, CSSProperties, FormEvent, HTMLInputTypeAttribute, JSX } from "react";
 import { t } from "../../lib/i18n";
 import type { FormErrors } from "../../hooks/useEntityForm";
 import type { NewPolicyFormValues } from "../../containers/NewPolicyFormContainer";

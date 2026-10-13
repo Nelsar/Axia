@@ -1,4 +1,5 @@
 import { t } from "../lib/i18n";
+import type { JSX } from "react";
 /** The "Edit / Delete" pair at the end of a table row — the same on five screens. */
 export interface RowActionsProps<T> {
   item: T;

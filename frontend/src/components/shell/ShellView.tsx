@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import type { NavGroup } from "../../lib/navigation";
 import type { Theme } from "../../lib/theme";
 import { t } from "../../lib/i18n";

@@ -6,6 +6,7 @@ import type { DashboardData, DashboardState } from "../../hooks/useDashboardData
 import { PageHeader } from "../PageHeader";
 import { Badge, Card, Spinner } from "../primitives";
 import { directoryCountNote, directoryCountValue, usersCountNote } from "./dashboardNotes";
+import type { JSX } from "react";
 
 export interface DashboardViewProps {
   user: SessionUser | null;

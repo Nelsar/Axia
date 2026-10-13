@@ -2,6 +2,7 @@ import type { GroupDto } from "../../api/dto";
 import { t } from "../../lib/i18n";
 import { Modal } from "../Modal";
 import { FormHint } from "../primitives";
+import type { JSX } from "react";
 
 export interface GroupMembersDialogProps {
   group: GroupDto;

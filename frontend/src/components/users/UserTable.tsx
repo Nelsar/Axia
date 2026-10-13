@@ -1,4 +1,4 @@
-import type { CSSProperties, MouseEvent } from "react";
+import type { CSSProperties, JSX, MouseEvent } from "react";
 import { t } from "../../lib/i18n";
 import type { UserDto } from "../../api/dto";
 import type { UserPermissions } from "../../hooks/usePermissions";

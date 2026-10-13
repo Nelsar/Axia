@@ -3,6 +3,7 @@ import { t } from "../../lib/i18n";
 import type { Column } from "../DataTable";
 import { Badge, Muted } from "../primitives";
 import { RowActions } from "../RowActions";
+import type { JSX } from "react";
 
 export interface ComputerColumnsConfig {
   canManage: boolean;

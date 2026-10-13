@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
 import { api } from "../api";
 import { isPermission } from "../api/dto";
 import type { RolePermissionsDto, RolesOverviewDto } from "../api/dto";

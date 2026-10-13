@@ -1,6 +1,7 @@
 import type { UserDto } from "../api/dto";
 import { useUserForm } from "../hooks/useUserForm";
 import { UserFormDialog } from "../components/users/UserFormDialog";
+import type { JSX } from "react";
 
 export interface UserFormDialogContainerProps {
   /** null means creating a new user. */

@@ -4,6 +4,7 @@ import type { UserPermissions } from "../../hooks/usePermissions";
 import type { ListStatus } from "../../hooks/usePagedList";
 import { Card, ErrorBanner, IncompleteNotice, LoadMore, SearchBox, Spinner } from "../primitives";
 import { UserTable } from "./UserTable";
+import type { JSX } from "react";
 
 export interface UsersListPanelProps {
   query: string;

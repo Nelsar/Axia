@@ -1,4 +1,4 @@
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, JSX } from "react";
 import { isPermission } from "../../api/dto";
 import { t } from "../../lib/i18n";
 import type { ListStatus } from "../../hooks/usePagedList";

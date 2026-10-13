@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, type JSX } from "react";
 import { t } from "../lib/i18n";
 import { api } from "../api";
 import type { GroupDto, PagedResponse } from "../api/dto";

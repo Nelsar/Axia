@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import { DataTable } from "../DataTable";
 import type { Column } from "../DataTable";
 import { PageHeader } from "../PageHeader";

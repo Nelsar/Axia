@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, type JSX } from "react";
 import { t } from "../lib/i18n";
 import { api } from "../api";
 import type { ProviderDto, RoleMappingDto, UserRole, Uuid } from "../api/dto";

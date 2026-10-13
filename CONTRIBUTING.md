@@ -10,7 +10,7 @@ By opening a pull request you agree that your contribution is licensed under the
 ## Getting it running
 
 You need the [.NET 10 SDK](https://dotnet.microsoft.com/download) and
-[Node 20 or newer](https://nodejs.org). The unit and integration tests need nothing else.
+[Node 22](https://nodejs.org) (or 20.19 and later, which Vite 8 still accepts). The unit and integration tests need nothing else.
 
 To see a change working end to end, the [Docker quick start](README.md#quick-start) is the
 shortest way: `docker compose up --build` builds the API and the console from your working tree

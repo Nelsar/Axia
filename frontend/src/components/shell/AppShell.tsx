@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo } from "react";
 import { t } from "../../lib/i18n";
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 
 /**
  * The console shell as compound components: <AppShell> knows the current path and hands it down

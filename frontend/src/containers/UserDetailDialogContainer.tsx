@@ -2,6 +2,7 @@ import type { UserDto } from "../api/dto";
 import type { UserPermissions } from "../hooks/usePermissions";
 import { useUserAttributes } from "../hooks/useUserAttributes";
 import { UserDetailDialog } from "../components/users/UserDetailDialog";
+import type { JSX } from "react";
 
 export interface UserDetailDialogContainerProps {
   user: UserDto;

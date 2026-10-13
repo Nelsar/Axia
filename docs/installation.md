@@ -31,7 +31,7 @@ Versions the project is built and tested with:
 | --- | --- | --- |
 | .NET SDK | 10.0 (10.0.112) | `global.json` is not pinned; any 10.0 SDK should do. |
 | ASP.NET Core runtime | 10.0 | For running a published build without the SDK. |
-| Node.js | 20 or 22 | CI builds the console on Node 20; its Docker image builds on `node:22-alpine`. |
+| Node.js | 22 (20.19+ works) | Vite 8 needs 20.19 or 22.12 and later. CI and the console's Docker image build on Node 22. |
 | Docker / Compose | Compose v2 (`docker compose`, not `docker-compose`) | |
 | OpenLDAP image (quick start, dev) | `osixia/openldap:1.5.0` | |
 | nginx image (console container) | `nginxinc/nginx-unprivileged:1.27-alpine` | |
@@ -56,7 +56,7 @@ Restored automatically by `dotnet restore`; listed so you know what you are runn
 | `Serilog.AspNetCore` 10, `Serilog.Sinks.Http`, `Serilog.Sinks.Grafana.Loki` | structured logging and shipping |
 | `Swashbuckle.AspNetCore` 6.6 | Swagger UI (Development only) |
 
-The console: React 18, TypeScript 5, Vite 6. Nothing else at runtime.
+The console: React 19, TypeScript 7, Vite 8. Nothing else at runtime.
 
 ### Network
 
