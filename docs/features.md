@@ -208,6 +208,10 @@ Paste one record per line in `rawText`, give a regular expression with named gro
   same goes for groups and computers, created or moved.
 - Deleting a unit that still contains entries is refused by the directory: `409`. Nothing is
   deleted recursively.
+- Renaming or moving a unit is judged by what it holds, since everything beneath moves with it: a
+  group mapped to a role you do not hold, or anything privileged in the directory, makes it `403`
+  unless you hold every permission, and the unit holding the bind account is not renamed or moved
+  at all. See [protected targets](access-control.md#protected-targets).
 - The `id` is derived from the DN, so it changes on rename or move.
 
 ## Computers
@@ -227,6 +231,8 @@ Paste one record per line in `rawText`, give a regular expression with named gro
   claim when it joins; renaming does not rename the machine; **deleting revokes a joined machine's
   trust** and it must rejoin.
 - Enable/disable flips the `ACCOUNTDISABLE` bit of `userAccountControl` only.
+- Domain controllers (writable or read-only), critical system objects and computers with
+  `adminCount` are changed and deleted only by someone holding every permission: `403` otherwise.
 - Creating fails against OpenLDAP; see [Directories](directories.md#computers-1).
 
 ## Directories (providers)

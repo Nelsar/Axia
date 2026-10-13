@@ -250,4 +250,13 @@
   <data name="ParentOutsideBaseDn" xml:space="preserve">
     <value>Le parent doit être {0} ou se trouver à l'intérieur : c'est la partie de l'annuaire que gère cette application.</value>
   </data>
+  <data name="UnitHoldsServiceAccount" xml:space="preserve">
+    <value>Cette unité contient le compte que l'application utilise elle-même pour se connecter à l'annuaire. Elle ne peut pas être renommée ni déplacée depuis l'application.</value>
+  </data>
+  <data name="UnitHoldsProtected" xml:space="preserve">
+    <value>Cette unité contient des comptes, groupes ou ordinateurs privilégiés dans l'annuaire. Seul un administrateur de cette application peut la renommer ou la déplacer.</value>
+  </data>
+  <data name="ComputerIsProtected" xml:space="preserve">
+    <value>Cet ordinateur est privilégié dans l'annuaire (par exemple, un contrôleur de domaine). Seul un administrateur de cette application peut le modifier ou le supprimer.</value>
+  </data>
 </root>

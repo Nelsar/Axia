@@ -10,6 +10,7 @@ using Nelsar.Axia.Domain.Authorization;
 using Nelsar.Axia.Domain.Entities;
 using Nelsar.Axia.Domain.Exceptions;
 using Nelsar.Axia.Domain.Repositories;
+using Nelsar.Axia.Domain.ValueObjects;
 
 namespace Nelsar.Axia.Application.Common.Authorization;
 
@@ -37,6 +38,13 @@ namespace Nelsar.Axia.Application.Common.Authorization;
 /// password through the application breaks the application at best, and at worst hands its rights
 /// in the directory to whoever chose the new password.
 ///
+/// Computers and organizational units are held to the same rules. A domain controller's account is
+/// privileged in the directory like Domain Admins is. A unit is measured by what it holds, because
+/// renaming or moving it re-addresses everything beneath it: a group mapped to a role by its DN
+/// stops matching the mapping, and a group named in DirectoryProtection stops being protected. That
+/// was enough, with users.update beside orgunits.manage, to move the unit holding the Admin group,
+/// reset an administrator's password while they outranked nobody, and move it back.
+///
 /// It is a second check, not a replacement for the first: the use case's own permission is still
 /// enforced by <see cref="Behaviours.AuthorizationBehaviour{TRequest,TResponse}"/> before the
 /// handler that calls this runs.
@@ -44,6 +52,7 @@ namespace Nelsar.Axia.Application.Common.Authorization;
 internal sealed class PrivilegeGuard
 {
     private readonly ActingUser _actingUser;
+    private readonly ILdapService _ldapService;
     private readonly IPermissionResolver _permissions;
     private readonly IRoleMappingResolver _roleMappings;
     private readonly IRolePermissionRepository _rolePermissions;
@@ -52,6 +61,7 @@ internal sealed class PrivilegeGuard
 
     public PrivilegeGuard(
         ActingUser actingUser,
+        ILdapService ldapService,
         IPermissionResolver permissions,
         IRoleMappingResolver roleMappings,
         IRolePermissionRepository rolePermissions,
@@ -59,6 +69,7 @@ internal sealed class PrivilegeGuard
         ILogger<PrivilegeGuard> logger)
     {
         _actingUser = actingUser;
+        _ldapService = ldapService;
         _permissions = permissions;
         _roleMappings = roleMappings;
         _rolePermissions = rolePermissions;
@@ -135,6 +146,66 @@ internal sealed class PrivilegeGuard
 
         var conferred = await _rolePermissions.GetPermissionsForRolesAsync(roles, cancellationToken);
         EnsureCallerHolds(held, conferred, existing?.Dn ?? resultingName!);
+    }
+
+    /// <summary>
+    /// Passes when renaming or moving the unit at <paramref name="unitDn"/> carries along nothing
+    /// the caller could not change directly: not the service account; nothing privileged in the
+    /// directory unless the caller holds everything; and no group mapped to a role granting
+    /// something the caller lacks. Deleting a unit needs none of this: the directory refuses to
+    /// delete one that still holds anything.
+    /// </summary>
+    /// <exception cref="PermissionDeniedException">Any of those does not hold.</exception>
+    public async Task EnsureMayReaddressUnitAsync(string unitDn, CancellationToken cancellationToken = default)
+    {
+        if (_actingUser.IsSystem)
+            return;
+
+        var unit = DistinguishedName.Create(unitDn);
+        var subtree = await _ldapService.InspectSubtreeAsync(unit.Value);
+
+        if (subtree.HoldsServiceAccount)
+            throw Refuse(unit.Value, "it holds the service account", ApplicationMessages.UnitHoldsServiceAccount());
+
+        var held = await CallerPermissionsAsync(cancellationToken);
+
+        var holdsProtectedGroup = _protection.ProtectedGroups.Any(group =>
+            DistinguishedName.TryCreate(group, out var protectedGroup) && protectedGroup!.IsWithin(unit));
+        if ((subtree.HoldsPrivileged || holdsProtectedGroup) && !HoldsEverything(held))
+            throw Refuse(unit.Value, "it holds entries privileged in the directory", ApplicationMessages.UnitHoldsProtected());
+
+        // Mappings by DN only: a mapping by name matches wherever the group is, so moving it
+        // changes nothing about it.
+        var roles = (await _roleMappings.GetEffectiveMappingsAsync(_actingUser.ProviderId))
+            .Where(mapping => !mapping.IdentifiesGroupByNameOnly
+                              && DistinguishedName.TryCreate(mapping.GroupName, out var group)
+                              && group!.IsWithin(unit))
+            .Select(mapping => mapping.RoleName)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        if (roles.Count == 0)
+            return;
+
+        var conferred = await _rolePermissions.GetPermissionsForRolesAsync(roles, cancellationToken);
+        EnsureCallerHolds(held, conferred, unit.Value);
+    }
+
+    /// <summary>
+    /// Passes when the computer is not the service account, and is not privileged in the
+    /// directory — a domain controller, say — unless the caller holds everything.
+    /// </summary>
+    /// <exception cref="PermissionDeniedException">Either does not hold.</exception>
+    public async Task EnsureMayManageComputerAsync(LdapComputer computer, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(computer);
+
+        if (_actingUser.IsSystem)
+            return;
+
+        if (computer.IsServiceAccount)
+            throw Refuse(computer.Dn, "it is the service account", ApplicationMessages.ServiceAccountNotManaged());
+
+        if (computer.IsPrivileged && !HoldsEverything(await CallerPermissionsAsync(cancellationToken)))
+            throw Refuse(computer.Dn, "it is privileged in the directory", ApplicationMessages.ComputerIsProtected());
     }
 
     private async Task<IReadOnlySet<string>> CallerPermissionsAsync(CancellationToken cancellationToken)

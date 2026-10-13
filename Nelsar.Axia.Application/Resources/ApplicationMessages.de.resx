@@ -250,4 +250,13 @@
   <data name="ParentOutsideBaseDn" xml:space="preserve">
     <value>Das übergeordnete Objekt muss {0} sein oder darin liegen: Das ist der Teil des Verzeichnisses, den diese Anwendung verwaltet.</value>
   </data>
+  <data name="UnitHoldsServiceAccount" xml:space="preserve">
+    <value>Diese Organisationseinheit enthält das Konto, mit dem sich die Anwendung selbst mit dem Verzeichnis verbindet. Sie kann über die Anwendung nicht umbenannt oder verschoben werden.</value>
+  </data>
+  <data name="UnitHoldsProtected" xml:space="preserve">
+    <value>Diese Organisationseinheit enthält Konten, Gruppen oder Computer, die im Verzeichnis privilegiert sind. Nur ein Administrator dieser Anwendung kann sie umbenennen oder verschieben.</value>
+  </data>
+  <data name="ComputerIsProtected" xml:space="preserve">
+    <value>Dieser Computer ist im Verzeichnis privilegiert (zum Beispiel ein Domänencontroller). Nur ein Administrator dieser Anwendung kann ihn ändern oder löschen.</value>
+  </data>
 </root>

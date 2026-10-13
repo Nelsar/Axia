@@ -250,4 +250,13 @@
   <data name="ParentOutsideBaseDn" xml:space="preserve">
     <value>Аталық нысан {0} немесе оның ішінде болуы керек: каталогтың бұл қолданба басқаратын бөлігі осы.</value>
   </data>
+  <data name="UnitHoldsServiceAccount" xml:space="preserve">
+    <value>Бұл бөлімшеде қолданбаның өзі каталогқа қосылу үшін пайдаланатын тіркелгі бар. Оны қолданба арқылы қайта атауға немесе жылжытуға болмайды.</value>
+  </data>
+  <data name="UnitHoldsProtected" xml:space="preserve">
+    <value>Бұл бөлімшеде каталогта артықшылығы бар тіркелгілер, топтар немесе компьютерлер бар. Оны тек осы қолданбаның әкімшісі қайта атай немесе жылжыта алады.</value>
+  </data>
+  <data name="ComputerIsProtected" xml:space="preserve">
+    <value>Бұл компьютердің каталогта артықшылығы бар (мысалы, домен контроллері). Оны тек осы қолданбаның әкімшісі өзгерте немесе жоя алады.</value>
+  </data>
 </root>

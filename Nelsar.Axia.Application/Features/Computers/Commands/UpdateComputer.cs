@@ -34,15 +34,18 @@ internal sealed class UpdateComputerCommandHandler : IRequestHandler<UpdateCompu
 {
     private readonly ILdapService _ldapService;
     private readonly ComputerDirectory _directory;
+    private readonly PrivilegeGuard _guard;
     private readonly ILogger<UpdateComputerCommandHandler> _logger;
 
     public UpdateComputerCommandHandler(
         ILdapService ldapService,
         ComputerDirectory directory,
+        PrivilegeGuard guard,
         ILogger<UpdateComputerCommandHandler> logger)
     {
         _ldapService = ldapService;
         _directory = directory;
+        _guard = guard;
         _logger = logger;
     }
 
@@ -51,6 +54,9 @@ internal sealed class UpdateComputerCommandHandler : IRequestHandler<UpdateCompu
         var current = await _directory.ResolveAsync(request.Id);
         if (current == null)
             return null;
+
+        // Disabling, renaming or moving a domain controller's account is a domain-wide outage.
+        await _guard.EnsureMayManageComputerAsync(current, cancellationToken);
 
         var dn = await _ldapService.UpdateComputerAsync(
             current.Dn,

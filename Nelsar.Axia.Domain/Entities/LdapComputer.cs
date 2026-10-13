@@ -32,4 +32,18 @@ public sealed class LdapComputer
     /// reports no such attribute — "we could not tell" rather than "enabled".
     /// </summary>
     public bool? Enabled { get; init; }
+
+    /// <summary>
+    /// The directory treats the machine as privileged: a domain controller, writable or
+    /// read-only (SERVER_TRUST_ACCOUNT, PARTIAL_SECRETS_ACCOUNT in userAccountControl), a critical
+    /// system object, or an account with adminCount set. Disabling or deleting a domain
+    /// controller's account breaks authentication across the domain.
+    /// </summary>
+    public bool IsPrivileged { get; init; }
+
+    /// <summary>
+    /// The account the application binds as — possible when that is a managed service account,
+    /// which Active Directory keeps as a computer.
+    /// </summary>
+    public bool IsServiceAccount { get; init; }
 }

@@ -250,4 +250,13 @@
   <data name="ParentOutsideBaseDn" xml:space="preserve">
     <value>ההורה חייב להיות {0} או בתוכו: זהו החלק בספרייה שהיישום הזה מנהל.</value>
   </data>
+  <data name="UnitHoldsServiceAccount" xml:space="preserve">
+    <value>היחידה הזו מכילה את החשבון שבו היישום עצמו משתמש כדי להתחבר לספרייה. לא ניתן לשנות את שמה או להעביר אותה דרך היישום.</value>
+  </data>
+  <data name="UnitHoldsProtected" xml:space="preserve">
+    <value>היחידה הזו מכילה חשבונות, קבוצות או מחשבים בעלי הרשאות מיוחדות בספרייה. רק מנהל של היישום הזה יכול לשנות את שמה או להעביר אותה.</value>
+  </data>
+  <data name="ComputerIsProtected" xml:space="preserve">
+    <value>המחשב הזה בעל הרשאות מיוחדות בספרייה (למשל, בקר תחום). רק מנהל של היישום הזה יכול לשנות או למחוק אותו.</value>
+  </data>
 </root>
