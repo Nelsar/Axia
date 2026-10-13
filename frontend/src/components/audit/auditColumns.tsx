@@ -30,6 +30,6 @@ export function auditColumns(): Array<Column<AuditEventDto>> {
       cell: (event) =>
         event.success ? <Badge tone="success">{t("common.success")}</Badge> : <Badge tone="danger">{t("common.failure")}</Badge>,
     },
-    { key: "details", header: t("audit.columnDetails"), className: "text-muted", cell: (event) => event.details ?? "" },
+    { key: "details", header: t("audit.columnDetails"), className: "text-muted cell-wrap", cell: (event) => event.details ?? "" },
   ];
 }
