@@ -228,8 +228,10 @@ Whatever a role allows, nobody may act on an account or group that can do more t
   and holding `groups.manage` does not let anyone into a group mapped to a role they do not hold;
 - in the directory — an account or group Active Directory marks privileged (`adminCount`, which
   covers Domain Admins and the other protected groups and their members) can only be changed by an
-  administrator of this application. OpenLDAP marks nothing, so list the groups that make someone
-  its administrator under `DirectoryProtection:ProtectedGroups`;
+  administrator of this application, and so can a domain controller's computer account. OpenLDAP
+  marks nothing, so list the groups that make someone its administrator under
+  `DirectoryProtection:ProtectedGroups`. An organizational unit counts as everything beneath it,
+  since renaming or moving it moves all of that;
 - and the account the application binds as (`Ldap:AdminUsername`) cannot be changed through it at
   all.
 

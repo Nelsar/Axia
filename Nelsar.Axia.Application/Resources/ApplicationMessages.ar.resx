@@ -250,4 +250,13 @@
   <data name="ParentOutsideBaseDn" xml:space="preserve">
     <value>يجب أن يكون الأصل {0} أو داخله: فهذا هو جزء الدليل الذي يديره هذا التطبيق.</value>
   </data>
+  <data name="UnitHoldsServiceAccount" xml:space="preserve">
+    <value>تحتوي هذه الوحدة على الحساب الذي يستخدمه التطبيق نفسه للاتصال بالدليل. لا يمكن إعادة تسميتها أو نقلها من خلال التطبيق.</value>
+  </data>
+  <data name="UnitHoldsProtected" xml:space="preserve">
+    <value>تحتوي هذه الوحدة على حسابات أو مجموعات أو أجهزة كمبيوتر ذات امتيازات في الدليل. لا يمكن إلا لمسؤول هذا التطبيق إعادة تسميتها أو نقلها.</value>
+  </data>
+  <data name="ComputerIsProtected" xml:space="preserve">
+    <value>هذا الكمبيوتر ذو امتيازات في الدليل (مثل وحدة تحكم بالمجال). لا يمكن إلا لمسؤول هذا التطبيق تغييره أو حذفه.</value>
+  </data>
 </root>

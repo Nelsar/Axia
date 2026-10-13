@@ -97,8 +97,14 @@ internal class StandardLdapProvider : ILdapProvider
     private const string ComputerSearchFilter =
         "(|(objectClass=computer)(objectClass=device))";
 
+    // adminCount and isCriticalSystemObject, with the DC bits of userAccountControl, say whether the
+    // machine is privileged (see IsPrivilegedMachine); the login attributes whether it is the bind
+    // account, which a managed service account can be.
     private static readonly string[] RequestedComputerAttributes =
-        ["cn", "description", "dNSHostName", "operatingSystem", "operatingSystemVersion", "userAccountControl"];
+    [
+        "cn", "description", "dNSHostName", "operatingSystem", "operatingSystemVersion", "userAccountControl",
+        "adminCount", "isCriticalSystemObject", "uid", "sAMAccountName", "userPrincipalName"
+    ];
 
     /// <summary>ACCOUNTDISABLE — bit 0x2 of userAccountControl.</summary>
     private const int AccountDisabledFlag = 0x2;
@@ -755,6 +761,61 @@ internal class StandardLdapProvider : ILdapProvider
         return true;
     }
 
+    public DirectorySubtree InspectSubtree(string dn)
+    {
+        var container = DistinguishedName.Create(dn);
+
+        using var conn = ConnectOrThrow();
+        try
+        {
+            return new DirectorySubtree(
+                HoldsPrivileged: AnyBeneath(conn, container.Value, PrivilegedEntryFilter),
+                HoldsServiceAccount: HoldsBindAccount(conn, container));
+        }
+        catch (LdapException ex)
+        {
+            _logger.LogError(ex, "Could not inspect what lies beneath {Dn}.", container.Value);
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectorySearchFailed(), ex);
+        }
+    }
+
+    /// <summary>
+    /// Anything Active Directory treats as privileged: adminCount, a critical system object, or a
+    /// domain controller by the bits of userAccountControl (the OID is AD's bitwise-AND rule).
+    /// Elsewhere none of these attributes exist, a filter on them matches nothing, and what is
+    /// privileged is told by DirectoryProtection instead.
+    /// </summary>
+    internal const string PrivilegedEntryFilter =
+        "(|(adminCount>=1)(isCriticalSystemObject=TRUE)"
+        + "(userAccountControl:1.2.840.113556.1.4.803:=8192)"
+        + "(userAccountControl:1.2.840.113556.1.4.803:=67108864))";
+
+    /// <summary>Whether any entry beneath <paramref name="baseDn"/> matches; stops at the first.</summary>
+    private static bool AnyBeneath(LdapConnection conn, string baseDn, string filter)
+    {
+        var results = conn.Search(baseDn, LdapConnection.ScopeSub, filter, ["1.1"], false);
+        return NextEntryOrNull(results) is not null;
+    }
+
+    /// <summary>
+    /// Whether the bind account lies beneath <paramref name="container"/>. Named by DN, that is a
+    /// comparison; named by login, as Active Directory usually has it, it is looked for there by
+    /// the same attributes IsServiceAccount compares.
+    /// </summary>
+    private bool HoldsBindAccount(LdapConnection conn, DistinguishedName container)
+    {
+        var bindName = _settings.AdminUsername?.Trim();
+        if (string.IsNullOrEmpty(bindName))
+            return false;
+
+        if (DistinguishedName.IsWellFormed(bindName))
+            return DistinguishedName.Create(bindName).IsWithin(container);
+
+        var escaped = EscapeLdapFilterValue(bindName);
+        return AnyBeneath(conn, container.Value,
+            $"(|(uid={escaped})(sAMAccountName={escaped})(userPrincipalName={escaped})(mail={escaped}))");
+    }
+
     // --- Groups ---
 
     public DirectoryGroupMembers GetGroupMembers(string groupDn)
@@ -1296,7 +1357,7 @@ internal class StandardLdapProvider : ILdapProvider
         }
     }
 
-    private static LdapComputer MapComputer(LdapEntry entry)
+    private LdapComputer MapComputer(LdapEntry entry)
     {
         var attrs = entry.GetAttributeSet();
         var dn = DistinguishedName.Create(entry.Dn);
@@ -1313,9 +1374,27 @@ internal class StandardLdapProvider : ILdapProvider
             DnsHostName = Get(attrs, "dNSHostName"),
             OperatingSystem = Get(attrs, "operatingSystem"),
             OperatingSystemVersion = Get(attrs, "operatingSystemVersion"),
-            Enabled = ReadEnabledFlag(attrs)
+            Enabled = ReadEnabledFlag(attrs),
+            IsPrivileged = IsPrivilegedMachine(attrs),
+            IsServiceAccount = IsServiceAccount(entry.Dn, attrs)
         };
     }
+
+    /// <summary>SERVER_TRUST_ACCOUNT: a writable domain controller.</summary>
+    private const int ServerTrustAccountFlag = 0x2000;
+
+    /// <summary>PARTIAL_SECRETS_ACCOUNT: a read-only domain controller.</summary>
+    private const int PartialSecretsAccountFlag = 0x4000000;
+
+    /// <summary>
+    /// A domain controller, writable or read-only; a critical system object; or an account with
+    /// adminCount set. See LdapComputer.IsPrivileged.
+    /// </summary>
+    internal static bool IsPrivilegedMachine(LdapAttributeSet attrs) =>
+        (int.TryParse(Get(attrs, "userAccountControl"), out var flags)
+         && (flags & (ServerTrustAccountFlag | PartialSecretsAccountFlag)) != 0)
+        || IsMarkedPrivileged(attrs)
+        || string.Equals(Get(attrs, "isCriticalSystemObject").Trim(), "TRUE", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Null when there is no userAccountControl to read — unknown, not enabled.</summary>
     private static bool? ReadEnabledFlag(LdapAttributeSet attrs)

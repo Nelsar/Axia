@@ -61,6 +61,10 @@ public class OrganizationalUnitTests
         var ldap = new Mock<ILdapService>();
         ldap.Setup(x => x.GetOrganizationalUnitsAsync())
             .ReturnsAsync(DirectoryOrganizationalUnitListing.Complete(units));
+        // Nothing beneath any of them that renaming or moving would carry along; what happens when
+        // there is is GuardedUnitsAndComputersTests' subject.
+        ldap.Setup(x => x.InspectSubtreeAsync(It.IsAny<string>()))
+            .ReturnsAsync(new DirectorySubtree(HoldsPrivileged: false, HoldsServiceAccount: false));
         return ldap;
     }
 

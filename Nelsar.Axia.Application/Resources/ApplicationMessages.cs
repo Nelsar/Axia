@@ -232,6 +232,13 @@ public static class ApplicationMessages
 
     public static string ServiceAccountNotManaged() => Get(nameof(ServiceAccountNotManaged));
 
+    public static string UnitHoldsServiceAccount() => Get(nameof(UnitHoldsServiceAccount));
+
+    /// <summary>Does not say what beneath it is privileged: the caller may not be allowed to know.</summary>
+    public static string UnitHoldsProtected() => Get(nameof(UnitHoldsProtected));
+
+    public static string ComputerIsProtected() => Get(nameof(ComputerIsProtected));
+
     /// <summary>The directory's policy said no — the caller's to fix, so it reads as advice.</summary>
     public static string PasswordRejectedByDirectory() => Get(nameof(PasswordRejectedByDirectory));
 

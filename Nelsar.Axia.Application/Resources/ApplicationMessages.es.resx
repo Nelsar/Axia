@@ -250,4 +250,13 @@
   <data name="ParentOutsideBaseDn" xml:space="preserve">
     <value>El elemento primario debe ser {0} o estar dentro de él: es la parte del directorio que administra esta aplicación.</value>
   </data>
+  <data name="UnitHoldsServiceAccount" xml:space="preserve">
+    <value>Esta unidad contiene la cuenta que la propia aplicación usa para conectarse al directorio. No se puede renombrar ni mover desde la aplicación.</value>
+  </data>
+  <data name="UnitHoldsProtected" xml:space="preserve">
+    <value>Esta unidad contiene cuentas, grupos o equipos con privilegios en el directorio. Solo un administrador de esta aplicación puede renombrarla o moverla.</value>
+  </data>
+  <data name="ComputerIsProtected" xml:space="preserve">
+    <value>Este equipo tiene privilegios en el directorio (por ejemplo, un controlador de dominio). Solo un administrador de esta aplicación puede modificarlo o eliminarlo.</value>
+  </data>
 </root>

@@ -66,6 +66,12 @@ internal interface ILdapProvider
     /// a directory that will not permit the delete — are exceptions, never false.</summary>
     bool DeleteOrganizationalUnit(string dn);
 
+    /// <summary>
+    /// What renaming or moving the container at <paramref name="dn"/> would carry along: whether
+    /// anything beneath it is privileged in the directory, and whether the bind account is.
+    /// </summary>
+    DirectorySubtree InspectSubtree(string dn);
+
     // Groups. Addressed by DN for the same reason organizational units are: a group name is
     // unique only within its container. Membership is a list of member DNs — what the directory
     // actually stores — and never logins.

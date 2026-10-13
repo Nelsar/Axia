@@ -58,8 +58,10 @@ Inside that, the following are meant to hold, and a case where they do not is wo
   earlier builds, are ignored unless `RoleMappings:AllowMappingsByName` is set, and the API will not
   start without an Admin mapping by DN.
 - **A target privileged in the directory is an administrator's to change.** Accounts and groups
-  with `adminCount` set, or in `DirectoryProtection:ProtectedGroups`, can only be changed by a
-  caller holding every permission; the bind account cannot be changed through the application.
+  with `adminCount` set, or in `DirectoryProtection:ProtectedGroups`, and computers that are domain
+  controllers or critical system objects, can only be changed by a caller holding every permission;
+  the bind account cannot be changed through the application. An organizational unit is renamed or
+  moved only by someone who could change everything that would carry along with it.
 - **Passwords are never written in clear.** They are set with `unicodePwd` in Active Directory and
   the Password Modify operation elsewhere, so the directory hashes and checks them; a directory
   offering neither is refused a password rather than given one as a plain attribute.

@@ -248,6 +248,10 @@ internal class ActiveDirectoryProvider : ILdapProvider
     public bool DeleteOrganizationalUnit(string dn) =>
         throw OrganizationalUnitsUnsupported();
 
+    // Asked only before an organizational unit is renamed or moved, which this provider cannot do.
+    public DirectorySubtree InspectSubtree(string dn) =>
+        throw OrganizationalUnitsUnsupported();
+
     private static FeatureNotImplementedException OrganizationalUnitsUnsupported() =>
         new(ApplicationMessages.OrganizationalUnitsUnsupportedByAdProvider());
 

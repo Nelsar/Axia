@@ -30,15 +30,18 @@ internal sealed class UpdateOrganizationalUnitCommandHandler
 {
     private readonly ILdapService _ldapService;
     private readonly OrganizationalUnitDirectory _directory;
+    private readonly PrivilegeGuard _guard;
     private readonly ILogger<UpdateOrganizationalUnitCommandHandler> _logger;
 
     public UpdateOrganizationalUnitCommandHandler(
         ILdapService ldapService,
         OrganizationalUnitDirectory directory,
+        PrivilegeGuard guard,
         ILogger<UpdateOrganizationalUnitCommandHandler> logger)
     {
         _ldapService = ldapService;
         _directory = directory;
+        _guard = guard;
         _logger = logger;
     }
 
@@ -49,6 +52,11 @@ internal sealed class UpdateOrganizationalUnitCommandHandler
         var current = await _directory.ResolveAsync(request.Id);
         if (current == null)
             return null;
+
+        // A new name or parent re-addresses everything beneath the unit, so the unit is judged by
+        // what it holds. A new description alone changes nothing below it.
+        if (Readdresses(current.Dn, request))
+            await _guard.EnsureMayReaddressUnitAsync(current.Dn, cancellationToken);
 
         var dn = await _ldapService.UpdateOrganizationalUnitAsync(
             current.Dn,
@@ -68,5 +76,17 @@ internal sealed class UpdateOrganizationalUnitCommandHandler
             ParentDn = updated.Parent,
             Description = request.Description ?? current.Description
         });
+    }
+
+    /// <summary>The same comparison StandardLdapProvider.UpdateOrganizationalUnit makes to decide
+    /// whether to rename or move.</summary>
+    private static bool Readdresses(string currentDn, UpdateOrganizationalUnitCommand request)
+    {
+        var current = DistinguishedName.Create(currentDn);
+        var renamed = !string.IsNullOrWhiteSpace(request.Name)
+                      && !string.Equals(request.Name.Trim(), current.Rdn, StringComparison.OrdinalIgnoreCase);
+        var moved = !string.IsNullOrWhiteSpace(request.ParentDistinguishedName)
+                    && !string.Equals(request.ParentDistinguishedName.Trim(), current.Parent, StringComparison.OrdinalIgnoreCase);
+        return renamed || moved;
     }
 }

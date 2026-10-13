@@ -26,6 +26,13 @@ How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
   queued job's status and results can only be read by the account that queued it, in the same
   directory; before, anyone holding `users.bulk` could read any job by its id.
 
+- Organizational units and computers are held to the same rule as accounts and groups: nobody
+  acts on something more powerful than they are. Renaming or moving a unit is judged by what it
+  holds — a group mapped to a role the caller lacks, anything privileged in the directory, or the
+  bind account — because everything beneath it is re-addressed; with `orgunits.manage` and
+  `users.update`, moving the unit that held the Admin group used to be a way to reset an
+  administrator's password. Domain controllers, read-only ones included, and other privileged
+  computers can only be changed or deleted by someone holding every permission.
 - Units, groups and computers can only be created in, or moved to, a parent inside the base DN.
   The parent used to be whatever DN the request named, so anyone allowed to manage them could
   write one anywhere the bind account could.

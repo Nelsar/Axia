@@ -21,11 +21,13 @@ internal sealed class DeleteComputerCommandHandler : IRequestHandler<DeleteCompu
 {
     private readonly ILdapService _ldapService;
     private readonly ComputerDirectory _directory;
+    private readonly PrivilegeGuard _guard;
 
-    public DeleteComputerCommandHandler(ILdapService ldapService, ComputerDirectory directory)
+    public DeleteComputerCommandHandler(ILdapService ldapService, ComputerDirectory directory, PrivilegeGuard guard)
     {
         _ldapService = ldapService;
         _directory = directory;
+        _guard = guard;
     }
 
     public async Task<bool> Handle(DeleteComputerCommand request, CancellationToken cancellationToken)
@@ -33,6 +35,8 @@ internal sealed class DeleteComputerCommandHandler : IRequestHandler<DeleteCompu
         var computer = await _directory.ResolveAsync(request.Id);
         if (computer == null)
             return false;
+
+        await _guard.EnsureMayManageComputerAsync(computer, cancellationToken);
 
         return await _ldapService.DeleteComputerAsync(computer.Dn);
     }

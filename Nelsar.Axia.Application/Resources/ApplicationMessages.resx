@@ -296,4 +296,16 @@
     <value>The parent must be {0} or inside it: that is the part of the directory this application manages.</value>
     <comment>{0} = the directory's base DN. A unit, group or computer was to be created in or moved to a parent outside it.</comment>
   </data>
+  <data name="UnitHoldsServiceAccount" xml:space="preserve">
+    <value>This unit holds the account the application itself uses to connect to the directory. It cannot be renamed or moved through the application.</value>
+    <comment>Renaming or moving an organizational unit that contains the account the application binds as.</comment>
+  </data>
+  <data name="UnitHoldsProtected" xml:space="preserve">
+    <value>This unit holds accounts, groups or computers that are privileged in the directory. Only an administrator of this application can rename or move it.</value>
+    <comment>Renaming or moving an organizational unit that contains entries privileged in the directory, without holding every permission.</comment>
+  </data>
+  <data name="ComputerIsProtected" xml:space="preserve">
+    <value>This computer is privileged in the directory (for example, a domain controller). Only an administrator of this application can change or delete it.</value>
+    <comment>Changing or deleting a computer the directory treats as privileged (a domain controller, say), without holding every permission.</comment>
+  </data>
 </root>

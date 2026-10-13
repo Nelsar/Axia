@@ -102,6 +102,9 @@ internal class LdapService : ILdapService
     public Task<bool> DeleteOrganizationalUnitAsync(string dn) =>
         Task.FromResult(_providerFactory.Resolve().DeleteOrganizationalUnit(dn));
 
+    public Task<DirectorySubtree> InspectSubtreeAsync(string dn) =>
+        Task.FromResult(_providerFactory.Resolve().InspectSubtree(dn));
+
     public Task<DirectoryGroupListing> GetGroupsAsync() =>
         Task.FromResult(_providerFactory.Resolve().GetAllGroups());
 

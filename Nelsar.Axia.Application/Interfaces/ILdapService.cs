@@ -63,6 +63,9 @@ public interface ILdapService
     /// <summary>False only when there was no such entry.</summary>
     Task<bool> DeleteOrganizationalUnitAsync(string dn);
 
+    /// <summary>What renaming or moving the container at <paramref name="dn"/> would carry along.</summary>
+    Task<DirectorySubtree> InspectSubtreeAsync(string dn);
+
     /// <summary>Every group under the configured base DN, carrying whether the enumeration
     /// finished — absence from a truncated listing proves nothing. One account's membership is
     /// on its entry instead; see <see cref="GetUserByDnAsync"/>.</summary>

@@ -134,9 +134,18 @@ check: **the target must not be more powerful than the caller.**
 | An account or group with `adminCount=1` (AD: Domain Admins, Enterprise Admins, Administrators, Account/Server/Backup/Print Operators, … and their members) | only a caller holding **every** permission |
 | A group listed in `DirectoryProtection:ProtectedGroups`, and its members | only a caller holding **every** permission |
 | The bind account (`Ldap:AdminUsername`) | **nobody** |
+| A computer that is a domain controller (writable or read-only), a critical system object, or has `adminCount=1` | only a caller holding **every** permission |
+| An organizational unit, to rename or move, judged by what is beneath it: a group mapped to a role, anything above, the bind account | as for what is beneath it |
 
 This applies to updating, resetting the password of, and deleting accounts (singly and in bulk),
-and to changing, re-membering and deleting groups. A refused bulk row fails that row only.
+to changing, re-membering and deleting groups, to changing, enabling, disabling and deleting
+computers, and to renaming and moving organizational units. A refused bulk row fails that row
+only.
+
+A unit is judged by its contents because renaming or moving it re-addresses everything beneath
+it: a group mapped to a role by DN stops matching its mapping, and a group in `ProtectedGroups`
+stops being protected. Changing only a unit's description, or deleting it (the directory refuses
+to delete one that is not empty), carries nothing along and is not checked.
 
 Examples:
 
@@ -145,6 +154,10 @@ Examples:
   already hold everything Admin holds.
 - A domain administrator whose groups map to no role is a plain `User` here, but their account is
   still protected by `adminCount`.
+- Someone with `orgunits.manage` cannot move the unit that holds the group mapped to Admin — which
+  would have let them, with `users.update`, reset an administrator's password while the mapping
+  matched nobody, and move it back.
+- Someone with `computers.manage` can disable a workstation, not a domain controller.
 
 The refusal is a `403` that does not say which permission the target holds; the log has the
 detail.

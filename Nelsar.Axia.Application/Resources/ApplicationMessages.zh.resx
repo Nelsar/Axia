@@ -250,4 +250,13 @@
   <data name="ParentOutsideBaseDn" xml:space="preserve">
     <value>父级必须是 {0} 或位于其内：这是本应用程序管理的目录部分。</value>
   </data>
+  <data name="UnitHoldsServiceAccount" xml:space="preserve">
+    <value>此组织单位包含应用程序自身用于连接目录的帐户。无法通过应用程序重命名或移动它。</value>
+  </data>
+  <data name="UnitHoldsProtected" xml:space="preserve">
+    <value>此组织单位包含在目录中具有特权的帐户、组或计算机。只有本应用程序的管理员才能重命名或移动它。</value>
+  </data>
+  <data name="ComputerIsProtected" xml:space="preserve">
+    <value>此计算机在目录中具有特权（例如域控制器）。只有本应用程序的管理员才能更改或删除它。</value>
+  </data>
 </root>
