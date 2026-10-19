@@ -3,7 +3,9 @@
 # The console, built and served by nginx, which also proxies /api to the API. One origin for both
 # means the browser makes no cross-origin calls, so Cors:AllowedOrigins can stay empty.
 
-FROM node:22-alpine AS build
+# What it builds is static files, the same on every platform, so it builds once, natively, and
+# only the nginx stage below is per platform.
+FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 WORKDIR /src
 
 # Dependencies first, so `npm ci` is cached unless package-lock.json changes.
