@@ -1,7 +1,8 @@
 # Development
 
 How the code is organised, how to build and test it, and the conventions a change is held to.
-[CONTRIBUTING.md](../CONTRIBUTING.md) is the short version for pull requests.
+[CONTRIBUTING.md](https://github.com/Nelsar/Axia/blob/main/CONTRIBUTING.md) is the short version for
+pull requests.
 
 ## Setup
 
@@ -72,7 +73,7 @@ attribute names, password write mode, paging.
 
 React 19 + TypeScript (strict) + Vite. Logic in hooks, markup in presentational components,
 wiring in containers. DTOs in `src/api/dto.ts` mirror `Nelsar.Axia.Contracts` by hand.
-Details: [frontend/README.md](../frontend/README.md).
+Details: [frontend/README.md](https://github.com/Nelsar/Axia/blob/main/frontend/README.md).
 
 ## Building and testing
 
@@ -152,7 +153,8 @@ One `frontend/src/lib/i18n/messages.<code>.ts` (typed against English, so a miss
 
 ## Conventions
 
-The ones a test enforces are in [CONTRIBUTING.md](../CONTRIBUTING.md#conventions-worth-knowing-before-you-write).
+The ones a test enforces are in
+[CONTRIBUTING.md](https://github.com/Nelsar/Axia/blob/main/CONTRIBUTING.md#conventions-worth-knowing-before-you-write).
 The rest, briefly:
 
 - No user-facing text in code; no logic that compares translated text.

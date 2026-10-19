@@ -61,8 +61,9 @@ Every later request is made *as that entry, in that directory*. A request that n
 directory in `X-LDAP-Provider-Id` is refused rather than served from another one.
 
 Tokens last `Jwt:ExpiresInMinutes` (60 by default) and cannot be revoked. There is no sign-out on
-the server side and no refresh token, but an account switched off in the directory loses its
-session within 30 seconds. See [SECURITY.md](../SECURITY.md#known-limitations).
+the server side and no refresh token, but an account switched off in the directory loses its session
+within 30 seconds. See
+[SECURITY.md](https://github.com/Nelsar/Axia/blob/main/SECURITY.md#known-limitations).
 
 ### Roles and permissions
 

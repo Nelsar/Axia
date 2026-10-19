@@ -49,7 +49,8 @@ system-wide:
 The file can hold the CA certificate or, for a self-signed server, the server's own certificate.
 One file applies to every `StandardLdap` directory, including those stored in the database.
 
-Revocation (CRL/OCSP) is not checked. See [SECURITY.md](../SECURITY.md#known-limitations).
+Revocation (CRL/OCSP) is not checked. See
+[SECURITY.md](https://github.com/Nelsar/Axia/blob/main/SECURITY.md#known-limitations).
 
 **Active Directory** needs a certificate on its domain controllers for LDAPS (AD CS, or any CA the
 API host trusts). AD accepts password changes (`unicodePwd`) only over an encrypted connection, so
@@ -283,5 +284,6 @@ See [Access control](access-control.md#protected-targets).
 4. Role groups (`groupOfNames` is simplest).
 5. `DirectoryProtection:ProtectedGroups` listing the groups whose members administer the
    directory, and the Admin group.
-6. For computer accounts, a schema with AD's `computer` class. [`deploy/dev/ad-schema.ldif`](../deploy/dev/ad-schema.ldif)
+6. For computer accounts, a schema with AD's `computer` class.
+   [`deploy/dev/ad-schema.ldif`](https://github.com/Nelsar/Axia/blob/main/deploy/dev/ad-schema.ldif)
    is one. Note the `sn` limitation above.

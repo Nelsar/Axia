@@ -81,7 +81,8 @@ Every screenshot is of the [quick start](#quick-start) and its demo directory.
 
 ## Documentation
 
-This README is the short version. The full documentation is in [`docs/`](docs/README.md):
+This README is the short version. The full documentation is in [`docs/`](docs/README.md), and
+online at [nelsar.github.io/Axia](https://nelsar.github.io/Axia/):
 [installation](docs/installation.md), [production deployment](docs/production.md), the complete
 [configuration reference](docs/configuration.md), [directories](docs/directories.md) (what is read
 and written in AD and OpenLDAP), [access control](docs/access-control.md),

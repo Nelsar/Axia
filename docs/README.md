@@ -4,8 +4,9 @@ Nelsar.Axia is a self-hosted web console and REST API for managing Active Direct
 other LDAP directories: users, groups, organizational units and computer accounts, with roles
 mapped from directory groups, an audit log and bulk provisioning.
 
-The [README](../README.md) is the short version. This folder is the long one: every feature, every
-setting, and the details that only matter once you run it against a real directory.
+The [README](https://github.com/Nelsar/Axia#readme) is the short version. This folder is the long
+one: every feature, every setting, and the details that only matter once you run it against a real
+directory.
 
 ## Start here
 
@@ -35,9 +36,11 @@ setting, and the details that only matter once you run it against a real directo
 
 ## Elsewhere in the repository
 
-- [SECURITY.md](../SECURITY.md) — the trust model, known limitations, and how to report a
-  vulnerability. Read the known limitations before deploying.
-- [CONTRIBUTING.md](../CONTRIBUTING.md) — how to run what CI runs, and the conventions a pull
-  request is held to.
-- [ROADMAP.md](../ROADMAP.md) — what is planned, and what is not done yet.
-- [frontend/README.md](../frontend/README.md) — the console's own structure.
+- [SECURITY.md](https://github.com/Nelsar/Axia/blob/main/SECURITY.md) — the trust model, known
+  limitations, and how to report a vulnerability. Read the known limitations before deploying.
+- [CONTRIBUTING.md](https://github.com/Nelsar/Axia/blob/main/CONTRIBUTING.md) — how to run what CI
+  runs, and the conventions a pull request is held to.
+- [ROADMAP.md](https://github.com/Nelsar/Axia/blob/main/ROADMAP.md) — what is planned, and what is
+  not done yet.
+- [frontend/README.md](https://github.com/Nelsar/Axia/blob/main/frontend/README.md) — the console's
+  own structure.

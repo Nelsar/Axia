@@ -1,8 +1,8 @@
 # Local test directory
 
-[`deploy/dev`](../deploy/dev) is an OpenLDAP for development and manual testing. It holds enough
-data to make listings, paging and search behave the way they do against a real domain, and it is
-shaped like Active Directory where that matters to the application.
+[`deploy/dev`](https://github.com/Nelsar/Axia/tree/main/deploy/dev) is an OpenLDAP for development
+and manual testing. It holds enough data to make listings, paging and search behave the way they do
+against a real domain, and it is shaped like Active Directory where that matters to the application.
 
 It is **not** the quick start's directory. The quick start runs everything in Docker and reaches
 its directory over LDAPS inside the Docker network. This one is published on your machine so that
@@ -40,12 +40,12 @@ The files are loaded in name order:
 
 | File | Loaded as | Contents |
 | --- | --- | --- |
-| [`ad-schema.ldif`](../deploy/dev/ad-schema.ldif) | `40-ad-schema` | AD's `user`, `computer` and `group` classes and the attributes the API uses (`sAMAccountName`, `userPrincipalName`, `userAccountControl`, `dNSHostName`, `operatingSystem`, `operatingSystemVersion`, `groupType`, `managedBy`, `adminCount`, `lastLogonTimestamp`, …), with AD's own OIDs. |
-| [`ad-memberof.ldif`](../deploy/dev/ad-memberof.ldif) | `45-ad-memberof` | Points the `memberOf` overlay at `group`/`member`, as AD maintains it. |
-| [`../quickstart/bootstrap.ldif`](../deploy/quickstart/bootstrap.ldif) | `50-demo` | The quick start's demo accounts and role groups. |
-| [`test-data.ldif`](../deploy/dev/test-data.ldif) | `60-test` | A UserDeleter account and group, more units, and the group shapes the API reads: `groupOfNames`, `groupOfUniqueNames`, `posixGroup`, a nested group. |
-| [`bulk-users.ldif`](../deploy/dev/bulk-users.ldif) | `70-bulk` | 300 OpenLDAP-style (`inetOrgPerson`) accounts in `ou=staff`, with a group per department. |
-| [`ad-data.ldif`](../deploy/dev/ad-data.ldif) | `80-ad-data` | An AD-shaped domain under `ou=Corp`. See below. |
+| [`ad-schema.ldif`](https://github.com/Nelsar/Axia/blob/main/deploy/dev/ad-schema.ldif) | `40-ad-schema` | AD's `user`, `computer` and `group` classes and the attributes the API uses (`sAMAccountName`, `userPrincipalName`, `userAccountControl`, `dNSHostName`, `operatingSystem`, `operatingSystemVersion`, `groupType`, `managedBy`, `adminCount`, `lastLogonTimestamp`, …), with AD's own OIDs. |
+| [`ad-memberof.ldif`](https://github.com/Nelsar/Axia/blob/main/deploy/dev/ad-memberof.ldif) | `45-ad-memberof` | Points the `memberOf` overlay at `group`/`member`, as AD maintains it. |
+| [`../quickstart/bootstrap.ldif`](https://github.com/Nelsar/Axia/blob/main/deploy/quickstart/bootstrap.ldif) | `50-demo` | The quick start's demo accounts and role groups. |
+| [`test-data.ldif`](https://github.com/Nelsar/Axia/blob/main/deploy/dev/test-data.ldif) | `60-test` | A UserDeleter account and group, more units, and the group shapes the API reads: `groupOfNames`, `groupOfUniqueNames`, `posixGroup`, a nested group. |
+| [`bulk-users.ldif`](https://github.com/Nelsar/Axia/blob/main/deploy/dev/bulk-users.ldif) | `70-bulk` | 300 OpenLDAP-style (`inetOrgPerson`) accounts in `ou=staff`, with a group per department. |
+| [`ad-data.ldif`](https://github.com/Nelsar/Axia/blob/main/deploy/dev/ad-data.ldif) | `80-ad-data` | An AD-shaped domain under `ou=Corp`. See below. |
 
 Totals after a fresh start: about 1,525 accounts, 2,056 computer accounts, 20 printers, 110
 groups and 74 organizational units.
