@@ -23,7 +23,28 @@ limitations, first: this instance holds a credential that can change your direct
 
 ## Images
 
-Both Dockerfiles are in the repository.
+Each release publishes both images to GitHub Container Registry, for `linux/amd64` and
+`linux/arm64`, built from the release's tag. The newest version is on the
+[releases page](https://github.com/Nelsar/Axia/releases).
+
+```bash
+docker pull ghcr.io/nelsar/axia-api:x.y.z
+docker pull ghcr.io/nelsar/axia-console:x.y.z
+```
+
+| Tag | Points at |
+| --- | --- |
+| `x.y.z` | that release, always. Pin this — or the digest — in production. |
+| `x.y` | the newest patch release of `x.y`. |
+| `latest` | the newest release. |
+
+Pinned, an upgrade happens when you decide on it, after reading the
+[changelog](https://github.com/Nelsar/Axia/blob/main/CHANGELOG.md): before 1.0 a minor version may
+need action on upgrade, and its entry says what. Each image carries its build provenance and an
+SBOM; `docker buildx imagetools inspect ghcr.io/nelsar/axia-api:x.y.z` lists them.
+
+To build them yourself instead, from a commit you have reviewed — both Dockerfiles are in the
+repository:
 
 ```bash
 docker build -t nelsar-axia-api:$(git rev-parse --short HEAD) .
@@ -33,9 +54,7 @@ docker build -t nelsar-axia-console:$(git rev-parse --short HEAD) frontend
 | Image | Base | Listens | Notes |
 | --- | --- | --- | --- |
 | API | `mcr.microsoft.com/dotnet/aspnet:10.0` | `8080` | `ASPNETCORE_ENVIRONMENT` defaults to Production. No `appsettings.json` inside; configure through the environment or a mounted file. |
-| Console | `nginxinc/nginx-unprivileged:1.27-alpine` | `8080` | Built with `VITE_API_SAME_ORIGIN=true`: it calls the API on its own origin. Its [`nginx.conf`](https://github.com/Nelsar/Axia/blob/main/frontend/nginx.conf) proxies `/api/` to `http://api:8080` and sends a `Content-Security-Policy` that admits nothing but its own origin (no inline script, no script, style, font or API from elsewhere), `X-Frame-Options: DENY`, `X-Content-Type-Options`, `Referrer-Policy`, `Cross-Origin-Opener-Policy`, `Permissions-Policy` and `Strict-Transport-Security` (effective once TLS is terminated in front). |
-
-There are no published images or releases yet; build from a commit you have reviewed.
+| Console | `nginxinc/nginx-unprivileged:1.27-alpine` | `8080` | Built with `VITE_API_SAME_ORIGIN=true`: it calls the API on its own origin. Its [`nginx.conf`](https://github.com/Nelsar/Axia/blob/main/frontend/nginx.conf) proxies `/api/` to `http://api:8080` — so on the console's network the API has to answer to the name `api`, or a `nginx.conf` of your own has to be mounted over `/etc/nginx/conf.d/default.conf` — and sends a `Content-Security-Policy` that admits nothing but its own origin (no inline script, no script, style, font or API from elsewhere), `X-Frame-Options: DENY`, `X-Content-Type-Options`, `Referrer-Policy`, `Cross-Origin-Opener-Policy`, `Permissions-Policy` and `Strict-Transport-Security` (effective once TLS is terminated in front). |
 
 If the console is served from a different origin than the API, build it without
 `VITE_API_SAME_ORIGIN` (it then defaults to `http://localhost:5063`, changeable on the sign-in
