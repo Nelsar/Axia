@@ -259,4 +259,13 @@
   <data name="ComputerIsProtected" xml:space="preserve">
     <value>Бұл компьютердің каталогта артықшылығы бар (мысалы, домен контроллері). Оны тек осы қолданбаның әкімшісі өзгерте немесе жоя алады.</value>
   </data>
+  <data name="BulkUserCreated" xml:space="preserve">
+    <value>Пайдаланушы сәтті жасалды.</value>
+  </data>
+  <data name="BulkUserUpdated" xml:space="preserve">
+    <value>Пайдаланушы сәтті жаңартылды.</value>
+  </data>
+  <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
+    <value>Күтпеген қатеге байланысты бұл жолды өңдеу мүмкін болмады. Толығырақ ақпарат сервер журналында.</value>
+  </data>
 </root>

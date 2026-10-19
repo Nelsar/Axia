@@ -7,6 +7,23 @@ configuration or the API in ways that need action on upgrade; its entry says wha
 
 How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
+## [Unreleased]
+
+### Security
+
+- A bulk row that fails for an unexpected reason says so in general terms, in the response and in
+  the audit trail, instead of carrying the exception's own text — which could be the LDAP
+  library's, host names included. The exception itself is logged at Error.
+- With `Observability:Console:Json` set to `false`, the plain-text console writes control
+  characters in logged values as escapes (`\r`, `\n`, `\u001b`), so a request path containing
+  `%0D%0A` can no longer start a log line of its own or restyle the terminal. The JSON sinks
+  already escaped them.
+
+### Fixed
+
+- A bulk row that succeeded said so in English whatever language the caller used; it is now
+  translated like every other message.
+
 ## [0.2.0] - 2026-10-13
 
 Hardening after the first release, and fixes to the console. **Upgrading from 0.1.0 takes one

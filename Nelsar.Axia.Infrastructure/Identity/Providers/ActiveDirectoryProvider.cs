@@ -173,7 +173,7 @@ internal class ActiveDirectoryProvider : ILdapProvider
     {
         using var context = CreateContext();
         var samAccount = Email.Create(email).LocalPart;
-        var user = new UserPrincipal(context, samAccount, password, enabled: true)
+        using var user = new UserPrincipal(context, samAccount, password, enabled: true)
         {
             DisplayName = name,
             EmailAddress = email,

@@ -259,4 +259,13 @@
   <data name="ComputerIsProtected" xml:space="preserve">
     <value>המחשב הזה בעל הרשאות מיוחדות בספרייה (למשל, בקר תחום). רק מנהל של היישום הזה יכול לשנות או למחוק אותו.</value>
   </data>
+  <data name="BulkUserCreated" xml:space="preserve">
+    <value>המשתמש נוצר בהצלחה.</value>
+  </data>
+  <data name="BulkUserUpdated" xml:space="preserve">
+    <value>המשתמש עודכן בהצלחה.</value>
+  </data>
+  <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
+    <value>לא ניתן היה לעבד שורה זו בגלל שגיאה בלתי צפויה. הפרטים נמצאים ביומן השרת.</value>
+  </data>
 </root>

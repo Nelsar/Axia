@@ -40,6 +40,17 @@ public static class ApplicationMessages
 
     public static string BulkQueueFull() => Get(nameof(BulkQueueFull));
 
+    public static string BulkUserCreated() => Get(nameof(BulkUserCreated));
+
+    public static string BulkUserUpdated() => Get(nameof(BulkUserUpdated));
+
+    /// <summary>
+    /// What a bulk row says when it failed for a reason that was not written for the caller — a
+    /// bug, or a library's own exception. Its text used to be the row's message, LDAP library
+    /// wording included; the exception itself goes to the log.
+    /// </summary>
+    public static string BulkRowFailedUnexpectedly() => Get(nameof(BulkRowFailedUnexpectedly));
+
     /// <summary>Names the base DN: it is configuration the caller has to work within, not a secret.</summary>
     public static string ParentOutsideBaseDn(string baseDn) => Format(nameof(ParentOutsideBaseDn), baseDn);
 

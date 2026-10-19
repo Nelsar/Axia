@@ -9,6 +9,7 @@ using Nelsar.Axia.Application.Configuration;
 using Nelsar.Axia.Application.Interfaces;
 using Nelsar.Axia.Application.Resources;
 using Nelsar.Axia.Contracts.Common;
+using Nelsar.Axia.Contracts.Exceptions;
 using Nelsar.Axia.Contracts.Requests;
 using Nelsar.Axia.Contracts.Responses;
 using Nelsar.Axia.Domain.Authorization;
@@ -161,7 +162,7 @@ internal sealed class ProcessBulkUsersCommandHandler
                     var resultingEmail = newEmail ?? email.Value;
 
                     item.Status = BulkOperationStatus.Completed;
-                    item.Message = "User updated successfully.";
+                    item.Message = ApplicationMessages.BulkUserUpdated();
                     item.User = new UserDto
                     {
                         Id = DeterministicIdFactory.BuildUserId(resultingEmail, existing.Dn, request.Name),
@@ -183,7 +184,7 @@ internal sealed class ProcessBulkUsersCommandHandler
 
                     await _ldapService.CreateUserAsync(request.Name, email.Value, request.Password);
                     item.Status = BulkOperationStatus.Completed;
-                    item.Message = "User created successfully.";
+                    item.Message = ApplicationMessages.BulkUserCreated();
                     item.User = new UserDto
                     {
                         Id = DeterministicIdFactory.BuildUserId(email.Value, string.Empty, request.Name),
@@ -198,11 +199,20 @@ internal sealed class ProcessBulkUsersCommandHandler
                         ApplicationMessages.BulkOperationUnknown(request.Operation ?? string.Empty));
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (IsMeantForTheCaller(ex))
             {
                 item.Status = BulkOperationStatus.Failed;
                 item.Message = ex.Message;
                 _logger.LogWarning(ex, "Bulk user operation failed for {Login}.", LogMask.Login(request.Email));
+            }
+            catch (Exception ex)
+            {
+                // A bug or a library's own exception: its text is not written for the caller and
+                // can name the directory's internals, and it would also land in the audit trail
+                // below. The row fails like any other; the exception goes to the log, at Error.
+                item.Status = BulkOperationStatus.Failed;
+                item.Message = ApplicationMessages.BulkRowFailedUnexpectedly();
+                _logger.LogError(ex, "Bulk user operation failed unexpectedly for {Login}.", LogMask.Login(request.Email));
             }
 
             await AuditRowAsync(operation, request, item, dn);
@@ -216,6 +226,17 @@ internal sealed class ProcessBulkUsersCommandHandler
             FailedCount = results.Count(x => x.Status == BulkOperationStatus.Failed)
         };
     }
+
+    /// <summary>
+    /// The exceptions whose message was written to be shown: the ones GlobalExceptionHandler
+    /// returns verbatim for a single request — a refused or invalid row, an account the caller
+    /// may not touch, a directory that did not answer.
+    /// </summary>
+    private static bool IsMeantForTheCaller(Exception exception) =>
+        exception is DomainException
+            or PermissionDeniedException
+            or NotAuthenticatedException
+            or DirectoryUnavailableException;
 
     /// <summary>
     /// One audit entry per row, under the name of whoever submitted the batch. The batch as a

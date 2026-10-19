@@ -18,8 +18,12 @@ updates:
       # with a licence key — so the bump Dependabot would offer is a licence change dressed as a
       # version number, for every deployment of this project. Moving off 12.x is a decision to
       # make on purpose (another mediator, or none), not a weekly pull request.
+      #
+      # Ignored by update type rather than by range: Dependabot read the NuGet interval "[13.0,)"
+      # as an ill-formed requirement and failed the whole NuGet run on it, so nothing here was
+      # updated at all. Minor and patch releases of 12.x still come through.
       - dependency-name: "MediatR"
-        versions: ["[13.0,)"]
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: npm
     directory: /frontend

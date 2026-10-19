@@ -259,4 +259,13 @@
   <data name="ComputerIsProtected" xml:space="preserve">
     <value>此计算机在目录中具有特权（例如域控制器）。只有本应用程序的管理员才能更改或删除它。</value>
   </data>
+  <data name="BulkUserCreated" xml:space="preserve">
+    <value>用户创建成功。</value>
+  </data>
+  <data name="BulkUserUpdated" xml:space="preserve">
+    <value>用户更新成功。</value>
+  </data>
+  <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
+    <value>由于意外错误，无法处理此行。详细信息请查看服务器日志。</value>
+  </data>
 </root>

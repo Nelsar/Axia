@@ -22,7 +22,8 @@ public class GlobalExceptionHandlerTests
 
         Assert.True(handled);
         body.Position = 0;
-        return (context.Response.StatusCode, await new StreamReader(body).ReadToEndAsync());
+        using var reader = new StreamReader(body);
+        return (context.Response.StatusCode, await reader.ReadToEndAsync());
     }
 
     [Fact]

@@ -308,4 +308,16 @@
     <value>This computer is privileged in the directory (for example, a domain controller). Only an administrator of this application can change or delete it.</value>
     <comment>Changing or deleting a computer the directory treats as privileged (a domain controller, say), without holding every permission.</comment>
   </data>
+  <data name="BulkUserCreated" xml:space="preserve">
+    <value>User created successfully.</value>
+    <comment>A bulk row that created its account.</comment>
+  </data>
+  <data name="BulkUserUpdated" xml:space="preserve">
+    <value>User updated successfully.</value>
+    <comment>A bulk row that updated its account.</comment>
+  </data>
+  <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
+    <value>This row could not be processed because of an unexpected error. The server log has the details.</value>
+    <comment>A bulk row that failed for a reason not meant for the caller (a bug, a library's own error). Says nothing about the cause.</comment>
+  </data>
 </root>

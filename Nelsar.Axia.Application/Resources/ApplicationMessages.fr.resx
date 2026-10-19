@@ -259,4 +259,13 @@
   <data name="ComputerIsProtected" xml:space="preserve">
     <value>Cet ordinateur est privilégié dans l'annuaire (par exemple, un contrôleur de domaine). Seul un administrateur de cette application peut le modifier ou le supprimer.</value>
   </data>
+  <data name="BulkUserCreated" xml:space="preserve">
+    <value>Utilisateur créé avec succès.</value>
+  </data>
+  <data name="BulkUserUpdated" xml:space="preserve">
+    <value>Utilisateur mis à jour avec succès.</value>
+  </data>
+  <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
+    <value>Cette ligne n’a pas pu être traitée en raison d’une erreur inattendue. Les détails figurent dans le journal du serveur.</value>
+  </data>
 </root>

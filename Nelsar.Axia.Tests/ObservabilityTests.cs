@@ -6,6 +6,7 @@ using Serilog;
 using Serilog.Context;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.Formatting.Display;
 
 namespace Nelsar.Axia.Tests;
 
@@ -82,7 +83,7 @@ public class ObservabilityTests
         using var factory = new ApiTestFactory(_ => { });
         var client = factory.CreateClient();
 
-        var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/rate-limit-settings");
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/rate-limit-settings");
         request.Headers.Add("X-Correlation-ID", "upstream-gateway-1234");
 
         var response = await client.SendAsync(request);
@@ -96,7 +97,7 @@ public class ObservabilityTests
         using var factory = new ApiTestFactory(_ => { });
         var client = factory.CreateClient();
 
-        var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/rate-limit-settings");
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/rate-limit-settings");
         // HttpClient itself refuses a literal CR/LF in a header, so the case that reaches a real
         // deployment is the one below: legal as a header, useless as an identifier.
         request.Headers.Add("X-Correlation-ID", "id with spaces and \"quotes\"");
@@ -183,6 +184,68 @@ public class ObservabilityTests
 
         Assert.Equal("Nelsar.Axia.Api", Scalar(captured, "Application"));
         Assert.Equal("Testing", Scalar(captured, "Environment"));
+    }
+
+    // ---- What a caller can do to a plain-text line -------------------------------------------
+
+    [Fact]
+    public void APlainTextLine_CannotBeBrokenByAValue()
+    {
+        // A request path decodes %0D%0A into a real line break, and the plain-text console wrote
+        // values as they stood: the caller chose the next line of the log.
+        const string forged = "/x\r\n[12:00:00 INF] signed in as admin";
+        var text = new CapturingSink();
+        var json = new CapturingSink();
+
+        using (var logger = SerilogRegistration
+                   .PlainText(new LoggerConfiguration(), to => to.Sink(text))
+                   .WriteTo.Sink(json)
+                   .CreateLogger())
+        {
+            logger.Warning("Rejected {Method} {Path}", "GET", forged);
+        }
+
+        var line = Render(Assert.Single(text.Events));
+        Assert.DoesNotContain('\n', line.TrimEnd('\r', '\n'));
+        Assert.Contains(@"/x\r\n[12:00:00 INF] signed in as admin", line);
+
+        // The JSON sinks escape on their own and get the value as it was.
+        Assert.Equal(forged, Scalar(Assert.Single(json.Events), "Path"));
+    }
+
+    [Fact]
+    public void ControlCharacters_AreEscaped_InsideStructuredValuesToo()
+    {
+        // An escape sequence restyles the terminal it is printed on; nested inside an object it
+        // is printed all the same.
+        var text = new CapturingSink();
+
+        using (var logger = SerilogRegistration
+                   .PlainText(new LoggerConfiguration(), to => to.Sink(text))
+                   .CreateLogger())
+        {
+            logger.Information("got {@Request}", new { Name = "\u001b[2Jcleared", Tags = new[] { "a\tb" } });
+        }
+
+        var request = Assert.IsType<StructureValue>(Assert.Single(text.Events).Properties["Request"]);
+        var members = request.Properties.ToDictionary(p => p.Name, p => p.Value);
+        Assert.Equal(@"\u001b[2Jcleared", ((ScalarValue)members["Name"]).Value);
+        Assert.Equal(@"a\tb", ((ScalarValue)((SequenceValue)members["Tags"]).Elements.Single()).Value);
+    }
+
+    [Fact]
+    public void TextWithoutControlCharacters_IsLeftAsItIs()
+    {
+        const string ordinary = "cn=Иван Петров,ou=people,dc=example,dc=org";
+
+        Assert.Same(ordinary, ControlCharacterEscaper.Escape(ordinary));
+    }
+
+    private static string Render(LogEvent logEvent)
+    {
+        using var output = new StringWriter();
+        new MessageTemplateTextFormatter(SerilogRegistration.PlainTextTemplate).Format(logEvent, output);
+        return output.ToString();
     }
 
     // ---- Which sinks get built ---------------------------------------------------------------
