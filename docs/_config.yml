@@ -1,0 +1,136 @@
+# GitHub Pages builds this folder into https://nelsar.github.io/Axia/ on every push to main.
+# The pages themselves stay plain Markdown that reads the same on GitHub: titles come from each
+# page's first heading, and what a page needs beyond that (its place in the navigation, its
+# search-result description) is set here under `defaults` rather than in front matter.
+
+title: Nelsar.Axia
+tagline: Web console and REST API for Active Directory and LDAP
+description: >-
+  Self-hosted web console and REST API for Active Directory and OpenLDAP: users, groups,
+  organizational units and computer accounts, with role-based access, an audit log and bulk
+  provisioning.
+url: https://nelsar.github.io
+baseurl: /Axia
+lang: en
+permalink: pretty
+
+remote_theme: just-the-docs/just-the-docs@v0.12.0
+plugins:
+  - jekyll-remote-theme
+  - jekyll-include-cache
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+logo: /brand/logo.svg
+search_enabled: true
+heading_anchors: true
+back_to_top: true
+back_to_top_text: Back to top
+aux_links:
+  GitHub: https://github.com/Nelsar/Axia
+gh_edit_link: true
+gh_edit_link_text: Edit this page on GitHub
+gh_edit_repository: https://github.com/Nelsar/Axia
+gh_edit_branch: main
+gh_edit_source: docs
+gh_edit_view_mode: edit
+footer_content: >-
+  Nelsar.Axia is licensed under the
+  <a href="https://github.com/Nelsar/Axia/blob/main/LICENSE">Apache License 2.0</a>.
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+      image: /screenshots/users.png
+  - scope:
+      path: README.md
+    values:
+      title: Documentation
+      permalink: /documentation/
+      nav_order: 1
+      description: >-
+        Where to start and what each page of the Nelsar.Axia documentation covers.
+  - scope:
+      path: overview.md
+    values:
+      nav_order: 2
+      description: >-
+        What Nelsar.Axia is made of and the concepts the rest of the documentation uses:
+        directories, sessions, roles, permissions, entry ids.
+  - scope:
+      path: installation.md
+    values:
+      nav_order: 3
+      description: >-
+        Requirements and dependencies of Nelsar.Axia, and the three ways to get a running
+        instance: Docker quick start, from source against your directory, or against a local
+        test directory.
+  - scope:
+      path: local-directory.md
+    values:
+      nav_order: 4
+      description: >-
+        A development OpenLDAP shaped like an Active Directory domain, with ~1,500 accounts,
+        ~2,000 computers and ~110 groups, for trying Nelsar.Axia on your machine.
+  - scope:
+      path: production.md
+    values:
+      nav_order: 5
+      description: >-
+        Deploying Nelsar.Axia for real users: container image, secrets, reverse proxy and TLS,
+        the bind account, persistence, upgrades and a checklist.
+  - scope:
+      path: configuration.md
+    values:
+      nav_order: 6
+      description: >-
+        Every Nelsar.Axia setting, its default, and what the API refuses to start with.
+  - scope:
+      path: directories.md
+    values:
+      nav_order: 7
+      description: >-
+        Managing Active Directory and OpenLDAP with Nelsar.Axia: LDAPS and StartTLS, several
+        directories at once, failover, and what is read and written.
+  - scope:
+      path: access-control.md
+    values:
+      nav_order: 8
+      description: >-
+        Role-based access in Nelsar.Axia: roles, the permission catalogue, role mappings from
+        directory groups, protected accounts and groups.
+  - scope:
+      path: features.md
+    values:
+      nav_order: 9
+      description: >-
+        Users, bulk operations, the login generator, groups, organizational units, computers,
+        the audit log, rate limits and the Nelsar.Axia console.
+  - scope:
+      path: api.md
+    values:
+      nav_order: 10
+      description: >-
+        The Nelsar.Axia REST API for Active Directory and LDAP: authentication, headers, paging,
+        errors, and every endpoint.
+  - scope:
+      path: operations.md
+    values:
+      nav_order: 11
+      description: >-
+        Running Nelsar.Axia: logging and log shipping, the database and migrations, caches and
+        backups.
+  - scope:
+      path: troubleshooting.md
+    values:
+      nav_order: 12
+      description: >-
+        Nelsar.Axia startup refusals, sign-in failures and odd listings, with their causes.
+  - scope:
+      path: development.md
+    values:
+      nav_order: 13
+      description: >-
+        Nelsar.Axia architecture, building, testing, and the conventions the tests enforce.

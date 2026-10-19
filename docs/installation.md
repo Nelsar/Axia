@@ -91,12 +91,13 @@ Every demo password is `Axia-Demo-1`:
 | `editor.demo` | UserEditor |
 | `user.demo` | User |
 
-What `docker compose up` starts (see [`docker-compose.yml`](../docker-compose.yml)):
+What `docker compose up` starts (see
+[`docker-compose.yml`](https://github.com/Nelsar/Axia/blob/main/docker-compose.yml)):
 
 | Service | What it does |
 | --- | --- |
 | `init` | Runs once. Generates a CA and a certificate for the directory, and the API's `Jwt__Key` and `Encryption__Key`, into Docker volumes. Does nothing on later starts. |
-| `openldap` | OpenLDAP with the demo content from [`deploy/quickstart/bootstrap.ldif`](../deploy/quickstart/bootstrap.ldif), LDAPS only, not published to the host. |
+| `openldap` | OpenLDAP with the demo content from [`deploy/quickstart/bootstrap.ldif`](https://github.com/Nelsar/Axia/blob/main/deploy/quickstart/bootstrap.ldif), LDAPS only, not published to the host. |
 | `api` | The API, built from the working tree. Reaches the directory over LDAPS and verifies its certificate. Database in the `api-data` volume. |
 | `console` | nginx serving the built console on `127.0.0.1:8080`, and proxying `/api/` to the API. The only thing published. |
 
@@ -238,10 +239,10 @@ added.
 
 ## Path 3: From source, against the local test directory
 
-[`deploy/dev`](../deploy/dev) holds an OpenLDAP for development: published on `127.0.0.1:389` in
-plain LDAP, with the quick start's demo accounts plus an Active-Directory-shaped domain of around
-1,500 accounts, 2,000 computers and 110 groups. [Local test directory](local-directory.md)
-describes what is in it.
+[`deploy/dev`](https://github.com/Nelsar/Axia/tree/main/deploy/dev) holds an OpenLDAP for
+development: published on `127.0.0.1:389` in plain LDAP, with the quick start's demo accounts plus
+an Active-Directory-shaped domain of around 1,500 accounts, 2,000 computers and 110 groups.
+[Local test directory](local-directory.md) describes what is in it.
 
 1. Steps 1–3 of path 2 (code, configuration files, keys).
 2. Start the directory:

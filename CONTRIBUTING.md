@@ -104,6 +104,15 @@ Right-to-left (Arabic, Hebrew) is handled with CSS logical properties — `margi
 `inset-inline-end`, `text-align: start`. If you write a physical `left` or `right` in a stylesheet,
 it will look correct to you and wrong to half the supported languages.
 
+## Documentation
+
+`docs/` is published to <https://nelsar.github.io/Axia/> by GitHub Pages on every push to `main`.
+It stays plain Markdown that reads the same on GitHub: a page's title is its first heading, and its
+place in the navigation and the description search engines show are set under `defaults` in
+`docs/_config.yml` — a new page needs an entry there. Link to anything outside `docs/` by its full
+GitHub URL: a relative `../` link works on GitHub and breaks on the site. Jekyll reads `{{` and
+`{%` as template syntax even inside code blocks, so a sample containing them breaks the build.
+
 ## Being civil
 
 Disagree about the code as much as you like. Be decent to the person. Maintainers will edit or
