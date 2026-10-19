@@ -13,6 +13,9 @@ url: https://nelsar.github.io
 baseurl: /Axia
 lang: en
 permalink: pretty
+# A README without front matter is copied as a raw file unless it is named here.
+include:
+  - README.md
 
 remote_theme: just-the-docs/just-the-docs@v0.12.0
 plugins:
