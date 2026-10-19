@@ -1,5 +1,6 @@
 using Nelsar.Axia.Api.Authorization;
 using Serilog;
+using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
 using Serilog.Sinks.Grafana.Loki;
@@ -177,8 +178,7 @@ public static class SerilogRegistration
             if (options.Console.Json)
                 logger.WriteTo.Console(new CompactJsonFormatter());
             else
-                logger.WriteTo.Console(
-                    outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {CorrelationId} {Message:lj}{NewLine}{Exception}");
+                PlainText(logger, to => to.Console(outputTemplate: PlainTextTemplate));
         }
 
         if (options.File.Enabled)
@@ -241,6 +241,19 @@ public static class SerilogRegistration
 
         return logger;
     }
+
+    /// <summary>The line the plain-text console writes, for a person reading it.</summary>
+    internal const string PlainTextTemplate =
+        "[{Timestamp:HH:mm:ss} {Level:u3}] {CorrelationId} {Message:lj}{NewLine}{Exception}";
+
+    /// <summary>
+    /// Sends events to a sink that renders values as they stand, through a sub-logger that escapes
+    /// their control characters first; see <see cref="ControlCharacterEscaper"/>. A sub-logger
+    /// enriches its own copy of each event, so the JSON sinks beside it still get every value
+    /// unchanged.
+    /// </summary>
+    internal static LoggerConfiguration PlainText(LoggerConfiguration logger, Action<LoggerSinkConfiguration> writeTo) =>
+        logger.WriteTo.Logger(text => writeTo(text.Enrich.With(new ControlCharacterEscaper()).WriteTo));
 
     private static string Required(string? value, string key) =>
         string.IsNullOrWhiteSpace(value)

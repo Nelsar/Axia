@@ -199,7 +199,7 @@ The API listens where ASP.NET Core is told to: `ASPNETCORE_URLS` or `ASPNETCORE_
 | --- | --- | --- |
 | `Observability:ApplicationName` | `Nelsar.Axia.Api` | Attached to every log event. |
 | `Observability:Console:Enabled` | `true` | Log to stdout. |
-| `Observability:Console:Json` | `true` | Compact JSON (for collectors). `false` gives readable lines; the Development example uses that. |
+| `Observability:Console:Json` | `true` | Compact JSON (for collectors). `false` gives readable lines, with control characters in values written as escapes (`\n`, `\u001b`) so a value cannot start a line; the Development example uses that. |
 | `Observability:File:Enabled` | `true` | Rolling file sink, compact JSON, one file per day. |
 | `Observability:File:Path` | `logs/axia-.json` | File name pattern; the date goes before the extension. Mount it in a container. |
 | `Observability:File:RetainedFileCountLimit` | `14` | Days of files kept. |
