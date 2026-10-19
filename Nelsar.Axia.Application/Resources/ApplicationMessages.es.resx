@@ -259,4 +259,13 @@
   <data name="ComputerIsProtected" xml:space="preserve">
     <value>Este equipo tiene privilegios en el directorio (por ejemplo, un controlador de dominio). Solo un administrador de esta aplicación puede modificarlo o eliminarlo.</value>
   </data>
+  <data name="BulkUserCreated" xml:space="preserve">
+    <value>Usuario creado correctamente.</value>
+  </data>
+  <data name="BulkUserUpdated" xml:space="preserve">
+    <value>Usuario actualizado correctamente.</value>
+  </data>
+  <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
+    <value>No se pudo procesar esta fila debido a un error inesperado. Los detalles están en el registro del servidor.</value>
+  </data>
 </root>

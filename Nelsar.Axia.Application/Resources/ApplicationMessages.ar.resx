@@ -259,4 +259,13 @@
   <data name="ComputerIsProtected" xml:space="preserve">
     <value>هذا الكمبيوتر ذو امتيازات في الدليل (مثل وحدة تحكم بالمجال). لا يمكن إلا لمسؤول هذا التطبيق تغييره أو حذفه.</value>
   </data>
+  <data name="BulkUserCreated" xml:space="preserve">
+    <value>تم إنشاء المستخدم بنجاح.</value>
+  </data>
+  <data name="BulkUserUpdated" xml:space="preserve">
+    <value>تم تحديث المستخدم بنجاح.</value>
+  </data>
+  <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
+    <value>تعذّرت معالجة هذا الصف بسبب خطأ غير متوقع. التفاصيل في سجل الخادم.</value>
+  </data>
 </root>

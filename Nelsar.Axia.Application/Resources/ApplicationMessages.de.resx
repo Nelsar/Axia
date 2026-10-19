@@ -259,4 +259,13 @@
   <data name="ComputerIsProtected" xml:space="preserve">
     <value>Dieser Computer ist im Verzeichnis privilegiert (zum Beispiel ein Domänencontroller). Nur ein Administrator dieser Anwendung kann ihn ändern oder löschen.</value>
   </data>
+  <data name="BulkUserCreated" xml:space="preserve">
+    <value>Benutzer erfolgreich angelegt.</value>
+  </data>
+  <data name="BulkUserUpdated" xml:space="preserve">
+    <value>Benutzer erfolgreich aktualisiert.</value>
+  </data>
+  <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
+    <value>Diese Zeile konnte wegen eines unerwarteten Fehlers nicht verarbeitet werden. Einzelheiten stehen im Serverprotokoll.</value>
+  </data>
 </root>

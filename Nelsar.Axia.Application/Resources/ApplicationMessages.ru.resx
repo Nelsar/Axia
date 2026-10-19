@@ -263,4 +263,13 @@
   <data name="ComputerIsProtected" xml:space="preserve">
     <value>Этот компьютер имеет привилегии в каталоге (например, это контроллер домена). Изменить или удалить его может только администратор приложения.</value>
   </data>
+  <data name="BulkUserCreated" xml:space="preserve">
+    <value>Пользователь успешно создан.</value>
+  </data>
+  <data name="BulkUserUpdated" xml:space="preserve">
+    <value>Пользователь успешно обновлён.</value>
+  </data>
+  <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
+    <value>Строку не удалось обработать из-за непредвиденной ошибки. Подробности — в журнале сервера.</value>
+  </data>
 </root>
