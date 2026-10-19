@@ -83,7 +83,7 @@ public class ObservabilityTests
         using var factory = new ApiTestFactory(_ => { });
         var client = factory.CreateClient();
 
-        var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/rate-limit-settings");
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/rate-limit-settings");
         request.Headers.Add("X-Correlation-ID", "upstream-gateway-1234");
 
         var response = await client.SendAsync(request);
@@ -97,7 +97,7 @@ public class ObservabilityTests
         using var factory = new ApiTestFactory(_ => { });
         var client = factory.CreateClient();
 
-        var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/rate-limit-settings");
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/rate-limit-settings");
         // HttpClient itself refuses a literal CR/LF in a header, so the case that reaches a real
         // deployment is the one below: legal as a header, useless as an identifier.
         request.Headers.Add("X-Correlation-ID", "id with spaces and \"quotes\"");

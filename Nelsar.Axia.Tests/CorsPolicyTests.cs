@@ -19,7 +19,7 @@ public class CorsPolicyTests
         ApiTestFactory factory, string origin)
     {
         var client = factory.CreateClient();
-        var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/providers/selectable");
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/providers/selectable");
         request.Headers.Add("Origin", origin);
         return await client.SendAsync(request);
     }
@@ -122,7 +122,7 @@ public class CorsPolicyTests
         using var factory = new ApiTestFactory(_ => { });
         var client = factory.CreateClient();
 
-        var preflight = new HttpRequestMessage(HttpMethod.Options, "/api/v1/users");
+        using var preflight = new HttpRequestMessage(HttpMethod.Options, "/api/v1/users");
         preflight.Headers.Add("Origin", "http://localhost:5500");
         preflight.Headers.Add("Access-Control-Request-Method", "GET");
         preflight.Headers.Add("Access-Control-Request-Headers", "authorization");
