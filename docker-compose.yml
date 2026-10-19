@@ -2,10 +2,15 @@
 # real deployment should be — LDAPS to the directory with a verified certificate, a reverse proxy
 # in front of the API, generated keys, nothing published beyond the console on localhost.
 #
-#   docker compose up --build
+#   docker compose up
 #
 # Then open http://localhost:8080 and sign in as admin.demo / Axia-Demo-1. See README.md, "Quick
 # start", for the other accounts and what each one may do.
+#
+# The API and the console are the released images from ghcr.io, of the version below, for amd64
+# and arm64 alike. `docker compose up --build` builds them from this checkout instead, which is
+# what to run after changing the code — and what happens on its own when the version named is not
+# published.
 #
 # This is for trying the project out, not for production: the directory, its demo passwords and
 # the API's database live in local Docker volumes. `docker compose down -v` removes all of it.
@@ -58,6 +63,8 @@ services:
     restart: unless-stopped
 
   api:
+    # The version is set at each release, with the others; see "Releasing" in CONTRIBUTING.md.
+    image: ghcr.io/nelsar/axia-api:${AXIA_VERSION:-0.2.0}
     build:
       context: .
       dockerfile: Dockerfile
@@ -99,6 +106,7 @@ services:
     restart: unless-stopped
 
   console:
+    image: ghcr.io/nelsar/axia-console:${AXIA_VERSION:-0.2.0}
     build:
       context: ./frontend
     ports:

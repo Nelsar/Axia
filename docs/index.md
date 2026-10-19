@@ -73,10 +73,10 @@ Compose v2 and nothing else.
 ```bash
 git clone https://github.com/Nelsar/Axia.git
 cd Axia
-docker compose up --build
+docker compose up
 ```
 
-When the API logs `Now listening on`, open <http://localhost:8080> and sign in as `admin.demo`
+It pulls the released images, for amd64 and arm64. When the API logs `Now listening on`, open <http://localhost:8080> and sign in as `admin.demo`
 with the password `Axia-Demo-1`. The other demo accounts, and the two ways to run it against your
 own directory, are in [Installation](installation.md). Before putting it in front of real users,
 read [Production deployment](production.md) and the

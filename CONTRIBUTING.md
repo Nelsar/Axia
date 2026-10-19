@@ -14,6 +14,7 @@ You need the [.NET 10 SDK](https://dotnet.microsoft.com/download) and
 
 To see a change working end to end, the [Docker quick start](README.md#quick-start) is the
 shortest way: `docker compose up --build` builds the API and the console from your working tree
+(without `--build` it runs the released images)
 and starts them against an OpenLDAP with demo accounts, one for each role. Its directory is
 reachable only inside Docker, so to run the API from source, point it at an LDAP server or an
 Active Directory you can reach, or at the [local test directory](docs/local-directory.md) in
@@ -122,13 +123,15 @@ remove anything that makes this an unpleasant place to be, and will say so when 
 ## Releasing
 
 For maintainers. Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html), and
-the version is written in two places: `Directory.Build.props`, which every .NET project inherits,
-and `frontend/package.json`.
+the version is written in three places: `Directory.Build.props`, which every .NET project
+inherits, `frontend/package.json`, and the image tags the quick start runs in `docker-compose.yml`.
 
 1. In `CHANGELOG.md`, give the section being released its version and date —
    `## [x.y.z] - YYYY-MM-DD` — and add its link at the bottom.
-2. Set the same version in `Directory.Build.props`, and in the console with
-   `npm version x.y.z --no-git-tag-version` in `frontend/`, which updates the lockfile too.
+2. Set the same version in `Directory.Build.props`, in the console with
+   `npm version x.y.z --no-git-tag-version` in `frontend/`, which updates the lockfile too, and as
+   the `AXIA_VERSION` default of both images in `docker-compose.yml`. Until step 4 has published
+   them, `docker compose up` on `main` builds from source instead.
 3. Merge that as a pull request, with CI green.
 4. Tag the merge commit on `main` and push the tag:
 
@@ -136,6 +139,11 @@ and `frontend/package.json`.
    git tag -a vx.y.z -m "Nelsar.Axia x.y.z"
    git push origin vx.y.z
    ```
+
+   The tag starts the `Images` workflow, which builds `ghcr.io/nelsar/axia-api` and
+   `ghcr.io/nelsar/axia-console` from it, for amd64 and arm64, and publishes them as `x.y.z`,
+   `x.y` and `latest`. Wait for it to finish before announcing the release; should it fail, run it
+   again from the Actions tab with the tag as its input.
 
 5. Publish the release from the tag, with that version's changelog section as its notes:
 

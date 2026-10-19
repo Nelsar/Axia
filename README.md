@@ -114,11 +114,13 @@ Docker. It needs Docker with Compose v2 and nothing else.
 ```bash
 git clone https://github.com/Nelsar/Axia.git
 cd Axia
-docker compose up --build
+docker compose up
 ```
 
-The first start builds two images and takes a few minutes. When the API logs `Now listening on`,
-open <http://localhost:8080> and sign in. Every demo password is `Axia-Demo-1`.
+It pulls the released images of the API and the console from GitHub Container Registry, for amd64
+and arm64; `docker compose up --build` builds them from the checkout instead. When the API logs
+`Now listening on`, open <http://localhost:8080> and sign in. Every demo password is
+`Axia-Demo-1`.
 
 | Login | Role | Try |
 | --- | --- | --- |
