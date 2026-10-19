@@ -76,11 +76,13 @@ Needs Docker with Compose v2 and nothing else.
 ```bash
 git clone https://github.com/Nelsar/Axia.git
 cd Axia
-docker compose up --build
+docker compose up
 ```
 
-The first start builds two images and takes a few minutes. When the API logs `Now listening on`,
-open <http://localhost:8080>.
+The first start pulls the released images of the API and the console from GitHub Container
+Registry, for amd64 and arm64. `docker compose up --build` builds them from the checkout instead,
+which takes a few minutes; it is also what happens when the version `docker-compose.yml` names has
+not been published. When the API logs `Now listening on`, open <http://localhost:8080>.
 
 Every demo password is `Axia-Demo-1`:
 
@@ -98,10 +100,11 @@ What `docker compose up` starts (see
 | --- | --- |
 | `init` | Runs once. Generates a CA and a certificate for the directory, and the API's `Jwt__Key` and `Encryption__Key`, into Docker volumes. Does nothing on later starts. |
 | `openldap` | OpenLDAP with the demo content from [`deploy/quickstart/bootstrap.ldif`](https://github.com/Nelsar/Axia/blob/main/deploy/quickstart/bootstrap.ldif), LDAPS only, not published to the host. |
-| `api` | The API, built from the working tree. Reaches the directory over LDAPS and verifies its certificate. Database in the `api-data` volume. |
-| `console` | nginx serving the built console on `127.0.0.1:8080`, and proxying `/api/` to the API. The only thing published. |
+| `api` | The API: `ghcr.io/nelsar/axia-api`, or the working tree with `--build`. Reaches the directory over LDAPS and verifies its certificate. Database in the `api-data` volume. |
+| `console` | `ghcr.io/nelsar/axia-console`: nginx serving the built console on `127.0.0.1:8080`, and proxying `/api/` to the API. The only thing published. |
 
-The port can be changed with `CONSOLE_PORT=9090 docker compose up`.
+The port can be changed with `CONSOLE_PORT=9090 docker compose up`, and the images' version with
+`AXIA_VERSION=x.y.z docker compose up`.
 
 `docker compose down` stops it; `docker compose down -v` also deletes the directory, its
 certificates, the keys and the database.

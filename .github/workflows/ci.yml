@@ -73,9 +73,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # The README's first command, run as written. It catches what no other job builds: both
-      # Dockerfiles, the nginx proxy, the generated certificate and keys, the demo directory and
-      # the role mappings in docker-compose.yml.
+      # The README's first command, with --build so that it runs this commit rather than the
+      # released images it would pull. It catches what no other job builds: both Dockerfiles,
+      # the nginx proxy, the generated certificate and keys, the demo directory and the role
+      # mappings in docker-compose.yml.
       - run: docker compose up -d --build
 
       # Readiness is polled on the unauthenticated picker rather than on sign-in: sign-in is

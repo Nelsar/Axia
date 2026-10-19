@@ -1,0 +1,113 @@
+# The API and console images, for linux/amd64 and linux/arm64.
+#
+# A release tag publishes them to GitHub Container Registry as ghcr.io/nelsar/axia-api and
+# ghcr.io/nelsar/axia-console, built from that tag; see "Releasing" in CONTRIBUTING.md. A pull
+# request that touches how they are built builds both platforms without publishing, so a broken
+# arm64 build shows up there rather than on release day — the quick start job in CI builds amd64
+# only.
+name: Images
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - frontend/Dockerfile
+      - frontend/.dockerignore
+      - frontend/nginx.conf
+      - .github/workflows/images.yml
+  # Publishing a tag again, should the run for it have failed. A tag built this way becomes
+  # `latest` if it is the highest version, as on a push; build tags in order.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to build and publish, e.g. v0.2.1
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: images-${{ github.ref }}-${{ inputs.tag }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  image:
+    name: ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Pushing to ghcr.io under this repository's owner. Unused on a pull request, which only
+      # builds; the token a pull request from a fork gets cannot write packages anyway.
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: axia-api
+            context: .
+            file: Dockerfile
+            description: Nelsar.Axia API — REST API for Active Directory and OpenLDAP
+          - image: axia-console
+            context: frontend
+            file: frontend/Dockerfile
+            description: Nelsar.Axia console — the web UI, served by nginx, which proxies /api/ to http://api:8080
+    env:
+      PUBLISH: ${{ github.event_name != 'pull_request' }}
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # On a dispatch, the tag asked for — not the branch the workflow was started from.
+          ref: ${{ inputs.tag || github.ref }}
+
+      # Runs the arm64 image's own RUN steps. The builds themselves do not need it: the API
+      # cross-compiles and the console's files are the same on every platform.
+      - uses: docker/setup-qemu-action@v4
+
+      - uses: docker/setup-buildx-action@v4
+
+      - if: env.PUBLISH == 'true'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 0.2.1, 0.2 and latest for v0.2.1; a pre-release (v0.3.0-rc.1) gets its own version only.
+      # The labels link the package to this repository, which is where ghcr.io takes its
+      # description, licence and source link from.
+      - id: meta
+        uses: docker/metadata-action@v6
+        env:
+          # A multi-platform image is an index; ghcr.io reads the description from there.
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+        with:
+          images: ghcr.io/nelsar/${{ matrix.image }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ env.TAG }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ env.TAG }}
+            type=ref,event=pr
+          labels: |
+            org.opencontainers.image.title=${{ matrix.image }}
+            org.opencontainers.image.description=${{ matrix.description }}
+          annotations: |
+            org.opencontainers.image.description=${{ matrix.description }}
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          platforms: linux/amd64,linux/arm64
+          push: ${{ env.PUBLISH == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          # Provenance and an SBOM travel with the image: how and from which commit it was built,
+          # and what is in it, for whoever scans what they deploy.
+          provenance: mode=max
+          sbom: true
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,scope=${{ matrix.image }},mode=max
