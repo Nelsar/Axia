@@ -21,7 +21,7 @@ an audit log and bulk user provisioning.
 Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
 [Apache 2.0](LICENSE).
 
-> **Status: MVP.** The API and console do what is described below, and 880 tests cover it. What is
+> **Status: MVP.** The API and console do what is described below, and 886 tests cover it. What is
 > not yet here is listed under [Not in scope yet](#not-in-scope-yet) — read it before deciding
 > whether this fits.
 
@@ -382,7 +382,7 @@ the tests if a message is left untranslated.
 dotnet test
 ```
 
-880 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
+886 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
 authorisation on every guarded use case, what may reach a log sink, multi-directory isolation, and
 translation completeness in every supported language.
 
