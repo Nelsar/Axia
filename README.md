@@ -143,7 +143,7 @@ own directory, run it as below.
 ### Prerequisites
 
 - [.NET SDK 10](https://dotnet.microsoft.com/download) (built and tested on 10.0.112)
-- [Node.js](https://nodejs.org/) 18 or newer, for the console
+- [Node.js](https://nodejs.org/) 22 (or 20.19 and later), for the console
 - An LDAP or Active Directory server to point at
 
 ### 1. Configuration

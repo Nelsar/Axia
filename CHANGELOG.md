@@ -19,6 +19,17 @@ How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
   `%0D%0A` can no longer start a log line of its own or restyle the terminal. The JSON sinks
   already escaped them.
 
+### Added
+
+- Images: every release publishes `ghcr.io/nelsar/axia-api` and `ghcr.io/nelsar/axia-console`
+  for `linux/amd64` and `linux/arm64`, tagged `x.y.z`, `x.y` and `latest`, with build provenance
+  and an SBOM. See [Production deployment](docs/production.md#images).
+
+### Changed
+
+- The quick start runs the released images: `docker compose up` pulls them instead of building
+  for several minutes. `docker compose up --build` still builds the checkout.
+
 ### Fixed
 
 - A bulk row that succeeded said so in English whatever language the caller used; it is now
