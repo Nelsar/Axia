@@ -1,0 +1,38 @@
+<!--
+  The Windows installer: Nelsar.Axia-<version>-<x64|arm64>.msi, a per-machine install of the API,
+  with the console it serves, as a Windows service. See docs/installation-windows.md for what it
+  does and docs/development.md for how to build it.
+
+  It packages a self-contained publish of the API made beforehand, with the console in its
+  wwwroot, and is not part of Nelsar.Axia.sln: it builds on Windows only, and the solution builds
+  everywhere. WiX 5, not 6 or later: those come with a maintenance fee and a EULA to accept on
+  every build, and nothing used here needs them.
+-->
+<Project Sdk="WixToolset.Sdk/5.0.2">
+
+  <PropertyGroup>
+    <OutputName>Nelsar.Axia-$(Version)-$(Platform)</OutputName>
+    <!-- Given on the command line, relative to where the build is run from. -->
+    <_AxiaPublishDir Condition="'$(AxiaPublishDir)' != ''">$([MSBuild]::EnsureTrailingSlash($([System.IO.Path]::GetFullPath('$(AxiaPublishDir)'))))</_AxiaPublishDir>
+    <!-- ICE60 asks for a language on every versioned file that is not a font. The .NET runtime's
+         files carry versions and no language, and Windows Installer copes; there is nothing to fix. -->
+    <SuppressIces>ICE60</SuppressIces>
+    <DefineConstants>Version=$(Version);PublishDir=$(_AxiaPublishDir)</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Both are easy to leave out, and either left out builds something wrong rather than nothing:
+       an x86 package of 64-bit binaries, or one with no binaries at all. -->
+  <Target Name="AxiaCheckInputs" BeforeTargets="Build">
+    <Error Condition="'$(Platform)' != 'x64' and '$(Platform)' != 'arm64'"
+           Text="Build with -p:Platform=x64 or -p:Platform=arm64, matching the runtime the API was published for." />
+    <Error Condition="'$(_AxiaPublishDir)' == '' or !Exists('$(_AxiaPublishDir)Nelsar.Axia.Api.exe')"
+           Text="Set -p:AxiaPublishDir to a self-contained publish of the API for win-$(Platform); see docs/development.md." />
+    <Error Condition="!Exists('$(_AxiaPublishDir)wwwroot/index.html')"
+           Text="$(_AxiaPublishDir) has no console in wwwroot. Publish the API with -p:AxiaConsoleDist; see docs/development.md." />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Util.wixext" Version="5.0.2" />
+  </ItemGroup>
+
+</Project>

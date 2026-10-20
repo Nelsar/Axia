@@ -9,7 +9,8 @@ Three ways to get a running instance, from quickest to most real:
 3. [From source, against the local test directory](#path-3-from-source-against-the-local-test-directory):
    the same, against a throwaway AD-shaped OpenLDAP in Docker. For development.
 
-Production is a separate page: [Production deployment](production.md).
+Production is a separate page: [Production deployment](production.md). On Windows there is also
+an MSI that installs it as a service, with no Docker: [Windows installer](installation-windows.md).
 
 ## Requirements
 

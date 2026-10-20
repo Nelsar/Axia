@@ -115,6 +115,32 @@ The integration tests read `Nelsar.Axia.Api/appsettings.json` if present. One te
 There are no tests against a live directory; LDAP is faked at the provider boundary. The
 [local test directory](local-directory.md) is for manual and exploratory testing.
 
+### The Windows installer
+
+`deploy/windows` builds the MSI described in [Windows installer](installation-windows.md), with
+[WiX 5](https://docs.firegiant.com/wix/), which `dotnet build` fetches. On Windows only, and not
+part of `Nelsar.Axia.sln`. From the repository root, for `x64` or `arm64`:
+
+```powershell
+cd frontend; $env:VITE_API_SAME_ORIGIN = "true"; npm ci; npm run build; cd ..
+dotnet publish Nelsar.Axia.Api -c Release -r win-x64 --self-contained -p:AxiaConsoleDist=../frontend/dist -o artifacts/publish/win-x64
+dotnet build deploy/windows/Nelsar.Axia.Installer.wixproj -c Release -p:Platform=x64 -p:AxiaPublishDir=artifacts/publish/win-x64 -o artifacts/msi
+```
+
+`artifacts/msi/Nelsar.Axia-<version>-x64.msi` is the result, versioned from
+`Directory.Build.props`. The build stops if the platform, the publish or the console in it is
+missing.
+
+What the package does on the machine is checked by `deploy/windows/test-install.ps1`, which the
+*Installers* workflow runs on every pull request touching the API or the installer: install with
+settings, the service running as `NT SERVICE\NelsarAxia`, the console and API answering, the
+settings file closed to everyone else, an upgrade keeping the keys, an uninstall keeping the data.
+It installs a service for real, so run it yourself only on a machine you can throw away.
+
+The settings file is written by the API itself — `Nelsar.Axia.Api init-settings <path>
+[Section:Key=value]…`, which the package runs as a custom action — so what it writes is unit
+tested in `SettingsFileTests` rather than in WiX.
+
 ## Database migrations
 
 The model — `AppDbContext` and the configurations under `Persistence/Configurations` — is one, and

@@ -165,3 +165,8 @@ inherits, `frontend/package.json`, and the image tags the quick start runs in `d
    ```bash
    gh release create vx.y.z --verify-tag --title "Nelsar.Axia x.y.z" --notes-file notes.md
    ```
+
+   Publishing it starts the `Installers` workflow, which builds the Windows installers from the
+   tag, installs, upgrades and removes the x64 one on its runner, and attaches
+   `Nelsar.Axia-x.y.z-x64.msi` and `Nelsar.Axia-x.y.z-arm64.msi` to the release a few minutes
+   later. Should it fail, run it again from the Actions tab with the tag as its input.

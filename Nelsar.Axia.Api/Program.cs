@@ -33,6 +33,14 @@ try
         return;
     }
 
+    // Creates or updates the settings file an installed instance runs with, and exits. See
+    // InitSettingsCommand.
+    if (InitSettingsCommand.IsInvoked(args))
+    {
+        Environment.ExitCode = InitSettingsCommand.Run(args);
+        return;
+    }
+
     // Windows starts a service in System32. Content root and working directory both follow the
     // binaries instead, so that a relative path in configuration — the log file, a SQLite
     // database — means what it means when the API is started by hand from its own folder, and not
@@ -46,6 +54,10 @@ try
         Args = args,
         ContentRootPath = isWindowsService ? AppContext.BaseDirectory : null
     });
+
+    // --SettingsFile, which an installed instance is started with: its settings live outside the
+    // folder of its binaries. First, so that everything below reads them. See SettingsFile.
+    SettingsFile.AddTo(builder.Configuration);
 
     // Run as a Windows service or a systemd unit when started as one: start and stop are reported
     // to the service manager, and a stop request shuts the host down cleanly. Both do nothing when

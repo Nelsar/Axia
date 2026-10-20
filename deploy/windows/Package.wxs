@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  What the installer puts where:
+
+    %ProgramFiles%\Nelsar.Axia\   the API and the console it serves. Replaced on upgrade.
+    %ProgramData%\Nelsar.Axia\    appsettings.json, the SQLite database, logs\. Kept on upgrade and
+                                  on uninstall: the keys in appsettings.json are what the stored
+                                  bind passwords and the audit trail are readable with.
+
+  and the NelsarAxia service, running as its own virtual account, NT SERVICE\NelsarAxia, which may
+  write to the second folder and nowhere else. docs/installation-windows.md is the user's side.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+
+  <Package Name="Nelsar.Axia"
+           Manufacturer="Nelsar"
+           Version="$(Version)"
+           UpgradeCode="79655DA3-9C1A-4CDE-B8EC-50CA96C5DEF3"
+           Scope="perMachine"
+           InstallerVersion="500">
+
+    <!-- Never change the UpgradeCode: it is how a newer package finds the installed one, and how
+         ConfigMgr and Intune tell which version a machine has. -->
+    <MajorUpgrade DowngradeErrorMessage="A newer version of Nelsar.Axia is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/Nelsar/Axia" />
+    <Property Id="ARPHELPLINK" Value="https://nelsar.github.io/Axia/installation-windows/" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+
+    <!--
+      Settings an unattended install can give on the msiexec command line. All empty by default,
+      and an empty one changes nothing, so an upgrade or a repair run without them keeps what is in
+      appsettings.json. None of them is a secret: msiexec writes its command line to its log.
+    -->
+    <Property Id="PORT" Secure="yes" />
+    <Property Id="LDAP_SERVER" Secure="yes" />
+    <Property Id="LDAP_BASEDN" Secure="yes" />
+    <Property Id="LDAP_USERNAME" Secure="yes" />
+    <Property Id="ADMIN_GROUP" Secure="yes" />
+    <Property Id="DATABASE_PROVIDER" Secure="yes" />
+    <!-- 1 starts the service at the end of a first install. Off by default, because a first
+         install has no bind password yet and the service would stop again at once. An upgrade
+         starts it regardless: it was configured, and was running, before. -->
+    <Property Id="START_SERVICE" Secure="yes" />
+
+    <SetProperty Id="AXIA_URLS" Value="http://+:[PORT]" Before="InstallInitialize" Sequence="execute" Condition="PORT" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="Nelsar.Axia" />
+    </StandardDirectory>
+    <StandardDirectory Id="CommonAppDataFolder">
+      <Directory Id="DATAFOLDER" Name="Nelsar.Axia" />
+    </StandardDirectory>
+
+    <!--
+      Everything the service keeps. Its access list replaces the one inherited from ProgramData,
+      which lets every user read: appsettings.json holds the signing and encryption keys. SYSTEM
+      and Administrators have full control, the service may modify (0x1301bf), nobody else gets
+      in. The last SID is NT SERVICE\NelsarAxia, which is derived from the service's name
+      (`sc.exe showsid NelsarAxia`); it changes if the service is ever renamed.
+    -->
+    <Component Id="DataFolder" Directory="DATAFOLDER" Guid="5B0C1C7E-2F7A-4C0B-9E51-3F2D8A64B7C1" Permanent="yes">
+      <CreateFolder>
+        <PermissionEx Sddl="D:PAI(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;0x1301bf;;;S-1-5-80-3955927558-18234870-3136303628-1275620392-1446890761)" />
+      </CreateFolder>
+    </Component>
+
+    <ComponentGroup Id="Binaries" Directory="INSTALLFOLDER">
+      <Files Include="$(PublishDir)**">
+        <Exclude Files="$(PublishDir)Nelsar.Axia.Api.exe" />
+      </Files>
+    </ComponentGroup>
+
+    <Component Id="Service" Directory="INSTALLFOLDER">
+      <File Id="AxiaApiExe" Source="$(PublishDir)Nelsar.Axia.Api.exe" KeyPath="yes" />
+
+      <ServiceInstall Name="NelsarAxia"
+                      DisplayName="Nelsar.Axia"
+                      Description="Web console and REST API for Active Directory and LDAP directories."
+                      Type="ownProcess"
+                      Start="auto"
+                      ErrorControl="normal"
+                      Account="NT SERVICE\NelsarAxia"
+                      Arguments="--SettingsFile &quot;[DATAFOLDER]appsettings.json&quot;"
+                      Vital="yes">
+        <!-- A restart policy rather than nothing: there is one instance. It also covers a start
+             at boot before the network or the database is up. -->
+        <util:ServiceConfig FirstFailureActionType="restart"
+                            SecondFailureActionType="restart"
+                            ThirdFailureActionType="restart"
+                            RestartServiceDelayInSeconds="60"
+                            ResetPeriodInDays="1" />
+      </ServiceInstall>
+
+      <ServiceControl Id="StopAndRemove" Name="NelsarAxia" Stop="both" Remove="uninstall" Wait="yes" />
+    </Component>
+
+    <Component Id="ServiceStart" Directory="INSTALLFOLDER" Guid="C4E1F0B2-7D3A-4B8E-A6F5-1E9C2D7B8A40"
+               Condition="START_SERVICE = &quot;1&quot; OR WIX_UPGRADE_DETECTED">
+      <ServiceControl Id="Start" Name="NelsarAxia" Start="install" Wait="yes" />
+      <CreateFolder />
+    </Component>
+
+    <!--
+      appsettings.json: created on the first install with new keys and defaults that keep the
+      database and the logs in DATAFOLDER, then updated with whatever settings were given. Run on
+      every install, upgrade and repair, and it never replaces a key — see SettingsFile.Initialize.
+      Run by the installed API itself, as SYSTEM, before the service can start.
+
+      The command line is 240 characters, and Windows Installer allows 255 (ICE03 says when it is
+      over): a further property needs a shorter name, or a second action.
+    -->
+    <CustomAction Id="InitSettings"
+                  FileRef="AxiaApiExe"
+                  ExeCommand="init-settings &quot;[DATAFOLDER]appsettings.json&quot; &quot;Urls=[AXIA_URLS]&quot; &quot;Ldap:Server=[LDAP_SERVER]&quot; &quot;Ldap:BaseDn=[LDAP_BASEDN]&quot; &quot;Ldap:AdminUsername=[LDAP_USERNAME]&quot; &quot;RoleMappings:GroupDns:Admin=[ADMIN_GROUP]&quot; &quot;Database:Provider=[DATABASE_PROVIDER]&quot;"
+                  Execute="deferred"
+                  Impersonate="no"
+                  Return="check" />
+
+    <InstallExecuteSequence>
+      <Custom Action="InitSettings" After="InstallFiles" Condition="NOT (REMOVE ~= &quot;ALL&quot;)" />
+    </InstallExecuteSequence>
+
+    <Feature Id="Main" Title="Nelsar.Axia">
+      <ComponentRef Id="DataFolder" />
+      <ComponentGroupRef Id="Binaries" />
+      <ComponentRef Id="Service" />
+      <ComponentRef Id="ServiceStart" />
+    </Feature>
+
+  </Package>
+</Wix>

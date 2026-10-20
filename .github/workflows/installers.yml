@@ -1,0 +1,147 @@
+# The Windows installer, Nelsar.Axia-<version>-<x64|arm64>.msi.
+#
+# A pull request that touches the API or the installer builds both and installs, upgrades and
+# removes the x64 one on the runner (deploy/windows/test-install.ps1), so a package that installs
+# but does not run shows up there. Publishing a release builds them from its tag and attaches them
+# to it; see "Releasing" in CONTRIBUTING.md.
+name: Installers
+
+on:
+  pull_request:
+    paths:
+      - deploy/windows/**
+      - Nelsar.Axia.Api/**
+      - Nelsar.Axia.Application/**
+      - Nelsar.Axia.Infrastructure/**
+      - Nelsar.Axia.Migrations.*/**
+      - Directory.Build.props
+      - .github/workflows/installers.yml
+  release:
+    types: [published]
+  # Attaching them again, should the run for a release have failed.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to build and attach the installers to, e.g. v0.3.0
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: installers-${{ github.ref }}-${{ inputs.tag }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  TAG: ${{ inputs.tag || github.event.release.tag_name }}
+
+jobs:
+  build:
+    name: MSI — ${{ matrix.platform }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [x64, arm64]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG || github.ref }}
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Build the console
+        working-directory: frontend
+        env:
+          VITE_API_SAME_ORIGIN: "true"
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publish the API with it
+        run: >
+          dotnet publish Nelsar.Axia.Api -c Release -r win-${{ matrix.platform }} --self-contained
+          -p:AxiaConsoleDist=../frontend/dist -o artifacts/publish
+
+      - name: Build the installer
+        run: >
+          dotnet build deploy/windows/Nelsar.Axia.Installer.wixproj -c Release
+          -p:Platform=${{ matrix.platform }} -p:AxiaPublishDir=artifacts/publish -o artifacts/msi
+
+      # The same binaries under a lower version, for test-install.ps1 to upgrade from.
+      - name: Build an older version to upgrade from
+        if: matrix.platform == 'x64'
+        run: >
+          dotnet build deploy/windows/Nelsar.Axia.Installer.wixproj -c Release
+          -p:Platform=x64 -p:AxiaPublishDir=artifacts/publish -p:Version=0.0.1 -o artifacts/older
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: msi-${{ matrix.platform }}
+          path: artifacts/msi/*.msi
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v7
+        if: matrix.platform == 'x64'
+        with:
+          name: msi-older
+          path: artifacts/older/*.msi
+          if-no-files-found: error
+
+  test:
+    name: MSI — install, upgrade, uninstall
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG || github.ref }}
+          sparse-checkout: deploy/windows
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: msi-x64
+          path: current
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: msi-older
+          path: older
+
+      - name: Install, upgrade and uninstall
+        shell: pwsh
+        run: >
+          deploy/windows/test-install.ps1
+          -Older (Get-Item older/*.msi).FullName
+          -Current (Get-Item current/*.msi).FullName
+
+  attach:
+    name: Attach to the release
+    if: github.event_name != 'pull_request'
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: msi-x64
+          path: msi
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: msi-arm64
+          path: msi
+
+      - name: Upload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$TAG" msi/*/*.msi --clobber --repo "${{ github.repository }}"

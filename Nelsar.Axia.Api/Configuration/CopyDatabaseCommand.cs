@@ -42,6 +42,9 @@ internal static class CopyDatabaseCommand
         {
             // Everything else on the command line is configuration, as it is for the API.
             var configuration = Host.CreateApplicationBuilder([.. rest]).Configuration;
+
+            // An installed instance keeps its settings in a file of its own; --SettingsFile names it.
+            SettingsFile.AddTo(configuration);
             var (targetProvider, targetConnectionString) = AxiaDatabase.FromConfiguration(configuration);
 
             // Opened read-only where the engine allows it, so that the database being moved away
