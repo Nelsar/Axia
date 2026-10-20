@@ -18,9 +18,9 @@ public sealed class ConsoleFilesTests : IDisposable
 
     public ConsoleFilesTests()
     {
-        File.WriteAllText(Path.Combine(_console, "index.html"), "<!DOCTYPE html><title>Nelsar.Axia</title>");
-        Directory.CreateDirectory(Path.Combine(_console, "assets"));
-        File.WriteAllText(Path.Combine(_console, "assets", "index-abc123.js"), "export {};");
+        File.WriteAllText(Path.Join(_console, "index.html"), "<!DOCTYPE html><title>Nelsar.Axia</title>");
+        Directory.CreateDirectory(Path.Join(_console, "assets"));
+        File.WriteAllText(Path.Join(_console, "assets", "index-abc123.js"), "export {};");
     }
 
     public void Dispose() => Directory.Delete(_console, recursive: true);
