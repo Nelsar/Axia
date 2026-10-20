@@ -51,6 +51,10 @@
   <ItemGroup>
     <ProjectReference Include="../Nelsar.Axia.Infrastructure/Nelsar.Axia.Infrastructure.csproj" />
     <ProjectReference Include="../Nelsar.Axia.Contracts/Nelsar.Axia.Contracts.csproj" />
+    <!-- Nothing here calls into these; EF Core loads whichever one Database:Provider names, by
+         assembly name. Referenced so that both are built and published with the API. -->
+    <ProjectReference Include="../Nelsar.Axia.Migrations.PostgreSql/Nelsar.Axia.Migrations.PostgreSql.csproj" />
+    <ProjectReference Include="../Nelsar.Axia.Migrations.Sqlite/Nelsar.Axia.Migrations.Sqlite.csproj" />
   </ItemGroup>
 
 </Project>

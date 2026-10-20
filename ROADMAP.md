@@ -30,9 +30,8 @@ What stands between the MVP and running it comfortably in production, roughly in
 - **Revocation checks for directory certificates**, without turning an unreachable CRL endpoint
   into an outage.
 - **Bulk jobs that survive a restart.** They are held in memory today; moving them into the
-  database is also what makes a second instance possible.
-- **PostgreSQL alongside SQLite**, for deployments that need more than one process. Better decided
-  before the schema grows than after.
+  database — PostgreSQL since 0.3 — is also, with the rate-limit and sign-in counters, what stands
+  between the API and a second instance.
 
 ## Later
 

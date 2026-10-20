@@ -37,7 +37,8 @@ Api ──► Application ──► Domain
 | `Nelsar.Axia.Domain` | Entities (`RoleMapping`, `Provider`, …), value objects (`DistinguishedName`, `Email`, `EncryptedSecret`), the permission catalogue, pure services (`UserPatternGenerator`) | nothing |
 | `Nelsar.Axia.Contracts` | DTOs, request/response types, module interfaces (`IUsersModule`, …), exceptions that cross layers | nothing |
 | `Nelsar.Axia.Application` | Use cases as MediatR commands and queries, validators, the pipeline behaviours, permission and role resolution, `PrivilegeGuard` | Domain, Contracts |
-| `Nelsar.Axia.Infrastructure` | LDAP providers, `DefaultLdapProviderFactory`, EF Core `AppDbContext` and migrations, AES-GCM encryption, JWT issuing, the bulk job worker | Application, Domain, Contracts |
+| `Nelsar.Axia.Infrastructure` | LDAP providers, `DefaultLdapProviderFactory`, EF Core `AppDbContext` and `AxiaDatabase`, AES-GCM encryption, JWT issuing, the bulk job worker | Application, Domain, Contracts |
+| `Nelsar.Axia.Migrations.PostgreSql`, `.Sqlite` | Each database's migrations; see [Database migrations](#database-migrations) | Infrastructure |
 | `Nelsar.Axia.Api` | Controllers, middleware (correlation id, provider header, exception handler), CORS, rate limiting, Serilog setup, startup | all |
 
 `LayerBoundaryTests` enforces these.
@@ -99,6 +100,14 @@ Tests (xUnit, ~780) cover, beyond units:
 | What reaches logs | `LogMaskingTests`, `ObservabilityTests`, `SecretAndFilterTests` |
 | HTTP behaviour | `*ControllerIntegrationTests` (via `ApiTestFactory`, environment `Testing`) |
 | Translations | `ResourceMessageTests` |
+| Databases: the provider setting, each one's migrations, moving between them | `DatabaseTests` (SQLite), `PostgreSqlTests` (a real server; skipped unless `AXIA_TEST_POSTGRES` names one, which CI does) |
+
+To run the PostgreSQL tests locally, against the server in `deploy/dev` or any other the account
+may create databases on:
+
+```bash
+AXIA_TEST_POSTGRES="Host=localhost;Username=nelsar_axia;Password=nelsar-axia-dev;Database=nelsar_axia" dotnet test --filter PostgreSqlTests
+```
 
 The integration tests read `Nelsar.Axia.Api/appsettings.json` if present. One test expects
 `Ldap:Server` to be unset; see [Troubleshooting → Tests](troubleshooting.md#tests).
@@ -108,17 +117,38 @@ There are no tests against a live directory; LDAP is faked at the provider bound
 
 ## Database migrations
 
-EF Core migrations live in `Nelsar.Axia.Infrastructure/Persistence/Migrations` and are applied at
-startup. To add one:
+The model — `AppDbContext` and the configurations under `Persistence/Configurations` — is one, and
+does not know which database it is on. The migrations are per database, because a migration is SQL
+for one engine: `Nelsar.Axia.Migrations.PostgreSql/Migrations` and
+`Nelsar.Axia.Migrations.Sqlite/Migrations`. `AxiaDatabase` picks the set that `Database:Provider`
+names, and the API applies it at startup.
+
+A change to the model needs a migration **in each**, under the same name. Each project is its own
+startup project, with a `DesignTimeContextFactory` that knows its database, so nothing needs to be
+running:
 
 ```bash
 dotnet tool install -g dotnet-ef        # once
-dotnet ef migrations add <Name> \
-  --project Nelsar.Axia.Infrastructure --startup-project Nelsar.Axia.Api
+dotnet ef migrations add <Name> --project Nelsar.Axia.Migrations.PostgreSql --startup-project Nelsar.Axia.Migrations.PostgreSql
+dotnet ef migrations add <Name> --project Nelsar.Axia.Migrations.Sqlite --startup-project Nelsar.Axia.Migrations.Sqlite
 ```
+
+`EachDatabasesMigrations_DescribeTheModel` fails when either set is behind the model. Read what was
+generated: the two will differ where the engines do. Data migrations written as SQL have to be
+written for each.
 
 A migration that changes behaviour for existing databases (as `RevokeAccidentalDefaultGrants` and
 `AddProviderSecurity` did) needs an upgrade note in the README.
+
+### Another database
+
+`DatabaseProvider` lists the databases. To add one: its EF Core provider package in
+Infrastructure, a value in the enum and a case in `AxiaDatabase.UseAxiaDatabase`, a
+`Nelsar.Axia.Migrations.<Name>` project made like the other two with its own
+`DesignTimeContextFactory`, referenced from the API and copied in the `Dockerfile`, and its initial
+migration. Anything one engine needs and another must not have goes in `AppDbContext.OnModelCreating`,
+behind `Database.Is…()`, as the SQLite audit timestamp and PostgreSQL's UTC conversion do.
+`copy-database` moves an existing deployment onto it.
 
 ## Adding things
 

@@ -25,6 +25,14 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
+    // Copies another database into the configured one and exits; the API does not start. See
+    // CopyDatabaseCommand.
+    if (CopyDatabaseCommand.IsInvoked(args))
+    {
+        Environment.ExitCode = await CopyDatabaseCommand.RunAsync(args);
+        return;
+    }
+
     // Windows starts a service in System32. Content root and working directory both follow the
     // binaries instead, so that a relative path in configuration — the log file, a SQLite
     // database — means what it means when the API is started by hand from its own folder, and not

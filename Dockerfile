@@ -16,6 +16,8 @@ COPY Nelsar.Axia.Application/Nelsar.Axia.Application.csproj Nelsar.Axia.Applicat
 COPY Nelsar.Axia.Infrastructure/Nelsar.Axia.Infrastructure.csproj Nelsar.Axia.Infrastructure/
 COPY Nelsar.Axia.Domain/Nelsar.Axia.Domain.csproj Nelsar.Axia.Domain/
 COPY Nelsar.Axia.Contracts/Nelsar.Axia.Contracts.csproj Nelsar.Axia.Contracts/
+COPY Nelsar.Axia.Migrations.PostgreSql/Nelsar.Axia.Migrations.PostgreSql.csproj Nelsar.Axia.Migrations.PostgreSql/
+COPY Nelsar.Axia.Migrations.Sqlite/Nelsar.Axia.Migrations.Sqlite.csproj Nelsar.Axia.Migrations.Sqlite/
 # The version every project inherits. Left out, the image would build as 1.0.0, silently.
 COPY Directory.Build.props ./
 RUN dotnet restore Nelsar.Axia.Api/Nelsar.Axia.Api.csproj -a "$TARGETARCH"
@@ -25,6 +27,8 @@ COPY Nelsar.Axia.Application/ Nelsar.Axia.Application/
 COPY Nelsar.Axia.Infrastructure/ Nelsar.Axia.Infrastructure/
 COPY Nelsar.Axia.Domain/ Nelsar.Axia.Domain/
 COPY Nelsar.Axia.Contracts/ Nelsar.Axia.Contracts/
+COPY Nelsar.Axia.Migrations.PostgreSql/ Nelsar.Axia.Migrations.PostgreSql/
+COPY Nelsar.Axia.Migrations.Sqlite/ Nelsar.Axia.Migrations.Sqlite/
 
 RUN dotnet publish Nelsar.Axia.Api/Nelsar.Axia.Api.csproj -c Release -a "$TARGETARCH" -o /app --no-restore
 
@@ -34,9 +38,10 @@ COPY --from=build /app .
 
 # Not as root. A process holding the directory's bind password and the token signing key has no
 # use for root, and anything that took it over would have had the container's. $APP_UID is the
-# unprivileged user the .NET images ship (1654). The two places the API writes — the SQLite
-# database under /data and the file logs under /app/logs — are created here and given to it, so
-# that a named volume mounted on either starts out owned by that user too.
+# unprivileged user the .NET images ship (1654). The two places the API may write — /data, for a
+# SQLite database where Database:Provider chooses one, and the file logs under /app/logs — are
+# created here and given to it, so that a named volume mounted on either starts out owned by that
+# user too.
 RUN mkdir -p /data /app/logs && chown "$APP_UID" /data /app/logs
 USER $APP_UID
 

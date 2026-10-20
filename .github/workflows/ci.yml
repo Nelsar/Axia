@@ -26,6 +26,24 @@ jobs:
   api:
     name: API — build and test
     runs-on: ubuntu-latest
+    # For PostgreSqlTests, the only tests that need a server; each makes a database of its own on
+    # it. Locally they are skipped unless AXIA_TEST_POSTGRES is set — see PostgreSqlFactAttribute.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      AXIA_TEST_POSTGRES: Host=localhost;Port=5432;Username=postgres;Password=ci-only;Database=postgres
+      # Missing server, failed tests: never a job that skips them and passes.
+      AXIA_TEST_POSTGRES_REQUIRED: "true"
     steps:
       - uses: actions/checkout@v7
 
@@ -41,8 +59,9 @@ jobs:
       # on Linux, which is exactly the kind of thing that gets read as noise.
       - run: dotnet build Nelsar.Axia.sln --no-restore -warnaserror
 
-      # No directory, no database, no network: the suite stands up the API in memory. Anything
-      # that starts needing a live LDAP server belongs behind a trait, not in this job.
+      # No directory and no network: the suite stands up the API in memory, on SQLite or EF Core's
+      # in-memory store, apart from the PostgreSQL tests above. Anything that starts needing a
+      # live LDAP server belongs behind a trait, not in this job.
       - run: dotnet test Nelsar.Axia.sln --no-build --verbosity normal
 
   console:
@@ -75,8 +94,9 @@ jobs:
 
       # The README's first command, with --build so that it runs this commit rather than the
       # released images it would pull. It catches what no other job builds: both Dockerfiles,
-      # the nginx proxy, the generated certificate and keys, the demo directory and the role
-      # mappings in docker-compose.yml.
+      # the nginx proxy, the generated certificate, keys and database password, the API starting
+      # on PostgreSQL and seeding it, the demo directory and the role mappings in
+      # docker-compose.yml.
       - run: docker compose up -d --build
 
       # Readiness is polled on the unauthenticated picker rather than on sign-in: sign-in is

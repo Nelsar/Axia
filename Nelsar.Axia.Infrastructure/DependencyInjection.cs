@@ -39,9 +39,10 @@ public static class DependencyInjection
 
     private static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? "Data Source=nelsar-axia.db";
-        services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+        // Read now rather than when the context is first resolved, so that a missing or unknown
+        // provider stops startup with the setting named. See AxiaDatabase.FromConfiguration.
+        var (provider, connectionString) = AxiaDatabase.FromConfiguration(configuration);
+        services.AddDbContext<AppDbContext>(options => options.UseAxiaDatabase(provider, connectionString));
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
 
         return services;

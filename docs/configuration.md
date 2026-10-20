@@ -44,7 +44,8 @@ log line that names the setting and the fix. See [What stops startup](#what-stop
 | [`Ldap`](#ldap) | **yes** in practice | The default directory |
 | [`RoleMappings`](#rolemappings) | **yes** (`GroupDns:Admin`) | Which groups get which role |
 | [`DirectoryProtection`](#directoryprotection) | on OpenLDAP | Groups only an Admin may change |
-| [`ConnectionStrings`](#connectionstrings) | no | Database location |
+| [`Database`](#database-and-connectionstrings) | **yes** (`Provider`) | Which database |
+| [`ConnectionStrings`](#database-and-connectionstrings) | **yes** with PostgreSQL | Where it is |
 | [`Auth`](#auth) | no | Self-registration |
 | [`Cors`](#cors) | when the console is not on localhost | Which websites may call the API |
 | [`ReverseProxy`](#reverseproxy) | behind a proxy | Whose `X-Forwarded-*` to believe |
@@ -141,13 +142,44 @@ Active Directory needs nothing here: `adminCount=1` already marks Domain Admins 
 protected groups and their members, and the application honours it. OpenLDAP marks nothing, so list
 the groups that make someone an administrator of the directory, and the group mapped to Admin.
 
-## `ConnectionStrings`
+## `Database` and `ConnectionStrings`
+
+Where the API keeps what is not in the directory: the directories it connects to, role mappings,
+role permissions, rate limits and the audit trail.
 
 | Key | Default | Description |
 | --- | --- | --- |
-| `ConnectionStrings:DefaultConnection` | `Data Source=nelsar-axia.db` | SQLite connection string. Relative paths are relative to the working directory. The example Development file uses `nelsar-axia-dev.db`; the quick start uses `/data/nelsar-axia.db` on a volume. |
+| `Database:Provider` | none, **required** | `PostgreSql` or `Sqlite`, in any case. |
+| `ConnectionStrings:DefaultConnection` | **required** with `PostgreSql`; `Data Source=nelsar-axia.db` with `Sqlite` | The connection string, in the form the provider's driver takes. |
 
-SQLite is the only supported database. Migrations are applied automatically at startup.
+**PostgreSQL** is the database for a deployment. Any supported PostgreSQL version works; the quick
+start and CI use 17. The account needs to create tables in its database on the first start, and
+whenever an upgrade brings a migration:
+
+```bash
+Database__Provider=PostgreSql
+ConnectionStrings__DefaultConnection="Host=db.internal;Database=nelsar_axia;Username=nelsar_axia;Password=…;SSL Mode=VerifyFull"
+```
+
+Use `SSL Mode=VerifyFull` whenever the server is on another host. GSS encryption is off unless the
+connection string names it (`GSS Encryption Mode=Prefer`): the API's image carries no Kerberos
+library, and the driver would otherwise look for one on every new connection.
+
+**SQLite** keeps everything in one file and needs no server. The unit tests run on it, and it is
+still a choice for a single small instance, or for running the API from source without a database
+server. Relative paths are relative to the working directory:
+
+```bash
+Database__Provider=Sqlite
+ConnectionStrings__DefaultConnection="Data Source=/data/nelsar-axia.db"
+```
+
+There is no default provider. Versions before 0.3 used SQLite without being told to, so a
+configuration written for one of them names a SQLite file and no provider. Rather than guess, the
+API stops and says so: set `Sqlite` to go on with that file, or copy it into PostgreSQL first —
+see [Moving to another database](operations.md#moving-to-another-database).
+
+Migrations are applied automatically at startup, each database from its own set.
 
 ## `Auth`
 
@@ -294,6 +326,8 @@ restart:
 | --- | --- |
 | `Jwt:Key is not set` / `…still the placeholder…` / `…shorter than 32 bytes…` | Generate one: `openssl rand -base64 48`. |
 | `Encryption:Key is not set` / `…not valid base64` / `…decodes to N bytes…` | Generate one: `openssl rand -base64 32`. |
+| `Database:Provider is not set` | `PostgreSql` with a connection string, or `Sqlite` to keep a database from 0.2 or earlier. See [Database](#database-and-connectionstrings). |
+| `Database:Provider is PostgreSql, and ConnectionStrings:DefaultConnection is not set` | Name the server. |
 | `Ldap:Security is Ldaps … and Ldap:Port is 389…` | Use 636, or `Security: StartTls`, or (knowingly) `None`. |
 | `Ldap:ProviderType is ActiveDirectory, which cannot use StartTls` | Use `Ldaps`, or `StandardLdap`. |
 | `ActiveDirectory … Windows` | Use `StandardLdap` on Linux/macOS. |

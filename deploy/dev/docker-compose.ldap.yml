@@ -1,5 +1,5 @@
 # An OpenLDAP for running the API from the IDE or `dotnet run` against something other than a real
-# directory. Same image and demo accounts as the quick start, plus the test data next to this file
+# directory, and a PostgreSQL for it to keep its own state in (see the end of the file). Same image and demo accounts as the quick start, plus the test data next to this file
 # (test-data.ldif, bulk-users.ldif, and an AD-style domain from ad-*.ldif), but published on
 # localhost and spoken to in plain LDAP: the quick start's certificate names the host "openldap",
 # which a process outside Docker does not reach it as.
@@ -47,6 +47,28 @@ services:
       retries: 60
       start_period: 60s
 
+  # The API's own database, for running it from source. appsettings.Development.json.example
+  # points at it: Host=localhost;Database=nelsar_axia;Username=nelsar_axia;Password=nelsar-axia-dev.
+  # Start it alone, for an API pointed at a directory of your own:
+  #
+  #   docker compose -f deploy/dev/docker-compose.ldap.yml up -d --wait postgres
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: nelsar_axia
+      POSTGRES_USER: nelsar_axia
+      POSTGRES_PASSWORD: nelsar-axia-dev
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nelsar_axia -d nelsar_axia"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
 volumes:
   ldap-data:
   ldap-config:
+  db-data:
