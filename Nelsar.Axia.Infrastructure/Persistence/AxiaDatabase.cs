@@ -41,7 +41,7 @@ public static class AxiaDatabase
         string connectionString)
         where TContext : DbContext
     {
-        ((DbContextOptionsBuilder)options).UseAxiaDatabase(provider, connectionString);
+        options.UseAxiaDatabase(provider, connectionString);
         return options;
     }
 
