@@ -22,8 +22,14 @@
     }
   },
 
+  // The PostgreSQL in deploy/dev/docker-compose.ldap.yml:
+  //   docker compose -f deploy/dev/docker-compose.ldap.yml up -d --wait postgres
+  // Or no server at all: "Provider": "Sqlite" and "Data Source=nelsar-axia-dev.db".
+  "Database": {
+    "Provider": "PostgreSql"
+  },
   "ConnectionStrings": {
-    "DefaultConnection": "Data Source=nelsar-axia-dev.db"
+    "DefaultConnection": "Host=localhost;Database=nelsar_axia;Username=nelsar_axia;Password=nelsar-axia-dev"
   },
   "Encryption": {
     "Key": "CHANGE_ME_BASE64_16_24_OR_32_BYTE_AES_KEY"

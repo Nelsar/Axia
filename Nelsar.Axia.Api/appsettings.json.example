@@ -77,6 +77,16 @@
         }
     },
 
+    // Where the API keeps its own state — directories it connects to, role mappings and
+    // permissions, rate limits, the audit trail. Required: "PostgreSql", or "Sqlite" for a single
+    // file. The connection string carries the database password, so give it through the
+    // environment rather than here:
+    //
+    //   ConnectionStrings__DefaultConnection="Host=db.internal;Database=nelsar_axia;Username=nelsar_axia;Password=…;SSL Mode=VerifyFull"
+    "Database": {
+        "Provider": "PostgreSql"
+    },
+
     // Whether an unauthenticated caller may create a directory account through
     // POST /api/v1/auth/register. Off, and worth leaving off: that endpoint writes to the directory
     // with nothing but a rate limiter in front of it. Administrators create accounts through
