@@ -25,6 +25,12 @@ no longer assumed, so `Database:Provider` has to be set before the new version s
 - Images: releases are published to Docker Hub as well, as `nelsar/axia-api` and
   `nelsar/axia-console`, the same images and tags as on ghcr.io. See
   [Production deployment](docs/production.md#images).
+- The API can serve the console itself, so that one process on one port is the whole application
+  where there is no nginx: from `wwwroot` next to its binaries, or from `Console:Path`, with the
+  headers the console image sends. `dotnet publish -p:AxiaConsoleDist=…` puts a built console
+  there. Nothing changes for the container images, which have no `wwwroot`. See
+  [Configuration](docs/configuration.md#console).
+- The API runs as a Windows service or a systemd unit when started as one.
 
 ### Changed
 
