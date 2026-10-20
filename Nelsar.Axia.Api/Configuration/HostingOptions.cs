@@ -212,3 +212,53 @@ public sealed class HttpsOptions
     /// </summary>
     public bool RedirectToHttps { get; set; }
 }
+
+/// <summary>
+/// Whether this process serves the console's files as well as the API, and from where.
+/// </summary>
+public sealed class ConsoleOptions
+{
+    public const string SectionName = "Console";
+
+    /// <summary>The folder looked in when <see cref="Path"/> is not set, next to the binaries.</summary>
+    public const string DefaultFolder = "wwwroot";
+
+    /// <summary>
+    /// The folder holding the built console — <c>index.html</c> and what Vite emitted with it.
+    /// Relative paths are relative to the folder the API's binaries are in.
+    ///
+    /// Unset, the API looks for <c>wwwroot</c> next to its binaries and serves the console from it
+    /// when it is there, which is how a package installs it; when it is not — the container image,
+    /// a development checkout — it serves the API alone, as it always has. Set, the folder has to
+    /// hold the console, or startup stops: a console that was asked for and is quietly missing
+    /// would surface as a 404 at the address users were given, with nothing pointing here.
+    /// </summary>
+    public string? Path { get; set; }
+
+    /// <summary>
+    /// The folder to serve the console from, or <see langword="null"/> when there is none to
+    /// serve.
+    /// </summary>
+    /// <param name="baseDirectory">The folder the binaries are in.</param>
+    /// <exception cref="InvalidOperationException"><see cref="Path"/> does not hold a console.</exception>
+    public string? ResolveRoot(string baseDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(Path))
+        {
+            var beside = System.IO.Path.Combine(baseDirectory, DefaultFolder);
+            return HoldsConsole(beside) ? beside : null;
+        }
+
+        var root = System.IO.Path.GetFullPath(Path.Trim(), baseDirectory);
+        if (!HoldsConsole(root))
+            throw new InvalidOperationException(
+                $"{SectionName}:{nameof(Path)} is '{Path}', and '{root}' has no index.html. Point it at "
+                + "the folder `npm run build` produced (frontend/dist), or remove the setting to serve "
+                + "the API alone.");
+
+        return root;
+    }
+
+    private static bool HoldsConsole(string folder) =>
+        File.Exists(System.IO.Path.Combine(folder, "index.html"));
+}

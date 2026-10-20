@@ -49,6 +49,7 @@ log line that names the setting and the fix. See [What stops startup](#what-stop
 | [`Cors`](#cors) | when the console is not on localhost | Which websites may call the API |
 | [`ReverseProxy`](#reverseproxy) | behind a proxy | Whose `X-Forwarded-*` to believe |
 | [`Https`](#https) | when the API holds the certificate | HTTP → HTTPS redirect |
+| [`Console`](#console) | no | Serving the console from the API itself |
 | [`Observability`](#observability) | no | Log sinks and correlation ids |
 | [`Serilog`](#serilog) | no | Log levels |
 
@@ -193,6 +194,37 @@ HSTS is sent outside Development regardless.
 The API listens where ASP.NET Core is told to: `ASPNETCORE_URLS` or `ASPNETCORE_HTTP_PORTS`
 (the container image defaults to port `8080`), or the launch profile in development (`5063`).
 
+## `Console`
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `Console:Path` | unset | The folder holding the built console (`index.html` and `assets/`). Relative paths are relative to the folder the API's binaries are in. |
+
+Unset, the API serves the console when a `wwwroot` folder with an `index.html` is next to its
+binaries, and the API alone when there is none — the container image and a development checkout
+have none, and nothing changes for them. Set, the folder has to hold the console, or startup stops.
+
+Serving the console from the API makes one process on one port the whole application, with no
+nginx — for an installed package or a Windows service. The console's files get the headers the
+console image's nginx sends (its `Content-Security-Policy`, `Cross-Origin-Opener-Policy`,
+`Permissions-Policy` and the rest); everything under `/api/` keeps the API's own. Files under
+`/assets/` are named after their content and may be cached for good; `index.html` is revalidated
+on every load, so an upgrade reaches browsers at once.
+
+The console has to be built to call the API on its own origin, then published with the API:
+
+```bash
+cd frontend && VITE_API_SAME_ORIGIN=true npm run build && cd ..
+dotnet publish Nelsar.Axia.Api -c Release -o publish -p:AxiaConsoleDist=../frontend/dist
+```
+
+`publish/wwwroot` then holds the console.
+
+Started as a Windows service or a systemd unit, the API reports to the service manager. As a
+Windows service its working directory is the folder of its binaries, so relative paths in
+configuration — `Observability:File:Path`, a SQLite database — are taken from there, not from
+`System32`.
+
 ## `Observability`
 
 | Key | Default | Description |
@@ -270,5 +302,6 @@ restart:
 | `No role mapping grants the Admin role by distinguished name…` | Set `RoleMappings:GroupDns:Admin`. |
 | a `Cors:AllowedOrigins` entry quoted with its corrected form | Use a bare origin. |
 | a `TrustedCaCertificatePath` problem | Point it at a readable PEM/DER file. |
+| `Console:Path is '…', and '…' has no index.html` | Point it at the built console (`frontend/dist`), or remove it to serve the API alone. |
 
 [Troubleshooting](troubleshooting.md) has more, including failures after startup.

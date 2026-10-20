@@ -17,6 +17,8 @@
     <PackageReference Include="Serilog.Sinks.Http" Version="9.2.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.13" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.10" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.21.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10">
       <PrivateAssets>all</PrivateAssets>
@@ -30,6 +32,20 @@
          this the next publish ships the log files — masked logins, DNs, request paths — next to
          the binaries. -->
     <Content Remove="logs/**" />
+  </ItemGroup>
+
+  <!-- The built console, published next to the binaries as wwwroot, where the API finds and serves
+       it (see ConsoleOptions). Only when asked for — an installer's build, not the container
+       image's, whose console nginx serves:
+
+         VITE_API_SAME_ORIGIN=true npm run build    (in frontend/)
+         dotnet publish Nelsar.Axia.Api -c Release -p:AxiaConsoleDist=../frontend/dist
+
+       Built beforehand rather than here, so that building the API never needs Node. -->
+  <ItemGroup Condition="'$(AxiaConsoleDist)' != ''">
+    <ResolvedFileToPublish Include="$([MSBuild]::EnsureTrailingSlash('$(AxiaConsoleDist)'))**"
+                           RelativePath="wwwroot/%(RecursiveDir)%(Filename)%(Extension)"
+                           CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

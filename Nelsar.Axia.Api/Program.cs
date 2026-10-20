@@ -13,6 +13,7 @@ using Nelsar.Axia.Api.Swagger;
 using Nelsar.Axia.Infrastructure;
 using Nelsar.Axia.Infrastructure.Persistence;
 using Nelsar.Axia.Infrastructure.RateLimiting;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using Serilog;
 
 // A logger for the window before configuration has been read — long enough to fail in, and
@@ -24,7 +25,25 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    var builder = WebApplication.CreateBuilder(args);
+    // Windows starts a service in System32. Content root and working directory both follow the
+    // binaries instead, so that a relative path in configuration — the log file, a SQLite
+    // database — means what it means when the API is started by hand from its own folder, and not
+    // somewhere under the operating system's.
+    var isWindowsService = WindowsServiceHelpers.IsWindowsService();
+    if (isWindowsService)
+        Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+
+    var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+    {
+        Args = args,
+        ContentRootPath = isWindowsService ? AppContext.BaseDirectory : null
+    });
+
+    // Run as a Windows service or a systemd unit when started as one: start and stop are reported
+    // to the service manager, and a stop request shuts the host down cleanly. Both do nothing when
+    // the process was started any other way — from a shell, in a container, under a test.
+    builder.Services.AddWindowsService();
+    builder.Services.AddSystemd();
 
     // Structured logging, and which sinks it reaches: console and a rolling JSON file by default,
     // Logstash and Loki on a switch. See Observability/SerilogRegistration.cs.
@@ -37,6 +56,12 @@ try
         ?? new ReverseProxyOptions();
     var httpsOptions = builder.Configuration.GetSection(HttpsOptions.SectionName).Get<HttpsOptions>()
         ?? new HttpsOptions();
+
+    // Read before the host is built, like the two above: a console that was asked for and is
+    // missing stops startup here. Null when there is no console to serve, which is the container
+    // image's case — nginx serves it there.
+    var consoleRoot = (builder.Configuration.GetSection(ConsoleOptions.SectionName).Get<ConsoleOptions>()
+        ?? new ConsoleOptions()).ResolveRoot(AppContext.BaseDirectory);
 
     if (proxyOptions.IsConfigured)
     {
@@ -246,7 +271,7 @@ try
 
     // Ahead of everything that can answer, the exception handler and the rate limiter included,
     // so that no response leaves without these.
-    app.UseMiddleware<SecurityHeadersMiddleware>();
+    app.UseMiddleware<SecurityHeadersMiddleware>(consoleRoot is not null);
 
     app.UseExceptionHandler();
 
@@ -277,6 +302,14 @@ try
 
     if (httpsOptions.RedirectToHttps)
         app.UseHttpsRedirection();
+
+    // Ahead of CORS, the rate limiter and authentication: the console's files are the same public
+    // files for everyone, and counting them against a client's limit would spend it on page loads.
+    if (consoleRoot is not null)
+    {
+        app.UseConsoleFiles(consoleRoot);
+        Log.Information("Serving the console from {ConsoleRoot}.", consoleRoot);
+    }
 
     app.UseCors(FrontendCorsPolicy);
     app.UseRateLimiter();
