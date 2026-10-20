@@ -156,7 +156,8 @@ public class AuditRepositoryTests
             services.RemoveAll(typeof(DbContextOptions<AppDbContext>));
             services.RemoveAll(typeof(DbContextOptions));
             services.RemoveAll(typeof(IDbContextOptionsConfiguration<AppDbContext>));
-            services.AddDbContext<AppDbContext>(options => options.UseSqlite(connection));
+            services.AddDbContext<AppDbContext>(options => options.UseSqlite(
+                connection, sqlite => sqlite.MigrationsAssembly(AxiaDatabase.SqliteMigrationsAssembly)));
         });
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization =
@@ -225,7 +226,7 @@ public class AuditRepositoryTests
 
             var commands = new List<string>();
             var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite(connection)
+                .UseAxiaSqlite(connection)
                 .LogTo(line => commands.Add(line), [RelationalEventId.CommandExecuted])
                 .Options;
 

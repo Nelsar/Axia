@@ -16,7 +16,9 @@ internal sealed class AuditEventConfiguration : IEntityTypeConfiguration<AuditEv
     internal const string TimestampFormat = @"yyyy\-MM\-dd HH\:mm\:ss.FFFFFFFzzz";
 
     /// <summary>
-    /// Stores the timestamp as that text, always in UTC.
+    /// Stores the timestamp as that text, always in UTC. On SQLite only — applied by
+    /// <see cref="AppDbContext"/>, which knows the provider: PostgreSQL has a type for an instant
+    /// and orders by it.
     ///
     /// The point is ordering. EF Core refuses to ORDER BY a DateTimeOffset on SQLite, because
     /// the text it stores compares wrongly across different offsets, and that refusal is why the
@@ -39,7 +41,7 @@ internal sealed class AuditEventConfiguration : IEntityTypeConfiguration<AuditEv
         entity.Property(x => x.Action).IsRequired().HasMaxLength(256);
         entity.Property(x => x.Details).HasMaxLength(4000);
         entity.Property(x => x.ObjectDn).HasMaxLength(1024);
-        entity.Property(x => x.Timestamp).IsRequired().HasConversion(TimestampAsUtcText);
+        entity.Property(x => x.Timestamp).IsRequired();
 
         // The audit page reads newest first, a page at a time.
         entity.HasIndex(x => x.Timestamp);

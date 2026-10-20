@@ -17,6 +17,7 @@
     <!-- EF Core Sqlite still pulls a vulnerable SQLitePCLRaw.lib.e_sqlite3 (NU1903); pin
          the patched patch version directly until the EF Core dependency graph catches up. -->
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.21.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.10" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
@@ -30,10 +31,6 @@
     <ProjectReference Include="../Nelsar.Axia.Application/Nelsar.Axia.Application.csproj" />
     <ProjectReference Include="../Nelsar.Axia.Domain/Nelsar.Axia.Domain.csproj" />
     <ProjectReference Include="../Nelsar.Axia.Contracts/Nelsar.Axia.Contracts.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Persistence\Migrations\" />
   </ItemGroup>
 
 </Project>

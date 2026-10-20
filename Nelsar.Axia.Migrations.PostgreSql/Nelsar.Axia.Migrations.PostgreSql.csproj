@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The schema's history on PostgreSQL. It starts at 0.3.0 from the model as it stood then,
+       rather than replaying SQLite's history: a database copied from SQLite is created by these
+       and then filled. Selected by AxiaDatabase; adding a migration is described in
+       CONTRIBUTING.md. -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- For `dotnet ef`, which runs this project as its startup project; see
+         DesignTimeContextFactory. Nothing of it is shipped. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Nelsar.Axia.Infrastructure/Nelsar.Axia.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

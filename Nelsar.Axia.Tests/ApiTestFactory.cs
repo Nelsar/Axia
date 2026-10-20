@@ -74,6 +74,11 @@ public class ApiTestFactory : WebApplicationFactory<Program>
         // eagerly: Program.cs calls GetSection(...).Get<T>() while the app is being built, which
         // happens before ConfigureAppConfiguration's callbacks run. Host settings are in the
         // configuration from the start, so they reach both kinds of reader.
+        // The provider is read while the app is built (see AxiaDatabase.FromConfiguration), so it
+        // is a host setting too. Which one hardly matters: the registration it produces is
+        // replaced below by an in-memory database.
+        builder.UseSetting(AxiaDatabase.ProviderKey, nameof(DatabaseProvider.Sqlite));
+
         foreach (var (key, value) in _configuration)
             builder.UseSetting(key, value);
 

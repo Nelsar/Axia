@@ -71,7 +71,7 @@ public class DefaultGrantsTests
         await using var connection = new SqliteConnection("Data Source=:memory:");
         await connection.OpenAsync();
 
-        var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options;
+        var options = new DbContextOptionsBuilder<AppDbContext>().UseAxiaSqlite(connection).Options;
         await using var db = new AppDbContext(options);
         var migrator = db.GetService<IMigrator>();
 
@@ -99,7 +99,7 @@ public class DefaultGrantsTests
         await using var connection = new SqliteConnection("Data Source=:memory:");
         await connection.OpenAsync();
 
-        var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options;
+        var options = new DbContextOptionsBuilder<AppDbContext>().UseAxiaSqlite(connection).Options;
         await using var db = new AppDbContext(options);
         var migrator = db.GetService<IMigrator>();
 
