@@ -8,7 +8,7 @@ documentation uses.
 ```
  browser ──► console (React, static files) ──► API (ASP.NET Core, :5063 / :8080) ──► directory (LDAP/LDAPS)
                                                   │
-                                                  └──► SQLite database (settings, audit log)
+                                                  └──► PostgreSQL database (settings, audit log)
 ```
 
 | Piece | What it is | Where it lives |
@@ -16,7 +16,7 @@ documentation uses.
 | **API** | `Nelsar.Axia.Api`, an ASP.NET Core application on .NET 10. Every operation goes through it, and it does all the checks. | `Nelsar.Axia.*` projects |
 | **Console** | A single-page React + TypeScript application. It holds no state beyond the session and enforces nothing; it is a convenience over the API. | `frontend/` |
 | **Directory** | Your Active Directory, OpenLDAP or other LDAP server. Accounts, groups, units and computers live there and only there. | Yours |
-| **Database** | SQLite. Holds what is not in the directory: extra directory connections, role mappings, role permissions, rate-limit settings and the audit log. Created and migrated on first start. | A file next to the API, or a volume |
+| **Database** | PostgreSQL, or SQLite for a single small instance. Holds what is not in the directory: extra directory connections, role mappings, role permissions, rate-limit settings and the audit log. Created and migrated on first start. | A PostgreSQL server; or, for SQLite, a file next to the API or on a volume |
 
 The application never copies directory objects into its database. Every list and every lookup is
 a live LDAP query; every change is written straight to the directory.
@@ -99,7 +99,8 @@ refused attempts. See [Features → Audit log](features.md#audit-log).
 Nelsar.Axia.Domain          entities, value objects (DistinguishedName, Email), pure services
 Nelsar.Axia.Application     use cases as MediatR commands/queries; validation, permission checks,
                             auditing and logging as pipeline behaviours
-Nelsar.Axia.Infrastructure  LDAP providers, EF Core + SQLite, encryption, tokens, background jobs
+Nelsar.Axia.Infrastructure  LDAP providers, EF Core (PostgreSQL, SQLite), encryption, tokens, background jobs
+Nelsar.Axia.Migrations.*    the schema's migrations, one project per database
 Nelsar.Axia.Api             controllers, middleware, composition root, observability
 Nelsar.Axia.Contracts       DTOs and module interfaces shared across layers
 Nelsar.Axia.Tests           xUnit tests (unit, integration, architecture)

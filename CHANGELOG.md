@@ -9,6 +9,38 @@ How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
 ## [Unreleased]
 
+The API's own state moves to PostgreSQL. **Upgrading from 0.2 takes one decision:** the database is
+no longer assumed, so `Database:Provider` has to be set before the new version starts — see
+*Changed*.
+
+### Added
+
+- PostgreSQL: `Database:Provider=PostgreSql`, with `ConnectionStrings:DefaultConnection` naming the
+  server. See [Configuration](docs/configuration.md#database-and-connectionstrings).
+- `copy-database`, which copies everything the API keeps — directories with their encrypted bind
+  passwords, role mappings, role permissions, rate limits, the audit trail — from one database into
+  another, whichever two engines they are. One transaction, every table's row count checked before
+  it commits, the old database opened read-only. See
+  [Moving to another database](docs/operations.md#moving-to-another-database).
+
+### Changed
+
+- **On upgrade:** `Database:Provider` is required, and the API refuses to start without it. Every
+  earlier version used SQLite without being told to, so there is no default to fall back on. To
+  keep the SQLite database you have, set `Database__Provider=Sqlite`. To move to PostgreSQL, create
+  an empty database, point the configuration at it, run `copy-database` once, then start.
+- The quick start runs on PostgreSQL, with a password generated on the first start. A quick start
+  set up by 0.2 keeps its SQLite database in the `api-data` volume, no longer mounted; the new one
+  starts empty unless it is copied over.
+- SQLite is still supported, for a single small instance and for the unit tests. Each database
+  keeps its own migrations, in `Nelsar.Axia.Migrations.PostgreSql` and
+  `Nelsar.Axia.Migrations.Sqlite`; a SQLite database from 0.2 is already up to date.
+
+## [0.2.1] - 2026-10-20
+
+Released images, and two fixes to what reaches a caller and a log. Upgrading from 0.2.0 needs no
+action.
+
 ### Security
 
 - A bulk row that fails for an unexpected reason says so in general terms, in the response and in

@@ -34,6 +34,18 @@ outside Docker does not reach it as, and certificate verification in the API can
 Configure the API with `Ldap:Security=None` for this directory; see
 [Installation, path 3](installation.md#path-3-from-source-against-the-local-test-directory).
 
+The same file starts a PostgreSQL for the API's own state, which the Development example
+configuration already points at:
+
+| | |
+| --- | --- |
+| Address | `127.0.0.1:5432` |
+| Database, user | `nelsar_axia` / `nelsar_axia` |
+| Password | `nelsar-axia-dev` |
+
+`up -d --wait postgres` starts it alone, for an API pointed at a directory of your own. `down -v`
+deletes its data along with the directory's.
+
 ## What is in it
 
 The files are loaded in name order:

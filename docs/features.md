@@ -295,7 +295,7 @@ settings, **whether it was allowed, refused or failed**. Newest first.
 | `success` | Whether it went through |
 | `timestamp` | UTC |
 
-Bulk batches get one entry for the batch and one per row. The audit log lives in the same SQLite
+Bulk batches get one entry for the batch and one per row. The audit log lives in the same
 database as everything else and is written by the same process; it records what happened, but is
 not tamper-proof.
 

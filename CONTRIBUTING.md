@@ -19,7 +19,8 @@ and starts them against an OpenLDAP with demo accounts, one for each role. Its d
 reachable only inside Docker, so to run the API from source, point it at an LDAP server or an
 Active Directory you can reach, or at the [local test directory](docs/local-directory.md) in
 `deploy/dev`: an OpenLDAP on `127.0.0.1:389` with an AD-shaped domain of ~1,500 accounts and
-~2,000 computers. The full documentation is in [`docs/`](docs/README.md).
+~2,000 computers, and the PostgreSQL on `127.0.0.1:5432` that the Development example
+configuration uses. The full documentation is in [`docs/`](docs/README.md).
 
 ```bash
 cp Nelsar.Axia.Api/appsettings.json.example Nelsar.Axia.Api/appsettings.json
@@ -78,6 +79,9 @@ named is the one that will tell you.
 - **Secrets stay out of the log.** `SensitivePropertyRedactor` redacts properties whose names read
   like a secret, including a bare `key`. If you add a log property that carries one, the name
   should trip that list rather than be an exception to it.
+- **A change to the model is a migration for every database.** PostgreSQL and SQLite each keep
+  their own; `EachDatabasesMigrations_DescribeTheModel` fails while either is behind. The commands
+  are in [Development → Database migrations](docs/development.md#database-migrations).
 - **Behaviour changes come with a test that fails without them.** The tests exist mostly because
   things that fail quietly — authorisation, directory isolation, what reaches a sink, translation
   completeness — are the things worth pinning. A useful habit: break your own fix on purpose and
@@ -132,6 +136,11 @@ inherits, `frontend/package.json`, and the image tags the quick start runs in `d
    `npm version x.y.z --no-git-tag-version` in `frontend/`, which updates the lockfile too, and as
    the `AXIA_VERSION` default of both images in `docker-compose.yml`. Until step 4 has published
    them, `docker compose up` on `main` builds from source instead.
+
+   The compose default moves earlier when a change on `main` makes `docker-compose.yml` something
+   the published images cannot run — the move to PostgreSQL did. That pull request sets it to the
+   coming version, so `docker compose up` builds from source until the release instead of pulling
+   images that fail.
 3. Merge that as a pull request, with CI green.
 4. Tag the merge commit on `main` and push the tag:
 

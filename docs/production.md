@@ -11,11 +11,15 @@ limitations, first: this instance holds a credential that can change your direct
  browser ─────────► reverse proxy ──┬──► console (nginx, static) 
                     (TLS, :443)     └──► API (:8080) ──────────────────────────► directory
                                               │
-                                              └── /data  (SQLite)   /app/logs
+                                              ├──► PostgreSQL (TLS)
+                                              └──  /app/logs
 ```
 
-- **One API instance.** SQLite and in-memory bulk jobs make it single-instance. Run it with a
-  restart policy rather than replicas.
+- **One API instance.** Bulk jobs, rate-limit counters and failed sign-in counts are held in the
+  process, so a second instance would keep its own. Run one, with a restart policy rather than
+  replicas. The database is no longer what stands in the way of more.
+- **PostgreSQL** for the API's own state. SQLite still works for a single small instance; see
+  [Configuration](configuration.md#database-and-connectionstrings).
 - **Console and API on one origin** (`https://axia.example.com/` and `…/api/`), so the browser
   needs no CORS. That is how the quick start's nginx is built, and the simplest to get right.
 - **TLS at the proxy**, plain HTTP inside, the proxy named in `ReverseProxy:KnownProxies`.
@@ -71,6 +75,9 @@ ASPNETCORE_ENVIRONMENT=Production
 Jwt__Key=…                      # openssl rand -base64 48
 Encryption__Key=…               # openssl rand -base64 32; keep it, see below
 Ldap__AdminPassword=…
+ConnectionStrings__DefaultConnection="Host=db.internal;Database=nelsar_axia;Username=nelsar_axia;Password=…;SSL Mode=VerifyFull"
+
+Database__Provider=PostgreSql
 
 Ldap__Server=dc01.corp.example.com
 Ldap__BaseDn=DC=corp,DC=example,DC=com
@@ -81,7 +88,6 @@ Ldap__TrustedCaCertificatePath=/run/secrets/corp-ca.pem   # if the CA is not in 
 RoleMappings__GroupDns__Admin=CN=Axia-Admins,OU=Groups,DC=corp,DC=example,DC=com
 RoleMappings__GroupDns__UserEditor=CN=Axia-Helpdesk,OU=Groups,DC=corp,DC=example,DC=com
 
-ConnectionStrings__DefaultConnection=Data Source=/data/nelsar-axia.db
 Observability__File__Path=/app/logs/axia-.json
 
 ReverseProxy__KnownProxies__0=10.0.0.7
@@ -98,6 +104,7 @@ Everything is in the [Configuration reference](configuration.md).
 | `Jwt:Key` | Anyone holding it can mint a token for any account. Rotating it signs everyone out, which is harmless. |
 | `Encryption:Key` | Encrypts the bind passwords of directories stored in the database. **Losing or changing it makes every stored bind password unreadable**; each directory then has to be given its password again. Back it up with the database. |
 | `Ldap:AdminPassword` | The bind account. See below. |
+| The database password, in `ConnectionStrings:DefaultConnection` | Whoever holds it can rewrite role mappings and permissions, and the audit trail. |
 | Bind passwords of other directories | Entered through the API/console; stored encrypted. |
 
 Use your platform's secret mechanism (Docker/Kubernetes secrets, a vault agent writing environment
@@ -108,12 +115,14 @@ The API refuses to start with a missing, short or placeholder key.
 
 ### Persistence
 
-| Path in the container | Holds | Lose it and |
+| Where | Holds | Lose it and |
 | --- | --- | --- |
-| `/data` (via `ConnectionStrings`) | SQLite: directories, role mappings, role permissions, rate limits, audit log | settings revert to defaults from configuration; **the audit log is gone** |
-| `/app/logs` (via `Observability:File:Path`) | rolling JSON logs | logs are gone (unless shipped) |
+| The database | directories, role mappings, role permissions, rate limits, audit log | settings revert to defaults from configuration; **the audit log is gone** |
+| `/app/logs` in the container (via `Observability:File:Path`) | rolling JSON logs | logs are gone (unless shipped) |
 
-Mount both as volumes. The image does not declare them.
+Back the database up as [Operations](operations.md#backup-and-restore) describes. Mount the log
+directory as a volume; the image does not declare it. On SQLite, the database file needs a volume
+too — `/data` is there for it.
 
 The API runs as the .NET images' unprivileged user, uid **1654**, not as root. A named volume on
 either path starts out owned by it. A host directory, or a volume created by a version that ran as
@@ -249,7 +258,9 @@ Before letting users in:
 - [ ] `Auth:AllowSelfRegistration` is `false`.
 - [ ] `Cors` is empty (same origin) or lists exactly the console's origin; `AllowAnyOrigin` is `false`.
 - [ ] TLS at the proxy; `ReverseProxy:KnownProxies` names it.
-- [ ] `/data` and the log directory are volumes; backups scheduled.
+- [ ] `Database:Provider` is `PostgreSql`, over TLS (`SSL Mode=VerifyFull`) when the server is
+      another host; database backups scheduled, `Encryption:Key` kept with them.
+- [ ] The log directory is a volume.
 - [ ] Logs reach somewhere someone looks (file + shipper).
 - [ ] Rate limits reviewed (`/api/v1/rate-limit-settings`).
 - [ ] The *not in scope* list in the README and SECURITY.md's known limitations read and accepted:
