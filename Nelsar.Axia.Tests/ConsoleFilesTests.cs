@@ -117,7 +117,7 @@ public sealed class ConsoleFilesTests : IDisposable
         try
         {
             var wwwroot = Directory.CreateDirectory(Path.Combine(binaries, "wwwroot")).FullName;
-            File.WriteAllText(Path.Combine(wwwroot, "index.html"), "");
+            File.WriteAllText(Path.Join(wwwroot, "index.html"), "");
 
             Assert.Equal(wwwroot, new ConsoleOptions().ResolveRoot(binaries));
         }
