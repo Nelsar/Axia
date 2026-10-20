@@ -41,13 +41,20 @@ public static class AxiaDatabase
         string connectionString)
         where TContext : DbContext
     {
-        options.UseAxiaDatabase(provider, connectionString);
+        Configure(options, provider, connectionString);
         return options;
     }
 
     /// <inheritdoc cref="UseAxiaDatabase{TContext}"/>
     public static DbContextOptionsBuilder UseAxiaDatabase(
         this DbContextOptionsBuilder options,
+        DatabaseProvider provider,
+        string connectionString) =>
+        Configure(options, provider, connectionString);
+
+    // Not an extension method, so that the generic overload above cannot end up calling itself.
+    private static DbContextOptionsBuilder Configure(
+        DbContextOptionsBuilder options,
         DatabaseProvider provider,
         string connectionString)
     {
