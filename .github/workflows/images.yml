@@ -128,7 +128,15 @@ jobs:
           cache-to: type=gha,scope=${{ matrix.image }},mode=max
 
       # Docker Hub takes no description from the image; this sets the one its search shows. The
-      # token needs the read, write and delete scope for it.
+      # token needs the read, write and delete scope for it. The overview is taken from the commit
+      # this workflow runs from, not the tag being built: on a dispatch for an older tag, the tag
+      # may predate it.
+      - if: env.DOCKERHUB == 'true'
+        uses: actions/checkout@v7
+        with:
+          path: .workflow
+          sparse-checkout: .github/dockerhub
+
       - if: env.DOCKERHUB == 'true'
         uses: peter-evans/dockerhub-description@v4
         with:
@@ -136,4 +144,4 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ${{ vars.DOCKERHUB_USERNAME }}/${{ matrix.image }}
           short-description: ${{ matrix.summary }}
-          readme-filepath: .github/dockerhub/README.md
+          readme-filepath: .workflow/.github/dockerhub/README.md
