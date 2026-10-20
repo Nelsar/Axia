@@ -24,6 +24,14 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
+    // Copies another database into the configured one and exits; the API does not start. See
+    // CopyDatabaseCommand.
+    if (CopyDatabaseCommand.IsInvoked(args))
+    {
+        Environment.ExitCode = await CopyDatabaseCommand.RunAsync(args);
+        return;
+    }
+
     var builder = WebApplication.CreateBuilder(args);
 
     // Structured logging, and which sinks it reaches: console and a rolling JSON file by default,

@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Nelsar.Axia.Domain.Entities;
 using Nelsar.Axia.Domain.ValueObjects;
+using Nelsar.Axia.Infrastructure.Persistence.Configurations;
 using Nelsar.Axia.Infrastructure.Persistence.Converters;
 
 namespace Nelsar.Axia.Infrastructure.Persistence;
@@ -52,5 +54,32 @@ public class AppDbContext : DbContext, IAppDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        // What one database needs and the others must not have. The model EF Core builds is
+        // cached per provider, so a process that talks to two of them — copy-database does — gets
+        // each its own.
+        if (Database.IsSqlite())
+        {
+            modelBuilder.Entity<AuditEvent>()
+                .Property(x => x.Timestamp)
+                .HasConversion(AuditEventConfiguration.TimestampAsUtcText);
+        }
+
+        if (Database.IsNpgsql())
+        {
+            // PostgreSQL stores an instant, and its driver refuses a DateTimeOffset with any offset
+            // but zero rather than convert it. Everything this application writes is UTC already;
+            // this keeps a value that is not — a row read from another database, say — from
+            // failing a write.
+            foreach (var property in modelBuilder.Model.GetEntityTypes()
+                         .SelectMany(entity => entity.GetProperties())
+                         .Where(property => property.ClrType == typeof(DateTimeOffset)))
+            {
+                property.SetValueConverter(UtcInstant);
+            }
+        }
     }
+
+    private static readonly ValueConverter<DateTimeOffset, DateTimeOffset> UtcInstant =
+        new(value => value.ToUniversalTime(), value => value);
 }

@@ -82,8 +82,8 @@ Serilog__MinimumLevel__Override__Nelsar.Axia=Debug
 
 ## The database
 
-SQLite, at `ConnectionStrings:DefaultConnection` (default `nelsar-axia.db` in the working
-directory).
+PostgreSQL, or SQLite, as `Database:Provider` says, at `ConnectionStrings:DefaultConnection`; see
+[Configuration](configuration.md#database-and-connectionstrings). The tables are the same on both.
 
 | Table | Holds |
 | --- | --- |
@@ -93,13 +93,14 @@ directory).
 | `RateLimitSettings` | Per-policy limits |
 | `AuditEvents` | The audit log (indexed by time) |
 | `UserLookups` | id → address map, so a user id can be resolved back to its entry |
-| `__EFMigrationsHistory`, `__EFMigrationsLock` | Applied migrations, and the lock taken while applying them |
+| `__EFMigrationsHistory` | Applied migrations. On SQLite, `__EFMigrationsLock` beside it is the lock taken while applying them; PostgreSQL locks the history table itself. |
 | `LdapConfigurations`, `LdapAttributeMappings` | Legacy. One row is written on first start; nothing reads it. |
 
 At every start the API, in order:
 
-1. Validates `Jwt`, `Encryption`, `Ldap` and `RoleMappings` settings.
-2. Applies pending migrations, under SQLite's migration lock.
+1. Validates `Database`, `Jwt`, `Encryption`, `Ldap` and `RoleMappings` settings.
+2. Applies pending migrations — the database's own set — under the migration lock, so that two
+   instances starting at once do not both apply them.
 3. Seeds what is missing: role mappings from `RoleMappings:GroupDns` (only on an empty table),
    missing rate-limit policies, default role permissions (only on an empty table), and the unused
    legacy `LdapConfigurations` row.
@@ -111,23 +112,87 @@ Seeding never overwrites what an administrator changed.
 
 ### Backup and restore
 
-The database is one file (plus `-wal`/`-shm` while the API runs). Back it up consistently with
-SQLite's own backup:
+Back up `Encryption:Key` with every backup: without it, the stored bind passwords in the backup
+are unreadable. The directory's own data is not in this database; back up the directory by its
+own means.
+
+**PostgreSQL**: `pg_dump` while the API runs, `pg_restore` into an empty database to restore.
+
+```bash
+pg_dump --format=custom --file="/backups/nelsar-axia-$(date +%F).dump" "host=db.internal dbname=nelsar_axia user=nelsar_axia"
+pg_restore --dbname="host=db.internal dbname=nelsar_axia user=nelsar_axia" --no-owner /backups/nelsar-axia-2026-10-20.dump
+```
+
+In the quick start: `docker compose exec postgres pg_dump -U nelsar_axia --format=custom nelsar_axia > nelsar-axia.dump`.
+
+**SQLite**: the database is one file (plus `-wal`/`-shm` while the API runs). Back it up
+consistently with SQLite's own backup, or stop the API and copy the file:
 
 ```bash
 sqlite3 /data/nelsar-axia.db ".backup '/backups/nelsar-axia-$(date +%F).db'"
 ```
 
-or stop the API and copy the file. Back up `Encryption:Key` alongside: without it, the stored bind
-passwords in the backup are unreadable.
+To restore either, stop the API, put the database back, start it. Migrations bring an older backup
+forward.
 
-To restore, stop the API, put the file back, start it. Migrations bring an older backup forward.
+### Moving to another database
 
-The directory's own data is not in this database; back up the directory by its own means.
+`copy-database` copies every table from one database into another, whichever two engines they are.
+It is how a deployment that began on SQLite — every one before 0.3 did — moves to PostgreSQL.
+
+It copies into the database the API is configured with, read the way the API reads it, so the
+steps are: configure the new database, copy, start.
+
+1. Stop the API. Back up the old database.
+2. Create an empty PostgreSQL database and an account that owns it.
+3. Point the configuration at it — `Database__Provider=PostgreSql` and its
+   `ConnectionStrings__DefaultConnection` — but do not start the API yet: on its first start it
+   seeds the database, and the copy only goes into an empty one.
+4. Run the image with `copy-database`, naming the old database, with the same configuration:
+
+   ```bash
+   docker run --rm --env-file axia.env -v /srv/nelsar-axia/data:/old:ro \
+     ghcr.io/nelsar/axia-api:x.y.z copy-database --from-provider Sqlite --from "Data Source=/old/nelsar-axia.db"
+   ```
+
+   From source: `dotnet Nelsar.Axia.Api.dll copy-database --from-provider Sqlite --from "Data Source=…"`.
+
+5. Start the API. It finds its tables migrated and filled, and seeds nothing.
+
+What it does, and refuses:
+
+- The old database is opened read-only, where the engine allows it, and is left as it was. A
+  SQLite path that does not exist is an error rather than a new empty file.
+- It refuses an old database that is behind this version's schema. Start this version on it once,
+  with its own `Database:Provider`, which brings it up to date, then copy.
+- It refuses a target that already has rows in any table.
+- It copies everything in one transaction and checks each table's row count against the old
+  database's before committing, so a failure leaves the target as empty as it was.
+- Bind passwords are copied as they are stored, encrypted, so the new database needs the same
+  `Encryption:Key`.
+
+The same command moves a database back to SQLite, or between two PostgreSQL servers.
+
+**The quick start**, from 0.2 or earlier: its SQLite database is in the `nelsar-axia_api-data`
+volume, which the quick start no longer mounts. To bring its audit trail along, before the first
+`docker compose up` of the new version:
+
+```bash
+docker compose up -d --wait postgres
+docker compose run --rm -v nelsar-axia_api-data:/old:ro api copy-database --from-provider Sqlite --from "Data Source=/old/nelsar-axia.db"
+docker compose up -d
+```
 
 ### Audit log retention
 
-There is no automatic pruning. The table grows by one row per sign-in and per change. To trim it:
+There is no automatic pruning. The table grows by one row per sign-in and per change. To trim it,
+on PostgreSQL:
+
+```sql
+DELETE FROM "AuditEvents" WHERE "Timestamp" < '2025-01-01';
+```
+
+On SQLite, where the timestamp is UTC text:
 
 ```bash
 sqlite3 /data/nelsar-axia.db "DELETE FROM AuditEvents WHERE Timestamp < '2025-01-01'; VACUUM;"

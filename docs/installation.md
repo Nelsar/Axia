@@ -21,6 +21,7 @@ Production is a separate page: [Production deployment](production.md).
 | .NET SDK 10 | — | **yes** | **yes** |
 | Node.js 22 (or 20.19+) and npm | — | **yes** | **yes** |
 | An LDAP / AD server you can reach | — | **yes** | — (provided) |
+| PostgreSQL | — (provided) | **yes**, or SQLite, or the one in `deploy/dev` | — (provided) |
 | OpenLDAP client tools (`ldapsearch`, `ldapadd`) | — | optional | optional, for poking at it |
 | Python 3 | — | — | only to regenerate test data |
 | `openssl` | — | to generate keys | to generate keys |
@@ -34,6 +35,7 @@ Versions the project is built and tested with:
 | Node.js | 22 (20.19+ works) | Vite 8 needs 20.19 or 22.12 and later. CI and the console's Docker image build on Node 22. |
 | Docker / Compose | Compose v2 (`docker compose`, not `docker-compose`) | |
 | OpenLDAP image (quick start, dev) | `osixia/openldap:1.5.0` | |
+| PostgreSQL | 17 (`postgres:17-alpine` in the quick start, dev and CI) | Any supported version should do. |
 | nginx image (console container) | `nginxinc/nginx-unprivileged:1.27-alpine` | |
 
 ### Operating system
@@ -50,7 +52,8 @@ Restored automatically by `dotnet restore`; listed so you know what you are runn
 | --- | --- |
 | `Novell.Directory.Ldap.NETStandard` 3.6 | LDAP for the `StandardLdap` provider |
 | `System.DirectoryServices` (+ `.AccountManagement`) 10.0 | the Windows-only `ActiveDirectory` provider |
-| `Microsoft.EntityFrameworkCore.Sqlite` 10.0 | the database |
+| `Npgsql.EntityFrameworkCore.PostgreSQL` 10.0 | the database, on PostgreSQL |
+| `Microsoft.EntityFrameworkCore.Sqlite` 10.0 | the database, on SQLite |
 | `Microsoft.AspNetCore.Authentication.JwtBearer` 10.0 | bearer tokens |
 | `MediatR` 12, `FluentValidation` 12 | use-case pipeline and validation |
 | `Serilog.AspNetCore` 10, `Serilog.Sinks.Http`, `Serilog.Sinks.Grafana.Loki` | structured logging and shipping |
@@ -65,6 +68,7 @@ The console: React 19, TypeScript 7, Vite 8. Nothing else at runtime.
 | Browser | console | 5500 (dev) / 8080 (container) | the UI |
 | Browser | API | 5063 (dev) | the console calls the API directly in development; in the container setup, nginx proxies `/api/` instead |
 | API | directory | 636 (LDAPS, default), 389 (StartTLS or plain), 3268/3269 (Global Catalog, read-only) | every operation |
+| API | PostgreSQL | 5432 | its own state; not with SQLite |
 | API | Logstash / Loki | as configured | only if log shipping is turned on |
 
 The API makes no other outbound connections.
@@ -98,9 +102,10 @@ What `docker compose up` starts (see
 
 | Service | What it does |
 | --- | --- |
-| `init` | Runs once. Generates a CA and a certificate for the directory, and the API's `Jwt__Key` and `Encryption__Key`, into Docker volumes. Does nothing on later starts. |
+| `init` | Runs before the others. Generates a CA and a certificate for the directory, the API's `Jwt__Key` and `Encryption__Key`, and the database's password, into Docker volumes. Makes only what is missing, so they stay the same across restarts. |
 | `openldap` | OpenLDAP with the demo content from [`deploy/quickstart/bootstrap.ldif`](https://github.com/Nelsar/Axia/blob/main/deploy/quickstart/bootstrap.ldif), LDAPS only, not published to the host. |
-| `api` | The API: `ghcr.io/nelsar/axia-api`, or the working tree with `--build`. Reaches the directory over LDAPS and verifies its certificate. Database in the `api-data` volume. |
+| `postgres` | PostgreSQL 17, the API's database, in the `db-data` volume. Not published to the host. |
+| `api` | The API: `ghcr.io/nelsar/axia-api`, or the working tree with `--build`. Reaches the directory over LDAPS and verifies its certificate. |
 | `console` | `ghcr.io/nelsar/axia-console`: nginx serving the built console on `127.0.0.1:8080`, and proxying `/api/` to the API. The only thing published. |
 
 The port can be changed with `CONSOLE_PORT=9090 docker compose up`, and the images' version with
@@ -108,6 +113,10 @@ The port can be changed with `CONSOLE_PORT=9090 docker compose up`, and the imag
 
 `docker compose down` stops it; `docker compose down -v` also deletes the directory, its
 certificates, the keys and the database.
+
+A quick start set up by 0.2 or earlier kept its database in SQLite, in the `api-data` volume, which
+is no longer used; the new one starts empty. [Moving to another database](operations.md#moving-to-another-database)
+shows how to bring the old one along.
 
 The quick start's directory is reachable only inside Docker. To run the API from source against a
 directory on your machine, use path 3.
@@ -148,7 +157,26 @@ with either missing, too short, malformed, or still the placeholder from the exa
 > are encrypted with it; a different key makes every one of them unreadable until it is entered
 > again.
 
-### 4. Point it at your directory
+### 4. Give it a database
+
+The Development example points at the PostgreSQL in `deploy/dev`, which needs only Docker:
+
+```bash
+docker compose -f deploy/dev/docker-compose.ldap.yml up -d --wait postgres
+```
+
+For a server of your own, set `ConnectionStrings:DefaultConnection` in
+`appsettings.Development.json` to it. To run with no database server at all, use SQLite:
+
+```jsonc
+"Database": { "Provider": "Sqlite" },
+"ConnectionStrings": { "DefaultConnection": "Data Source=nelsar-axia-dev.db" }
+```
+
+The API creates its tables on the first start. See
+[Configuration](configuration.md#database-and-connectionstrings).
+
+### 5. Point it at your directory
 
 Edit the `Ldap` section. For Active Directory over LDAPS:
 
@@ -181,7 +209,7 @@ If the directory's certificate is issued by an internal CA the machine does not 
 Every setting is described in the [Configuration reference](configuration.md#ldap). What the bind
 account needs to be allowed to do is in [Production → The bind account](production.md#the-bind-account).
 
-### 5. Say who the administrators are
+### 6. Say who the administrators are
 
 The API will not start until some directory group, named by its full DN, is mapped to the Admin
 role:
@@ -208,21 +236,20 @@ application Admin can change them (AD marks these on its own):
 "DirectoryProtection": { "ProtectedGroups": [ "cn=axia-admins,ou=groups,dc=example,dc=org" ] }
 ```
 
-### 6. Run the API
+### 7. Run the API
 
 ```bash
 dotnet run --project Nelsar.Axia.Api --launch-profile http
 ```
 
 The `http` profile sets `ASPNETCORE_ENVIRONMENT=Development` and listens on
-<http://localhost:5063>. On first start the API creates the SQLite database
-(`nelsar-axia-dev.db` in Development), applies migrations and seeds defaults. Swagger UI is at
-<http://localhost:5063/swagger> in Development.
+<http://localhost:5063>. On first start the API creates its tables in the database, applies
+migrations and seeds defaults. Swagger UI is at <http://localhost:5063/swagger> in Development.
 
 The `https` launch profile runs as **Production**: it does not load `appsettings.Development.json`
 and does not serve Swagger.
 
-### 7. Run the console
+### 8. Run the console
 
 ```bash
 npm --prefix frontend run dev
@@ -233,7 +260,7 @@ sign-in screen has an **API address** field to change it. The API admits browser
 port without configuration. The field exists on the development server only: the Docker image's
 console always calls the API on its own origin.
 
-### 8. Sign in
+### 9. Sign in
 
 Sign in with an account from your directory: a login (`uid`, `sAMAccountName`), a
 `userPrincipalName`, or an e-mail address, depending on `Ldap:UserSearchFilter`. Members of the
@@ -244,11 +271,12 @@ added.
 
 [`deploy/dev`](https://github.com/Nelsar/Axia/tree/main/deploy/dev) holds an OpenLDAP for
 development: published on `127.0.0.1:389` in plain LDAP, with the quick start's demo accounts plus
-an Active-Directory-shaped domain of around 1,500 accounts, 2,000 computers and 110 groups.
-[Local test directory](local-directory.md) describes what is in it.
+an Active-Directory-shaped domain of around 1,500 accounts, 2,000 computers and 110 groups — and a
+PostgreSQL on `127.0.0.1:5432` for the API's own state. [Local test directory](local-directory.md)
+describes what is in it.
 
 1. Steps 1–3 of path 2 (code, configuration files, keys).
-2. Start the directory:
+2. Start the directory, and the database beside it:
 
    ```bash
    docker compose -f deploy/dev/docker-compose.ldap.yml up -d --wait
@@ -286,7 +314,7 @@ an Active-Directory-shaped domain of around 1,500 accounts, 2,000 computers and 
    `Security: None` is plain LDAP. It is acceptable here only because the directory is on the
    same machine; the API logs a warning about it on every connection.
 
-4. Steps 6–7 of path 2. Sign in as `admin.demo` / `Axia-Demo-1`.
+4. Steps 7–8 of path 2. Sign in as `admin.demo` / `Axia-Demo-1`.
 
 ## Checking that it works
 

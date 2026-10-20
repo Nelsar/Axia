@@ -21,7 +21,7 @@ an audit log and bulk user provisioning.
 Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
 [Apache 2.0](LICENSE).
 
-> **Status: MVP.** The API and console do what is described below, and 886 tests cover it. What is
+> **Status: MVP.** The API and console do what is described below, and 905 tests cover it. What is
 > not yet here is listed under [Not in scope yet](#not-in-scope-yet) — read it before deciding
 > whether this fits.
 
@@ -145,6 +145,9 @@ own directory, run it as below.
 - [.NET SDK 10](https://dotnet.microsoft.com/download) (built and tested on 10.0.112)
 - [Node.js](https://nodejs.org/) 22 (or 20.19 and later), for the console
 - An LDAP or Active Directory server to point at
+- PostgreSQL for the API's own state — the Development example points at the one in `deploy/dev`:
+  `docker compose -f deploy/dev/docker-compose.ldap.yml up -d --wait postgres`. Or SQLite, with no
+  server at all; see [Configuration](docs/configuration.md#database-and-connectionstrings).
 
 ### 1. Configuration
 
@@ -177,7 +180,7 @@ repository: a host signing tokens with one would accept a token anybody can forg
 ASPNETCORE_ENVIRONMENT=Development dotnet run --project Nelsar.Axia.Api
 ```
 
-It listens on `http://localhost:5063`, creates a SQLite database on first run and applies
+It listens on `http://localhost:5063`, creates its tables in the database on first run and applies
 migrations. In `Development` it also serves Swagger UI at `/swagger`.
 
 ### 3. Run the console
@@ -385,9 +388,10 @@ the tests if a message is left untranslated.
 dotnet test
 ```
 
-886 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
-authorisation on every guarded use case, what may reach a log sink, multi-directory isolation, and
-translation completeness in every supported language.
+905 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
+authorisation on every guarded use case, what may reach a log sink, multi-directory isolation,
+each database's migrations against the model, and translation completeness in every supported
+language.
 
 ## Not in scope yet
 

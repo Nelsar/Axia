@@ -38,7 +38,7 @@ there is nothing yet to backport to.
 | --- | --- |
 | Browser → API | Untrusted. Every request is authenticated and authorised on its own; the console is a convenience, not a control. |
 | API → directory | **Trusted network.** See the first known limitation below — this one is load-bearing. |
-| API → its own database | Trusted. SQLite on the same host, holding providers, role mappings, rate-limit settings and the audit trail. |
+| API → its own database | Trusted. PostgreSQL, or SQLite on the same host, holding providers, role mappings, rate-limit settings and the audit trail. Whoever can write to it can change who holds which permission. |
 | Operator → configuration | Trusted. Anyone who can edit `appsettings.json` or the environment already controls the instance. |
 
 Inside that, the following are meant to hold, and a case where they do not is worth reporting:
