@@ -17,7 +17,7 @@ public class DatabaseTests
 {
     private static IConfiguration Configuration(params (string Key, string Value)[] settings) =>
         new ConfigurationBuilder()
-            .AddInMemoryCollection(settings.Select(s => KeyValuePair.Create(s.Key, (string?)s.Value)))
+            .AddInMemoryCollection(settings.Select(s => KeyValuePair.Create(s.Key, s.Value)))
             .Build();
 
     [Fact]
