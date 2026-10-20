@@ -245,7 +245,7 @@ public sealed class ConsoleOptions
     {
         if (string.IsNullOrWhiteSpace(Path))
         {
-            var beside = System.IO.Path.Combine(baseDirectory, DefaultFolder);
+            var beside = System.IO.Path.Join(baseDirectory, DefaultFolder);
             return HoldsConsole(beside) ? beside : null;
         }
 
