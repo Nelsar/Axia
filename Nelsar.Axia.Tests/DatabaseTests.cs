@@ -193,7 +193,7 @@ public class DatabaseTests
     public void AReadOnlySource_CannotBeCreatedByMistake()
     {
         // A mistyped path must not leave a new, empty database where the old one was expected.
-        var path = Path.Combine(Path.GetTempPath(), $"axia-missing-{Guid.NewGuid():N}.db");
+        var path = Path.Join(Path.GetTempPath(), $"axia-missing-{Guid.NewGuid():N}.db");
         using var connection = new SqliteConnection(AxiaDatabase.ReadOnlySqlite($"Data Source={path}"));
 
         Assert.Throws<SqliteException>(connection.Open);
