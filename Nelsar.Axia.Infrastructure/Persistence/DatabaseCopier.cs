@@ -105,7 +105,7 @@ public static class DatabaseCopier
             if (ordered.Contains(entity) || !visiting.Add(entity))
                 return;
 
-            foreach (var principal in entity.GetForeignKeys().Select(fk => fk.PrincipalEntityType).Where(p => p != entity))
+            foreach (var principal in entity.GetForeignKeys().Select(fk => fk.PrincipalEntityType).Where(p => !ReferenceEquals(p, entity)))
                 Visit(principal);
 
             ordered.Add(entity);
