@@ -9,23 +9,6 @@ How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
 ## [Unreleased]
 
-### Added
-
-- Images: releases are published to Docker Hub as well, as `nelsar/axia-api` and
-  `nelsar/axia-console`, the same images and tags as on ghcr.io. See
-  [Production deployment](docs/production.md#images).
-- The API can serve the console itself, so that one process on one port is the whole application
-  where there is no nginx: from `wwwroot` next to its binaries, or from `Console:Path`, with the
-  headers the console image sends. `dotnet publish -p:AxiaConsoleDist=…` puts a built console
-  there. Nothing changes for the container images, which have no `wwwroot`. See
-  [Configuration](docs/configuration.md#console).
-- The API runs as a Windows service or a systemd unit when started as one.
-
-## [0.2.1] - 2026-10-20
-
-Released images, and two fixes to what reaches a caller and a log. Upgrading from 0.2.0 needs no
-action.
-
 The API's own state moves to PostgreSQL. **Upgrading from 0.2 takes one decision:** the database is
 no longer assumed, so `Database:Provider` has to be set before the new version starts — see
 *Changed*.
@@ -39,6 +22,15 @@ no longer assumed, so `Database:Provider` has to be set before the new version s
   another, whichever two engines they are. One transaction, every table's row count checked before
   it commits, the old database opened read-only. See
   [Moving to another database](docs/operations.md#moving-to-another-database).
+- Images: releases are published to Docker Hub as well, as `nelsar/axia-api` and
+  `nelsar/axia-console`, the same images and tags as on ghcr.io. See
+  [Production deployment](docs/production.md#images).
+- The API can serve the console itself, so that one process on one port is the whole application
+  where there is no nginx: from `wwwroot` next to its binaries, or from `Console:Path`, with the
+  headers the console image sends. `dotnet publish -p:AxiaConsoleDist=…` puts a built console
+  there. Nothing changes for the container images, which have no `wwwroot`. See
+  [Configuration](docs/configuration.md#console).
+- The API runs as a Windows service or a systemd unit when started as one.
 
 ### Changed
 
