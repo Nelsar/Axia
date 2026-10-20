@@ -7,7 +7,10 @@ configuration or the API in ways that need action on upgrade; its entry says wha
 
 How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
-## [Unreleased]
+## [0.2.1] - 2026-10-20
+
+Released images, and two fixes to what reaches a caller and a log. Upgrading from 0.2.0 needs no
+action.
 
 ### Security
 
@@ -29,6 +32,8 @@ How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
 - The quick start runs the released images: `docker compose up` pulls them instead of building
   for several minutes. `docker compose up --build` still builds the checkout.
+- Dependencies: ASP.NET Core's JWT bearer authentication 10.0.13, FluentValidation 12.2.0 and
+  MediatR 12.5.0.
 
 ### Fixed
 
@@ -156,5 +161,6 @@ Read before deploying: [SECURITY.md](SECURITY.md#known-limitations) and
 [Not in scope yet](README.md#not-in-scope-yet). Above all, a session cannot be ended before its
 token expires, and directory certificates are not checked for revocation.
 
+[0.2.1]: https://github.com/Nelsar/Axia/releases/tag/v0.2.1
 [0.2.0]: https://github.com/Nelsar/Axia/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Nelsar/Axia/releases/tag/v0.1.0

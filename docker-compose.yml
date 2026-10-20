@@ -64,7 +64,7 @@ services:
 
   api:
     # The version is set at each release, with the others; see "Releasing" in CONTRIBUTING.md.
-    image: ghcr.io/nelsar/axia-api:${AXIA_VERSION:-0.2.0}
+    image: ghcr.io/nelsar/axia-api:${AXIA_VERSION:-0.2.1}
     build:
       context: .
       dockerfile: Dockerfile
@@ -106,7 +106,7 @@ services:
     restart: unless-stopped
 
   console:
-    image: ghcr.io/nelsar/axia-console:${AXIA_VERSION:-0.2.0}
+    image: ghcr.io/nelsar/axia-console:${AXIA_VERSION:-0.2.1}
     build:
       context: ./frontend
     ports:
