@@ -260,5 +260,5 @@ public sealed class ConsoleOptions
     }
 
     private static bool HoldsConsole(string folder) =>
-        File.Exists(System.IO.Path.Combine(folder, "index.html"));
+        File.Exists(System.IO.Path.Join(folder, "index.html"));
 }
