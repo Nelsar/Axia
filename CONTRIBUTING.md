@@ -142,8 +142,14 @@ inherits, `frontend/package.json`, and the image tags the quick start runs in `d
 
    The tag starts the `Images` workflow, which builds `ghcr.io/nelsar/axia-api` and
    `ghcr.io/nelsar/axia-console` from it, for amd64 and arm64, and publishes them as `x.y.z`,
-   `x.y` and `latest`. Wait for it to finish before announcing the release; should it fail, run it
-   again from the Actions tab with the tag as its input.
+   `x.y` and `latest`, and pushes the same to Docker Hub as `nelsar/axia-api` and
+   `nelsar/axia-console`, updating their overview there from `.github/dockerhub/README.md`. Wait
+   for it to finish before announcing the release; should it fail, run it again from the Actions
+   tab with the tag as its input.
+
+   Docker Hub is published to when the repository's `DOCKERHUB_USERNAME` variable is set, with an
+   access token of that account — read, write and delete scope — in the `DOCKERHUB_TOKEN` secret.
+   Without the variable, the workflow publishes to ghcr.io alone.
 
 5. Publish the release from the tag, with that version's changelog section as its notes:
 

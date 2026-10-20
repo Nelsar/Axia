@@ -7,6 +7,14 @@ configuration or the API in ways that need action on upgrade; its entry says wha
 
 How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
+## [Unreleased]
+
+### Added
+
+- Images: releases are published to Docker Hub as well, as `nelsar/axia-api` and
+  `nelsar/axia-console`, the same images and tags as on ghcr.io. See
+  [Production deployment](docs/production.md#images).
+
 ## [0.2.1] - 2026-10-20
 
 Released images, and two fixes to what reaches a caller and a log. Upgrading from 0.2.0 needs no
