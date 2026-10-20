@@ -116,7 +116,7 @@ public sealed class ConsoleFilesTests : IDisposable
         var binaries = Directory.CreateTempSubdirectory("axia-bin-").FullName;
         try
         {
-            var wwwroot = Directory.CreateDirectory(Path.Combine(binaries, "wwwroot")).FullName;
+            var wwwroot = Directory.CreateDirectory(Path.Join(binaries, "wwwroot")).FullName;
             File.WriteAllText(Path.Join(wwwroot, "index.html"), "");
 
             Assert.Equal(wwwroot, new ConsoleOptions().ResolveRoot(binaries));
