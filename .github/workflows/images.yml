@@ -1,7 +1,9 @@
 # The API and console images, for linux/amd64 and linux/arm64.
 #
 # A release tag publishes them to GitHub Container Registry as ghcr.io/nelsar/axia-api and
-# ghcr.io/nelsar/axia-console, built from that tag; see "Releasing" in CONTRIBUTING.md. A pull
+# ghcr.io/nelsar/axia-console, built from that tag; see "Releasing" in CONTRIBUTING.md. With the
+# DOCKERHUB_USERNAME variable and the DOCKERHUB_TOKEN secret set, the same images go to Docker Hub
+# as well, under that account, with .github/dockerhub/README.md as their overview there. A pull
 # request that touches how they are built builds both platforms without publishing, so a broken
 # arm64 build shows up there rather than on release day — the quick start job in CI builds amd64
 # only.
@@ -50,13 +52,18 @@ jobs:
             context: .
             file: Dockerfile
             description: Nelsar.Axia API — REST API for Active Directory and OpenLDAP
+            # Docker Hub's short description, at most 100 characters.
+            summary: REST API for managing Active Directory and OpenLDAP — users, groups, OUs, RBAC, audit log
           - image: axia-console
             context: frontend
             file: frontend/Dockerfile
             description: Nelsar.Axia console — the web UI, served by nginx, which proxies /api/ to http://api:8080
+            summary: Self-hosted LDAP admin and Active Directory web console — the UI for axia-api
     env:
       PUBLISH: ${{ github.event_name != 'pull_request' }}
       TAG: ${{ inputs.tag || github.ref_name }}
+      # Docker Hub is published to only once its account is configured; until then, ghcr.io alone.
+      DOCKERHUB: ${{ github.event_name != 'pull_request' && vars.DOCKERHUB_USERNAME != '' }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -76,6 +83,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - if: env.DOCKERHUB == 'true'
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       # 0.2.1, 0.2 and latest for v0.2.1; a pre-release (v0.3.0-rc.1) gets its own version only.
       # The labels link the package to this repository, which is where ghcr.io takes its
       # description, licence and source link from.
@@ -85,7 +98,9 @@ jobs:
           # A multi-platform image is an index; ghcr.io reads the description from there.
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
         with:
-          images: ghcr.io/nelsar/${{ matrix.image }}
+          images: |
+            ghcr.io/nelsar/${{ matrix.image }}
+            name=docker.io/${{ vars.DOCKERHUB_USERNAME }}/${{ matrix.image }},enable=${{ env.DOCKERHUB }}
           tags: |
             type=semver,pattern={{version}},value=${{ env.TAG }}
             type=semver,pattern={{major}}.{{minor}},value=${{ env.TAG }}
@@ -111,3 +126,14 @@ jobs:
           sbom: true
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,scope=${{ matrix.image }},mode=max
+
+      # Docker Hub takes no description from the image; this sets the one its search shows. The
+      # token needs the read, write and delete scope for it.
+      - if: env.DOCKERHUB == 'true'
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ vars.DOCKERHUB_USERNAME }}/${{ matrix.image }}
+          short-description: ${{ matrix.summary }}
+          readme-filepath: .github/dockerhub/README.md

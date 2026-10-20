@@ -32,6 +32,9 @@ docker pull ghcr.io/nelsar/axia-api:x.y.z
 docker pull ghcr.io/nelsar/axia-console:x.y.z
 ```
 
+The same images are on Docker Hub as `nelsar/axia-api` and `nelsar/axia-console`, with the same
+tags; either registry will do.
+
 | Tag | Points at |
 | --- | --- |
 | `x.y.z` | that release, always. Pin this — or the digest — in production. |
