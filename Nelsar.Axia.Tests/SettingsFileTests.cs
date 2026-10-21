@@ -36,8 +36,8 @@ public sealed class SettingsFileTests : IDisposable
         Assert.Equal(48, Convert.FromBase64String(At(root, "Jwt:Key")!).Length);
         Assert.Equal(32, Convert.FromBase64String(At(root, "Encryption:Key")!).Length);
         Assert.Equal("Sqlite", At(root, "Database:Provider"));
-        Assert.Equal($"Data Source={Path.Combine(_folder, "nelsar-axia.db")}", At(root, "ConnectionStrings:DefaultConnection"));
-        Assert.Equal(Path.Combine(_folder, "logs", "axia-.json"), At(root, "Observability:File:Path"));
+        Assert.Equal($"Data Source={Path.Join(_folder, "nelsar-axia.db")}", At(root, "ConnectionStrings:DefaultConnection"));
+        Assert.Equal(Path.Join(_folder, "logs", "axia-.json"), At(root, "Observability:File:Path"));
         Assert.Equal("http://+:8080", At(root, "Urls"));
     }
 
