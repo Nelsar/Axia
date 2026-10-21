@@ -101,7 +101,7 @@ public sealed class SettingsFileTests : IDisposable
         Environment.SetEnvironmentVariable(variable, "environment");
         try
         {
-            var configuration = new ConfigurationManager();
+            using var configuration = new ConfigurationManager();
             configuration.AddJsonFile(Path.Join(_folder, "absent.json"), optional: true);
             configuration.AddEnvironmentVariables();
             configuration.AddCommandLine(["--SettingsFile", FilePath]);
@@ -120,7 +120,7 @@ public sealed class SettingsFileTests : IDisposable
     [Fact]
     public void ANamedFileThatIsMissing_StopsStartup()
     {
-        var configuration = new ConfigurationManager();
+        using var configuration = new ConfigurationManager();
         configuration.AddCommandLine(["--SettingsFile", FilePath]);
 
         var error = Assert.Throws<InvalidOperationException>(() => SettingsFile.AddTo(configuration));
