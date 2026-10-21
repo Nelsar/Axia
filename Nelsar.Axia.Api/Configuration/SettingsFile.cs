@@ -143,11 +143,10 @@ internal static class SettingsFile
         var segments = key.Split(':');
         var current = root;
 
-        foreach (var segment in segments[..^1])
+        foreach (var name in segments[..^1].Select(segment =>
+                     current.Select(p => p.Key).FirstOrDefault(k => string.Equals(k, segment, StringComparison.OrdinalIgnoreCase))
+                     ?? segment))
         {
-            var name = current.Select(p => p.Key).FirstOrDefault(k => string.Equals(k, segment, StringComparison.OrdinalIgnoreCase))
-                ?? segment;
-
             if (current[name] is not JsonObject next)
             {
                 next = [];
