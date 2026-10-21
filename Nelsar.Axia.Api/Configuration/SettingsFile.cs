@@ -81,7 +81,7 @@ internal static class SettingsFile
         changed |= SetIfMissing(root, AxiaDatabase.ProviderKey, () => nameof(DatabaseProvider.Sqlite));
         changed |= SetIfMissing(root, $"ConnectionStrings:{AxiaDatabase.ConnectionStringName}",
             () => $"Data Source={Path.Combine(folder, "nelsar-axia.db")}");
-        changed |= SetIfMissing(root, "Observability:File:Path", () => Path.Combine(folder, "logs", "axia-.json"));
+        changed |= SetIfMissing(root, "Observability:File:Path", () => Path.Join(folder, "logs", "axia-.json"));
         changed |= SetIfMissing(root, "Urls", () => "http://+:8080");
 
         foreach (var (key, value) in settings)
