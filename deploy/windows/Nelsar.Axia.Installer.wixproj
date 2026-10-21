@@ -12,6 +12,11 @@
 
   <PropertyGroup>
     <OutputName>Nelsar.Axia-$(Version)-$(Platform)</OutputName>
+    <!-- A folder of its own for each version. WiX decides whether to bind again from the tracking
+         file the last bind left in this folder, not from the output name, so a second version built
+         into the same folder — CI builds 0.0.1 after the real one, to upgrade from — found nothing
+         to do and then failed to copy an .msi that was never made (MSB3030). -->
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\$(Version)\</IntermediateOutputPath>
     <!-- Given on the command line, relative to where the build is run from. -->
     <_AxiaPublishDir Condition="'$(AxiaPublishDir)' != ''">$([MSBuild]::EnsureTrailingSlash($([System.IO.Path]::GetFullPath('$(AxiaPublishDir)'))))</_AxiaPublishDir>
     <!-- ICE60 asks for a language on every versioned file that is not a font. The .NET runtime's
