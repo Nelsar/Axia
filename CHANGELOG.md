@@ -31,6 +31,15 @@ no longer assumed, so `Database:Provider` has to be set before the new version s
   there. Nothing changes for the container images, which have no `wwwroot`. See
   [Configuration](docs/configuration.md#console).
 - The API runs as a Windows service or a systemd unit when started as one.
+- A Windows installer, `Nelsar.Axia-x.y.z-x64.msi` and `-arm64.msi`, attached to each release: the
+  API and its console as the `NelsarAxia` service, running as its own virtual account, with no
+  Docker or .NET runtime to install first. Unattended installs take the directory and the admin
+  group as `msiexec` properties; settings, keys, database and logs live in
+  `%ProgramData%\Nelsar.Axia` and survive upgrades and uninstalls. See
+  [Windows installer](docs/installation-windows.md).
+- `--SettingsFile <path>` reads the settings from a file outside the folder of the binaries, and
+  `init-settings <path>` creates that file with new keys, or brings one up to date without touching
+  the keys. See [Configuration](docs/configuration.md#how-configuration-is-read).
 
 ### Changed
 

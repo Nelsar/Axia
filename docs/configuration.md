@@ -8,11 +8,21 @@ Standard ASP.NET Core configuration, in this order, later sources winning:
 
 1. `Nelsar.Axia.Api/appsettings.json`
 2. `Nelsar.Axia.Api/appsettings.{Environment}.json`, e.g. `appsettings.Development.json`
-3. Environment variables
-4. Command-line arguments
+3. The file named by `--SettingsFile <path>`, when the API is started with one
+4. Environment variables
+5. Command-line arguments
 
 Neither JSON file is in the repository; copy them from the `.example` files next to them. The
 files accept `//` comments.
+
+**`--SettingsFile`** keeps the settings outside the folder of the binaries, which is what an
+installed copy needs: the [Windows installer](installation-windows.md) starts its service with
+`--SettingsFile "%ProgramData%\Nelsar.Axia\appsettings.json"`. A file named and missing stops
+startup. `Nelsar.Axia.Api init-settings <path> [Section:Key=value]…` creates one — new
+`Jwt:Key` and `Encryption:Key`, SQLite, the database and logs beside the file, port 8080 — or
+brings an existing one up to date: it adds what is missing, writes the settings given, and leaves
+everything else, the keys above all, as it was. It does not keep `//` comments when it rewrites a
+file. `copy-database` takes `--SettingsFile` too.
 
 **Environment variables** use a double underscore for each level of nesting, and an index for
 array elements:

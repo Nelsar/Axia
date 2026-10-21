@@ -15,6 +15,7 @@ directory.
 | See it working in five minutes | [Installation → Quick start](installation.md#path-1-docker-quick-start) |
 | Run it from source against your own directory | [Installation → From source](installation.md#path-2-from-source-against-your-directory) |
 | Develop against a realistic directory on your machine | [Local test directory](local-directory.md) |
+| Install it on Windows as a service | [Windows installer](installation-windows.md) |
 | Put it in front of real users | [Production deployment](production.md) |
 
 ## Reference
@@ -23,6 +24,7 @@ directory.
 | --- | --- |
 | [Overview](overview.md) | What the application is made of and the concepts the rest of the documentation uses: directories, sessions, roles, permissions, entry ids. |
 | [Installation](installation.md) | Requirements and dependencies, and the three ways to get a running instance. |
+| [Windows installer](installation-windows.md) | The MSI: a Windows service with no Docker, unattended installs, upgrades, catalogue deployment. |
 | [Local test directory](local-directory.md) | The development OpenLDAP in `deploy/dev`: an AD-shaped domain with ~1,500 accounts, ~2,000 computers and ~110 groups. |
 | [Production deployment](production.md) | Container image, secrets, reverse proxy and TLS, the bind account, persistence, upgrades, a checklist. |
 | [Configuration reference](configuration.md) | Every setting, its default, and what the API refuses to start with. |

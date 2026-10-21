@@ -71,6 +71,14 @@ defaults:
         instance: Docker quick start, from source against your directory, or against a local
         test directory.
   - scope:
+      path: installation-windows.md
+    values:
+      # Between Installation and the local test directory, without renumbering every page.
+      nav_order: 3.5
+      description: >-
+        Installing Nelsar.Axia on Windows from an MSI, as a service with no Docker: unattended
+        installs, upgrades, and deployment through Intune, Configuration Manager or Group Policy.
+  - scope:
       path: local-directory.md
     values:
       nav_order: 4
