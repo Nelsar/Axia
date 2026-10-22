@@ -37,13 +37,23 @@ internal static class ProtectedSecurityIdentifiers
     internal static readonly uint[] PrivilegedPrimaryGroupRids = [512, 518, 519];
 
     /// <summary>Whether a binary SID is one of the protected ones.</summary>
-    public static bool IsProtected(byte[]? sid) =>
-        TryRead(sid, out var authority, out var subAuthorities)
-        && authority == 5
-        && subAuthorities.Length > 0
-        && ((subAuthorities is [32, var builtin] && BuiltinRids.Contains(builtin))
-            || (subAuthorities[0] == 21 && subAuthorities.Length == 5
-                && (DomainGroupRids.Contains(subAuthorities[^1]) || DomainAccountRids.Contains(subAuthorities[^1]))));
+    public static bool IsProtected(byte[]? sid)
+    {
+        if (!TryRead(sid, out var authority, out var subAuthorities))
+            return false;
+
+        if (authority != 5 || subAuthorities.Length == 0)
+            return false;
+
+        var isBuiltinProtected = subAuthorities is [32, var builtin] && BuiltinRids.Contains(builtin);
+
+        var isDomainSid = subAuthorities[0] == 21 && subAuthorities.Length == 5;
+        var domainRid = subAuthorities[^1];
+        var isDomainProtected = isDomainSid
+            && (DomainGroupRids.Contains(domainRid) || DomainAccountRids.Contains(domainRid));
+
+        return isBuiltinProtected || isDomainProtected;
+    }
 
     /// <summary>
     /// An LDAP filter matching the protected groups of the domain whose SID this is, and the
