@@ -268,4 +268,10 @@
   <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
     <value>تعذّرت معالجة هذا الصف بسبب خطأ غير متوقع. التفاصيل في سجل الخادم.</value>
   </data>
+  <data name="LoginNotAnActiveDirectoryName" xml:space="preserve">
+    <value>لا يمكن أن يكون اسم الدخول — جزء العنوان الذي يسبق @ — اسم حساب في Active Directory: يجب ألا يتجاوز 20 حرفًا وألا يحتوي على " / \ [ ] : ; | = , + * ? &lt; &gt;.</value>
+  </data>
+  <data name="AccountNameTaken" xml:space="preserve">
+    <value>يوجد بالفعل إدخال بهذا الاسم في الموضع الذي تُنشأ فيه الحسابات الجديدة. اختر اسمًا آخر للحساب.</value>
+  </data>
 </root>

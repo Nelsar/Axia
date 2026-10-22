@@ -20,6 +20,16 @@ public static class ApplicationMessages
 
     public static string UserAlreadyExistsInDirectory() => Get(nameof(UserAlreadyExistsInDirectory));
 
+    /// <summary>
+    /// The login cannot be an Active Directory account's sAMAccountName: too long, or a character
+    /// AD forbids there. The caller's to fix — a different address. Names no login: see
+    /// ResourceMessageTests.NoMessage_RepeatsAnAccount.
+    /// </summary>
+    public static string LoginNotAnActiveDirectoryName() => Get(nameof(LoginNotAnActiveDirectoryName));
+
+    /// <summary>Another entry already has the CN a new Active Directory account would be given.</summary>
+    public static string AccountNameTaken() => Get(nameof(AccountNameTaken));
+
     public static string UserAlreadyExists() => Get(nameof(UserAlreadyExists));
 
     public static string UserNotFoundForUpdate() => Get(nameof(UserNotFoundForUpdate));

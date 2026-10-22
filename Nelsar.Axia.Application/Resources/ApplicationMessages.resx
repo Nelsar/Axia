@@ -320,4 +320,12 @@
     <value>This row could not be processed because of an unexpected error. The server log has the details.</value>
     <comment>A bulk row that failed for a reason not meant for the caller (a bug, a library's own error). Says nothing about the cause.</comment>
   </data>
+  <data name="LoginNotAnActiveDirectoryName" xml:space="preserve">
+    <value>The login — the part of the address before @ — cannot be an Active Directory account name: it may be at most 20 characters long, and may not contain " / \ [ ] : ; | = , + * ? &lt; &gt;.</value>
+    <comment>Active Directory's sAMAccountName rules. Names no login: it would reach the log unmasked.</comment>
+  </data>
+  <data name="AccountNameTaken" xml:space="preserve">
+    <value>An entry with this name already exists where new accounts are created. Give the account a different name.</value>
+    <comment>The account's name becomes its CN in Active Directory. Names no account: it would reach the log unmasked.</comment>
+  </data>
 </root>

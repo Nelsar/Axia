@@ -272,4 +272,10 @@
   <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
     <value>Строку не удалось обработать из-за непредвиденной ошибки. Подробности — в журнале сервера.</value>
   </data>
+  <data name="LoginNotAnActiveDirectoryName" xml:space="preserve">
+    <value>Логин — часть адреса до @ — не может быть именем учётной записи Active Directory: он должен быть не длиннее 20 символов и не содержать " / \ [ ] : ; | = , + * ? &lt; &gt;.</value>
+  </data>
+  <data name="AccountNameTaken" xml:space="preserve">
+    <value>Там, где создаются новые учётные записи, уже есть запись с таким именем. Укажите другое имя.</value>
+  </data>
 </root>

@@ -1,4 +1,5 @@
-﻿using Nelsar.Axia.Domain.Entities;
+﻿using System.Globalization;
+using Nelsar.Axia.Domain.Entities;
 using Nelsar.Axia.Application.Common;
 using Nelsar.Axia.Application.Resources;
 using Nelsar.Axia.Domain.Exceptions;
@@ -17,20 +18,16 @@ namespace Nelsar.Axia.Infrastructure.Identity.Providers;
 /// <summary>
 /// The cross-platform LDAP provider, speaking the standard protocol (RFC 4511).
 /// Built on Novell.Directory.Ldap.NETStandard. Selected with ProviderType = "StandardLdap".
-/// Read/auth operations (Authenticate, FindUser, FindUserByDn, GetAllUsers) work against
-/// any RFC-compliant directory — Active Directory, OpenLDAP, or Novell eDirectory — since
-/// filters and attribute lookups try both AD-style (sAMAccountName/userPrincipalName) and
-/// generic-style (uid) names. CreateUser is the exception: it writes an inetOrgPerson entry
-/// with a uid RDN, which is correct for OpenLDAP/eDirectory but not for creating a true AD
-/// user object (AD needs objectClass=user, sAMAccountName, userAccountControl, LDAPS-encoded
-/// unicodePwd, etc.) — for AD user creation, use ActiveDirectoryProvider instead.
+/// Works against any RFC-compliant directory — Active Directory (Windows' or Samba's), OpenLDAP,
+/// or Novell eDirectory — since filters and attribute lookups try both AD-style
+/// (sAMAccountName/userPrincipalName) and generic-style (uid) names.
 ///
-/// Group creation carries the same caveat, and it is the only group operation that does.
-/// Listing, renaming, moving, editing and deleting work against AD's objectClass=group as well
-/// as the RFC classes, because they address the entry by DN and touch only cn/description/member
-/// — attributes all three directory types share. CreateGroup, however, writes a groupOfNames,
-/// which in Active Directory is a valid entry but not a security principal: it gets no SID and no
-/// groupType, so AD will not use it for access control. Create AD security groups in AD.
+/// Where the two kinds differ in what they write, the root DSE decides (see IsActiveDirectory):
+/// in Active Directory an account is a <c>user</c> named by cn with its login in sAMAccountName,
+/// switched on once unicodePwd has its password, and a group is a global security group; elsewhere
+/// an account is an inetOrgPerson named by uid and given its password by Password Modify, and a
+/// group is a groupOfNames. What is privileged is AD's own reckoning — adminCount, the protected
+/// SIDs and membership of their groups, see ProtectedSecurityIdentifiers — or DirectoryProtection.
 /// </summary>
 internal class StandardLdapProvider : ILdapProvider
 {
@@ -40,14 +37,14 @@ internal class StandardLdapProvider : ILdapProvider
 
     // Covers both OpenLDAP/eDirectory (uid) and AD (sAMAccountName/userPrincipalName)
     // login attributes so MapEntry can resolve a username regardless of directory type.
-    // objectClass tells an account from a computer or a contact (see IsAccount); adminCount is
-    // how Active Directory marks the privileged (see LdapUserInfo.IsPrivileged); the last four
-    // say whether the directory has switched the account off (see IsSwitchedOff).
+    // objectClass tells an account from a computer or a contact (see IsAccount); adminCount and
+    // objectSid are how Active Directory marks the privileged (see LdapUserInfo.IsPrivileged); the
+    // last four say whether the directory has switched the account off (see IsSwitchedOff).
     // pwdAccountLockedTime is operational, so it comes back only when asked for by name.
     private static readonly string[] RequestedUserAttributes =
     [
         "cn", "displayName", "mail", "uid", "sAMAccountName", "userPrincipalName", "memberOf", "objectClass", "adminCount",
-        "userAccountControl", "accountExpires", "pwdAccountLockedTime", "loginDisabled"
+        "objectSid", "userAccountControl", "accountExpires", "pwdAccountLockedTime", "loginDisabled"
     ];
 
     /// <summary>
@@ -69,7 +66,7 @@ internal class StandardLdapProvider : ILdapProvider
 
     private static readonly string[] RequestedOuAttributes = ["ou", "description"];
 
-    private static readonly string[] RequestedGroupAttributes = ["cn", "description", "member", "uniqueMember", "adminCount"];
+    private static readonly string[] RequestedGroupAttributes = ["cn", "description", "member", "uniqueMember", "adminCount", "objectSid"];
 
     /// <summary>Every attribute a group can list its members in. See GetGroupMembers.</summary>
     private static readonly string[] GroupMemberAttributes = ["member", "uniqueMember", "memberUid"];
@@ -103,7 +100,7 @@ internal class StandardLdapProvider : ILdapProvider
     private static readonly string[] RequestedComputerAttributes =
     [
         "cn", "description", "dNSHostName", "operatingSystem", "operatingSystemVersion", "userAccountControl",
-        "adminCount", "isCriticalSystemObject", "uid", "sAMAccountName", "userPrincipalName"
+        "adminCount", "objectSid", "isCriticalSystemObject", "uid", "sAMAccountName", "userPrincipalName"
     ];
 
     /// <summary>ACCOUNTDISABLE — bit 0x2 of userAccountControl.</summary>
@@ -209,7 +206,7 @@ internal class StandardLdapProvider : ILdapProvider
         try
         {
             var entry = SearchOne(conn, username);
-            return entry == null ? null : MapEntry(entry, GroupsNaming(conn, entry));
+            return entry == null ? null : MapEntry(entry, GroupsNaming(conn, entry), IsMemberOfProtectedGroup(conn, entry.Dn));
         }
         catch (LdapException ex)
         {
@@ -237,7 +234,9 @@ internal class StandardLdapProvider : ILdapProvider
             // groups decide the session's permissions and whether the account is protected, so
             // memberOf alone — which not every directory keeps — is not enough to go on.
             var entry = conn.Read(target.Value, RequestedUserAttributes);
-            return IsAccount(entry) ? MapEntry(entry, GroupsNaming(conn, entry)) : null;
+            return IsAccount(entry)
+                ? MapEntry(entry, GroupsNaming(conn, entry), IsMemberOfProtectedGroup(conn, entry.Dn))
+                : null;
         }
         catch (LdapException ex) when (ex.ResultCode == LdapException.NoSuchObject)
         {
@@ -347,18 +346,35 @@ internal class StandardLdapProvider : ILdapProvider
         EnsureWriteOperationsSupported();
         var uid = Email.Create(email).LocalPart;
 
+        using var conn = ConnectOrThrow();
+
+        // Active Directory — Windows' or Samba's — names an account by its cn, as its own tools
+        // do, and keeps the login in sAMAccountName; everything else by the login, in uid.
+        var activeDirectory = IsActiveDirectory(conn);
+        if (activeDirectory && !LdapUserMapper.IsActiveDirectoryAccountName(uid))
+            throw new DomainValidationException(ApplicationMessages.LoginNotAnActiveDirectoryName());
+
         // Escaped: an address's local part may hold ',', '+' or '=', and unescaped they ended the
         // RDN and let the address choose where in the tree the account was written.
-        var dn = $"uid={LdapDistinguishedNameEscaper.Escape(uid)},{_settings.BaseDn}";
-        var attrs = LdapUserMapper.BuildAttributes(name, email);
-
-        using var conn = ConnectOrThrow();
+        var accountName = name.Trim();
+        var dn = activeDirectory
+            ? $"CN={DistinguishedName.EscapeRdnValue(accountName)},{_settings.BaseDn}"
+            : $"uid={LdapDistinguishedNameEscaper.Escape(uid)},{_settings.BaseDn}";
+        var attrs = activeDirectory
+            ? LdapUserMapper.BuildActiveDirectoryAttributes(accountName, email)
+            : LdapUserMapper.BuildAttributes(name, email);
 
         EnsureLoginIsUnclaimed(conn, uid);
 
         try
         {
             conn.Add(new LdapEntry(dn, attrs));
+        }
+        catch (LdapException ex) when (activeDirectory && ex.ResultCode == LdapException.EntryAlreadyExists)
+        {
+            // The login is free — that was checked — but the name is not: two people called the
+            // same, in the same place.
+            throw new DomainConflictException(ApplicationMessages.AccountNameTaken());
         }
         catch (LdapException ex)
         {
@@ -372,6 +388,9 @@ internal class StandardLdapProvider : ILdapProvider
         try
         {
             SetPassword(conn, dn, password);
+
+            if (activeDirectory)
+                SwitchOn(conn, dn);
         }
         catch
         {
@@ -388,6 +407,28 @@ internal class StandardLdapProvider : ILdapProvider
         }
 
         _logger.LogInformation("LDAP user created: {Dn}", LogMask.DistinguishedName(dn));
+    }
+
+    /// <summary>NORMAL_ACCOUNT and nothing else: switched on, with a password required.</summary>
+    private const int NormalAccount = 0x200;
+
+    /// <summary>
+    /// Switches on an Active Directory account that has just been given its password. AD creates
+    /// an account written without one switched off and marked as needing none; replacing
+    /// userAccountControl with NORMAL_ACCOUNT alone undoes both.
+    /// </summary>
+    private void SwitchOn(LdapConnection conn, string dn)
+    {
+        try
+        {
+            conn.Modify(dn, new LdapModification(LdapModification.Replace,
+                new LdapAttribute("userAccountControl", NormalAccount.ToString(CultureInfo.InvariantCulture))));
+        }
+        catch (LdapException ex)
+        {
+            _logger.LogError(ex, "Could not switch on the new account {Dn}.", LogMask.DistinguishedName(dn));
+            throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedCreate(), ex);
+        }
     }
 
     public void UpdateUser(string distinguishedName, string? newName, string? newEmail, string? newPassword)
@@ -503,6 +544,13 @@ internal class StandardLdapProvider : ILdapProvider
             throw new DirectoryUnavailableException(ApplicationMessages.DirectoryRejectedUpdate(), ex);
         }
     }
+
+    /// <summary>
+    /// Whether the directory is Active Directory — Windows' or Samba's, which both say so in the
+    /// root DSE. Asked once per instance, with the password mode.
+    /// </summary>
+    private bool IsActiveDirectory(LdapConnection conn) =>
+        (_passwordWriteMode ??= DetectPasswordWriteMode(conn)) == PasswordWriteMode.ActiveDirectory;
 
     private PasswordWriteMode DetectPasswordWriteMode(LdapConnection conn)
     {
@@ -769,7 +817,7 @@ internal class StandardLdapProvider : ILdapProvider
         try
         {
             return new DirectorySubtree(
-                HoldsPrivileged: AnyBeneath(conn, container.Value, PrivilegedEntryFilter),
+                HoldsPrivileged: AnyBeneath(conn, container.Value, PrivilegedFilter(conn)),
                 HoldsServiceAccount: HoldsBindAccount(conn, container));
         }
         catch (LdapException ex)
@@ -789,6 +837,83 @@ internal class StandardLdapProvider : ILdapProvider
         "(|(adminCount>=1)(isCriticalSystemObject=TRUE)"
         + "(userAccountControl:1.2.840.113556.1.4.803:=8192)"
         + "(userAccountControl:1.2.840.113556.1.4.803:=67108864))";
+
+    /// <summary>
+    /// <see cref="PrivilegedEntryFilter"/>, and in Active Directory also every member of a
+    /// protected group however indirectly — see <see cref="ProtectedMembershipFilter"/>.
+    /// </summary>
+    private string PrivilegedFilter(LdapConnection conn) =>
+        ProtectedMembershipFilter(conn) is { } membership
+            ? $"(|{PrivilegedEntryFilter}{membership})"
+            : PrivilegedEntryFilter;
+
+    /// <summary>
+    /// The DNs of the protected groups (<see cref="ProtectedSecurityIdentifiers"/>) in the
+    /// directory's domain, found by SID once per instance. Empty outside Active Directory, where
+    /// DirectoryProtection names what is privileged instead.
+    /// </summary>
+    private IReadOnlyList<string> ProtectedGroupDns(LdapConnection conn)
+    {
+        if (_protectedGroupDns is not null)
+            return _protectedGroupDns;
+
+        if (!IsActiveDirectory(conn))
+            return _protectedGroupDns = [];
+
+        var domain = Get(conn.Read(string.Empty, ["defaultNamingContext"]).GetAttributeSet(), "defaultNamingContext");
+        var domainSid = conn.Read(domain, ["objectSid"]).GetAttributeSet().GetAttribute("objectSid")?.ByteValue
+                        ?? throw new LdapException("The domain object has no objectSid.", LdapException.NoSuchAttribute, null);
+
+        var groups = new List<string>();
+        var results = conn.Search(domain, LdapConnection.ScopeSub, ProtectedSecurityIdentifiers.GroupFilter(domainSid), ["1.1"], false);
+        while (NextEntryOrNull(results) is { } group)
+            groups.Add(group.Dn);
+
+        return _protectedGroupDns = groups;
+    }
+
+    private IReadOnlyList<string>? _protectedGroupDns;
+
+    /// <summary>
+    /// Matches whatever belongs to a protected group, directly or through any number of nested
+    /// groups (LDAP_MATCHING_RULE_IN_CHAIN), or has one as its primary group, which memberOf never
+    /// shows. Asked of the directory at the moment it matters, rather than read from adminCount,
+    /// which Samba never sets and Windows sets only when SDProp next runs. Null outside Active
+    /// Directory.
+    /// </summary>
+    private string? ProtectedMembershipFilter(LdapConnection conn)
+    {
+        var groups = ProtectedGroupDns(conn);
+        if (groups.Count == 0)
+            return null;
+
+        return "(|"
+               + string.Concat(groups.Select(dn => $"(memberOf:1.2.840.113556.1.4.1941:={EscapeLdapFilterValue(dn)})"))
+               + string.Concat(ProtectedSecurityIdentifiers.PrivilegedPrimaryGroupRids.Select(rid => $"(primaryGroupID={rid})"))
+               + ")";
+    }
+
+    /// <summary>
+    /// Every entry beneath the base DN that belongs to a protected group, for marking a listing:
+    /// one search, rather than one per entry. Empty outside Active Directory.
+    /// </summary>
+    private HashSet<string> MembersOfProtectedGroups(LdapConnection conn)
+    {
+        var members = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (ProtectedMembershipFilter(conn) is not { } filter)
+            return members;
+
+        var results = conn.Search(_settings.BaseDn, LdapConnection.ScopeSub, filter, ["1.1"], false);
+        while (NextEntryOrNull(results) is { } member)
+            members.Add(member.Dn);
+
+        return members;
+    }
+
+    /// <summary>Whether this one entry belongs to a protected group — a base search, so it is cheap.</summary>
+    private bool IsMemberOfProtectedGroup(LdapConnection conn, string dn) =>
+        ProtectedMembershipFilter(conn) is { } filter
+        && NextEntryOrNull(conn.Search(dn, LdapConnection.ScopeBase, filter, ["1.1"], false)) is not null;
 
     /// <summary>Whether any entry beneath <paramref name="baseDn"/> matches; stops at the first.</summary>
     private static bool AnyBeneath(LdapConnection conn, string baseDn, string filter)
@@ -856,6 +981,10 @@ internal class StandardLdapProvider : ILdapProvider
 
         try
         {
+            // Before the groups, and inside the try: if it cannot be asked, the listing comes back
+            // empty and truncated rather than with every group looking unprivileged.
+            var inProtectedGroups = MembersOfProtectedGroups(conn);
+
             var pageSize = _settings.UserSearchPageSize > 0 ? _settings.UserSearchPageSize : 500;
             byte[] cookie = [];
 
@@ -874,7 +1003,7 @@ internal class StandardLdapProvider : ILdapProvider
 
                 while (NextEntryOrNull(results) is { } entry)
                 {
-                    groups.Add(MapGroup(entry));
+                    groups.Add(MapGroup(entry, inProtectedGroups));
                 }
 
                 cookie = [];
@@ -898,6 +1027,12 @@ internal class StandardLdapProvider : ILdapProvider
         return DirectoryGroupListing.Complete(groups);
     }
 
+    /// <summary>
+    /// GROUP_TYPE_GLOBAL_GROUP | GROUP_TYPE_SECURITY_ENABLED: what Active Directory's own tools
+    /// create unless told otherwise.
+    /// </summary>
+    private const int GlobalSecurityGroup = unchecked((int)0x80000002);
+
     public string CreateGroup(string name, string parentDn, string description, IReadOnlyList<string> memberDns)
     {
         EnsureWriteOperationsSupported();
@@ -918,19 +1053,31 @@ internal class StandardLdapProvider : ILdapProvider
         EnsureInsideBase(parent);
         var dn = $"cn={DistinguishedName.EscapeRdnValue(groupName)},{parent}";
 
-        var attrs = new LdapAttributeSet
-        {
-            new LdapAttribute("objectClass", ["top", "groupOfNames"]),
-            new LdapAttribute("cn", groupName),
-            new LdapAttribute("member", members)
-        };
+        using var conn = ConnectOrThrow();
+
+        // In Active Directory a groupOfNames is a valid entry and no group at all: no SID, no
+        // groupType, nothing Windows will grant access by. A group there is a security group.
+        var attrs = IsActiveDirectory(conn)
+            ? new LdapAttributeSet
+            {
+                new LdapAttribute("objectClass", ["top", "group"]),
+                new LdapAttribute("cn", groupName),
+                new LdapAttribute("sAMAccountName", groupName),
+                new LdapAttribute("groupType", GlobalSecurityGroup.ToString(CultureInfo.InvariantCulture)),
+                new LdapAttribute("member", members)
+            }
+            : new LdapAttributeSet
+            {
+                new LdapAttribute("objectClass", ["top", "groupOfNames"]),
+                new LdapAttribute("cn", groupName),
+                new LdapAttribute("member", members)
+            };
 
         if (!string.IsNullOrWhiteSpace(description))
             attrs.Add(new LdapAttribute("description", description.Trim()));
 
         try
         {
-            using var conn = ConnectOrThrow();
             conn.Add(new LdapEntry(dn, attrs));
         }
         catch (LdapException ex) when (ex.ResultCode == LdapException.EntryAlreadyExists)
@@ -1101,6 +1248,9 @@ internal class StandardLdapProvider : ILdapProvider
 
         try
         {
+            // As in GetAllGroups: a machine put into a protected group is as privileged as a DC.
+            var inProtectedGroups = MembersOfProtectedGroups(conn);
+
             var pageSize = _settings.UserSearchPageSize > 0 ? _settings.UserSearchPageSize : 500;
             byte[] cookie = [];
 
@@ -1119,7 +1269,7 @@ internal class StandardLdapProvider : ILdapProvider
 
                 while (NextEntryOrNull(results) is { } entry)
                 {
-                    computers.Add(MapComputer(entry));
+                    computers.Add(MapComputer(entry, inProtectedGroups));
                 }
 
                 cookie = [];
@@ -1357,7 +1507,8 @@ internal class StandardLdapProvider : ILdapProvider
         }
     }
 
-    private LdapComputer MapComputer(LdapEntry entry)
+    /// <param name="inProtectedGroups">Entries found to belong to a protected group; see <see cref="MembersOfProtectedGroups"/>.</param>
+    private LdapComputer MapComputer(LdapEntry entry, IReadOnlySet<string> inProtectedGroups)
     {
         var attrs = entry.GetAttributeSet();
         var dn = DistinguishedName.Create(entry.Dn);
@@ -1375,7 +1526,7 @@ internal class StandardLdapProvider : ILdapProvider
             OperatingSystem = Get(attrs, "operatingSystem"),
             OperatingSystemVersion = Get(attrs, "operatingSystemVersion"),
             Enabled = ReadEnabledFlag(attrs),
-            IsPrivileged = IsPrivilegedMachine(attrs),
+            IsPrivileged = IsPrivilegedMachine(attrs) || inProtectedGroups.Contains(entry.Dn),
             IsServiceAccount = IsServiceAccount(entry.Dn, attrs)
         };
     }
@@ -1405,7 +1556,8 @@ internal class StandardLdapProvider : ILdapProvider
 
     // --- Helpers ---
 
-    private static LdapGroup MapGroup(LdapEntry entry)
+    /// <param name="inProtectedGroups">Entries found to belong to a protected group; see <see cref="MembersOfProtectedGroups"/>.</param>
+    private static LdapGroup MapGroup(LdapEntry entry, IReadOnlySet<string> inProtectedGroups)
     {
         var attrs = entry.GetAttributeSet();
         var dn = DistinguishedName.Create(entry.Dn);
@@ -1429,7 +1581,8 @@ internal class StandardLdapProvider : ILdapProvider
             ParentDn = dn.Parent,
             Description = Get(attrs, "description"),
             Members = members,
-            IsPrivileged = IsMarkedPrivileged(attrs)
+            // Domain Admins itself by its SID; a group put inside it by the membership chain.
+            IsPrivileged = IsMarkedPrivileged(attrs) || inProtectedGroups.Contains(entry.Dn)
         };
     }
 
@@ -1617,7 +1770,11 @@ internal class StandardLdapProvider : ILdapProvider
     /// Groups found to list the entry as a member, merged with its memberOf. See
     /// <see cref="GroupsNaming"/>.
     /// </param>
-    private LdapUserInfo MapEntry(LdapEntry entry, IReadOnlyCollection<string>? namedBy = null)
+    /// <param name="inProtectedGroup">
+    /// Whether the directory says the entry belongs to a protected group — asked where the entry is
+    /// read for a decision, not for a listing. See <see cref="IsMemberOfProtectedGroup"/>.
+    /// </param>
+    private LdapUserInfo MapEntry(LdapEntry entry, IReadOnlyCollection<string>? namedBy = null, bool inProtectedGroup = false)
     {
         var attrs = entry.GetAttributeSet();
         var memberOf = attrs.TryGetValue("memberOf", out var mo) ? mo.StringValueArray ?? [] : [];
@@ -1628,7 +1785,7 @@ internal class StandardLdapProvider : ILdapProvider
             DisplayName = Get(attrs, "displayName", "cn"),
             Email = Get(attrs, "mail"),
             Groups = namedBy is null ? memberOf : MergeGroups(memberOf, namedBy),
-            IsPrivileged = IsMarkedPrivileged(attrs),
+            IsPrivileged = IsMarkedPrivileged(attrs) || inProtectedGroup,
             IsServiceAccount = IsServiceAccount(entry.Dn, attrs),
             IsDisabled = IsSwitchedOff(attrs, DateTimeOffset.UtcNow)
         };
@@ -1768,9 +1925,14 @@ internal class StandardLdapProvider : ILdapProvider
         || !(classes.StringValueArray ?? []).Any(value =>
             NonAccountClasses.Contains(value, StringComparer.OrdinalIgnoreCase));
 
-    /// <summary>adminCount=1: Active Directory's own mark on protected accounts and groups.</summary>
+    /// <summary>
+    /// What the entry itself says: adminCount=1, the mark SDProp leaves on protected accounts and
+    /// groups, or a SID that is one of them — Domain Admins, the built-in Administrator. What it
+    /// belongs to is asked separately; see <see cref="ProtectedMembershipFilter"/>.
+    /// </summary>
     private static bool IsMarkedPrivileged(LdapAttributeSet attrs) =>
-        int.TryParse(Get(attrs, "adminCount"), out var count) && count > 0;
+        (int.TryParse(Get(attrs, "adminCount"), out var count) && count > 0)
+        || ProtectedSecurityIdentifiers.IsProtected(attrs.TryGetValue("objectSid", out var sid) ? sid.ByteValue : null);
 
     /// <summary>
     /// The value OpenLDAP's password policy writes to pwdAccountLockedTime for a lock that only an

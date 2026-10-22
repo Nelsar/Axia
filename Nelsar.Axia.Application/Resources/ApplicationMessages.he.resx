@@ -268,4 +268,10 @@
   <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
     <value>לא ניתן היה לעבד שורה זו בגלל שגיאה בלתי צפויה. הפרטים נמצאים ביומן השרת.</value>
   </data>
+  <data name="LoginNotAnActiveDirectoryName" xml:space="preserve">
+    <value>שם הכניסה — החלק בכתובת שלפני @ — אינו יכול להיות שם חשבון ב-Active Directory: לכל היותר 20 תווים, וללא " / \ [ ] : ; | = , + * ? &lt; &gt;.</value>
+  </data>
+  <data name="AccountNameTaken" xml:space="preserve">
+    <value>כבר קיימת רשומה בשם הזה במקום שבו נוצרים חשבונות חדשים. תנו לחשבון שם אחר.</value>
+  </data>
 </root>
