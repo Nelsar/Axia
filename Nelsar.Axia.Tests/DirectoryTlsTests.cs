@@ -226,6 +226,8 @@ public sealed class DirectoryTlsTests : IDisposable
             }
             catch (IOException)
             {
+                // Expected when the client closes/reset the connection; treat as end of input.
+                return;
             }
         });
         var log = new ListLogger();
