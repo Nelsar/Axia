@@ -161,8 +161,10 @@ steps are: configure the new database, copy, start.
 
 What it does, and refuses:
 
-- The old database is opened read-only, where the engine allows it, and is left as it was. A
-  SQLite path that does not exist is an error rather than a new empty file.
+- The old database is left as it was. A SQLite file is copied, with its `-wal` if a shutdown left
+  one, into a temporary folder, read from there and the copy removed, so the original is never
+  opened and can be mounted read-only. A SQLite path that does not exist is an error rather than a
+  new empty file.
 - It refuses an old database that is behind this version's schema. Start this version on it once,
   with its own `Database:Provider`, which brings it up to date, then copy.
 - It refuses a target that already has rows in any table.

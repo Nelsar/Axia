@@ -47,11 +47,10 @@ internal static class CopyDatabaseCommand
             SettingsFile.AddTo(configuration);
             var (targetProvider, targetConnectionString) = AxiaDatabase.FromConfiguration(configuration);
 
-            // Opened read-only where the engine allows it, so that the database being moved away
-            // from is left exactly as it was, whatever happens here.
-            var sourceConnectionString = sourceProvider == DatabaseProvider.Sqlite
-                ? AxiaDatabase.ReadOnlySqlite(from)
-                : from;
+            // A SQLite source is read from a copy, so that the database being moved away from is
+            // never opened at all, and can be mounted read-only. See SqliteSnapshot.
+            using var snapshot = sourceProvider == DatabaseProvider.Sqlite ? SqliteSnapshot.Take(from) : null;
+            var sourceConnectionString = snapshot?.ConnectionString ?? from;
 
             var source = new DbContextOptionsBuilder<AppDbContext>()
                 .UseAxiaDatabase(sourceProvider, sourceConnectionString).Options;

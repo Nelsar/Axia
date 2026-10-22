@@ -34,7 +34,7 @@ no longer assumed, so `Database:Provider` has to be set before the new version s
 - `copy-database`, which copies everything the API keeps — directories with their encrypted bind
   passwords, role mappings, role permissions, rate limits, the audit trail — from one database into
   another, whichever two engines they are. One transaction, every table's row count checked before
-  it commits, the old database opened read-only. See
+  it commits, and the old database never opened: a SQLite file is read from a copy. See
   [Moving to another database](docs/operations.md#moving-to-another-database).
 - Images: releases are published to Docker Hub as well, as `nelsar/axia-api` and
   `nelsar/axia-console`, the same images and tags as on ghcr.io. See
