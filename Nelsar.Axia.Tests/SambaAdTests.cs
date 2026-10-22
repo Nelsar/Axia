@@ -97,6 +97,7 @@ public class SambaAdTests
         }
         catch (LdapException ex) when (ex.ResultCode == LdapException.NoSuchObject)
         {
+            // Intentionally ignored: cleanup is idempotent and the entry may already be absent.
         }
     }
 
