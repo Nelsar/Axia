@@ -42,10 +42,20 @@ jobs:
           --health-retries 20
     env:
       AXIA_TEST_POSTGRES: Host=localhost;Port=5432;Username=postgres;Password=ci-only;Database=postgres
-      # Missing server, failed tests: never a job that skips them and passes.
+      # And SambaAdTests, against deploy/dev/samba started below.
+      AXIA_TEST_SAMBA: 127.0.0.1:1636
+      # Missing server or directory, failed tests: never a job that skips them and passes.
       AXIA_TEST_POSTGRES_REQUIRED: "true"
+      AXIA_TEST_SAMBA_REQUIRED: "true"
     steps:
       - uses: actions/checkout@v7
+
+      # A real Active Directory, Samba's, for SambaAdTests. Started first, because provisioning
+      # the domain takes about as long as the build does; waited for before the tests.
+      - name: Start the Samba AD domain controller
+        run: |
+          docker build -t axia-samba deploy/dev/samba
+          docker run -d --name samba --hostname dc1 -p 127.0.0.1:1636:636 axia-samba
 
       - uses: actions/setup-dotnet@v6
         with:
@@ -59,10 +69,24 @@ jobs:
       # on Linux, which is exactly the kind of thing that gets read as noise.
       - run: dotnet build Nelsar.Axia.sln --no-restore -warnaserror
 
-      # No directory and no network: the suite stands up the API in memory, on SQLite or EF Core's
-      # in-memory store, apart from the PostgreSQL tests above. Anything that starts needing a
-      # live LDAP server belongs behind a trait, not in this job.
+      - name: Wait for the domain controller, and take its CA
+        run: |
+          for attempt in $(seq 1 60); do
+            if docker exec samba sh -c 'LDAPTLS_CACERT=/export/ca.crt ldapsearch -x -H ldaps://localhost -D Administrator@axia.test -w Axia-Admin-1 -b "" -s base dn' > /dev/null 2>&1; then
+              docker cp samba:/export/ca.crt "$RUNNER_TEMP/samba-ca.crt"
+              exit 0
+            fi
+            sleep 5
+          done
+          docker logs samba
+          exit 1
+
+      # The suite stands up the API in memory, on SQLite or EF Core's in-memory store, and fakes
+      # the directory at the provider boundary — apart from the PostgreSQL and Samba tests, which
+      # are the only ones that need a server, and are skipped without one outside CI.
       - run: dotnet test Nelsar.Axia.sln --no-build --verbosity normal
+        env:
+          AXIA_TEST_SAMBA_CA: ${{ runner.temp }}/samba-ca.crt
 
   console:
     name: Console — typecheck and build
