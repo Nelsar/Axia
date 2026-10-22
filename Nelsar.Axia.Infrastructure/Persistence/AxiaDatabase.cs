@@ -1,5 +1,4 @@
 using System.Data.Common;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
@@ -145,12 +144,4 @@ public static class AxiaDatabase
         connectionString.Contains("gss", StringComparison.OrdinalIgnoreCase)
             ? connectionString
             : new NpgsqlConnectionStringBuilder(connectionString) { GssEncryptionMode = GssEncryptionMode.Disable }.ConnectionString;
-
-    /// <summary>
-    /// The same SQLite database, opened so that nothing can be written to it and a file that is
-    /// not there is an error rather than a new empty database. For reading a database that is to
-    /// be left exactly as it was.
-    /// </summary>
-    public static string ReadOnlySqlite(string connectionString) =>
-        new SqliteConnectionStringBuilder(connectionString) { Mode = SqliteOpenMode.ReadOnly }.ToString();
 }

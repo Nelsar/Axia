@@ -190,14 +190,58 @@ public class DatabaseTests
     }
 
     [Fact]
-    public void AReadOnlySource_CannotBeCreatedByMistake()
+    public void AMissingSqliteSource_IsAnError_NotANewEmptyDatabase()
     {
         // A mistyped path must not leave a new, empty database where the old one was expected.
         var path = Path.Join(Path.GetTempPath(), $"axia-missing-{Guid.NewGuid():N}.db");
-        using var connection = new SqliteConnection(AxiaDatabase.ReadOnlySqlite($"Data Source={path}"));
 
-        Assert.Throws<SqliteException>(connection.Open);
+        var ex = Assert.Throws<InvalidOperationException>(() => SqliteSnapshot.Take($"Data Source={path}"));
+
+        Assert.Contains("--from", ex.Message);
         Assert.False(File.Exists(path));
+    }
+
+    [Fact]
+    public async Task ASqliteSource_IsCopiedFromACopy_AndTheOriginalIsNeverOpened()
+    {
+        // The database 0.2 leaves behind: a file in WAL mode, shut down cleanly, so with no -wal
+        // or -shm beside it. Opening it in place — read-only, even — needs an -shm created next to
+        // it, which the read-only mount the upgrade steps use does not allow.
+        var folder = Directory.CreateTempSubdirectory("axia-old-").FullName;
+        var original = Path.Join(folder, "nelsar-axia.db");
+        try
+        {
+            var old = new DbContextOptionsBuilder<AppDbContext>()
+                .UseAxiaDatabase(DatabaseProvider.Sqlite, $"Data Source={original}").Options;
+            await using (var db = new AppDbContext(old))
+            {
+                await db.Database.MigrateAsync();
+                await DatabaseContent.FillEveryTableAsync(db);
+            }
+            SqliteConnection.ClearAllPools();
+            Assert.Equal(["nelsar-axia.db"], Directory.GetFiles(folder).Select(Path.GetFileName));
+            var before = await File.ReadAllBytesAsync(original);
+
+            await using var to = await SqliteDatabase.OpenAsync(migrate: false);
+            using (var snapshot = SqliteSnapshot.Take($"Data Source={original}"))
+            {
+                var from = new DbContextOptionsBuilder<AppDbContext>()
+                    .UseAxiaDatabase(DatabaseProvider.Sqlite, snapshot.ConnectionString).Options;
+                await DatabaseCopier.CopyAsync(from, to.Options, NullLogger.Instance);
+            }
+
+            await using (var copied = to.Context())
+                Assert.Equal(3, await copied.AuditEvents.CountAsync());
+
+            // Nothing written beside the original, nor to it.
+            Assert.Equal(["nelsar-axia.db"], Directory.GetFiles(folder).Select(Path.GetFileName));
+            Assert.Equal(before, await File.ReadAllBytesAsync(original));
+        }
+        finally
+        {
+            SqliteConnection.ClearAllPools();
+            Directory.Delete(folder, recursive: true);
+        }
     }
 
     /// <summary>A SQLite database in memory, alive for as long as this holds its connection.</summary>
