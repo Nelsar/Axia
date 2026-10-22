@@ -268,4 +268,10 @@
   <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
     <value>No se pudo procesar esta fila debido a un error inesperado. Los detalles están en el registro del servidor.</value>
   </data>
+  <data name="LoginNotAnActiveDirectoryName" xml:space="preserve">
+    <value>El inicio de sesión — la parte de la dirección antes de @ — no puede ser un nombre de cuenta de Active Directory: debe tener como máximo 20 caracteres y no contener " / \ [ ] : ; | = , + * ? &lt; &gt;.</value>
+  </data>
+  <data name="AccountNameTaken" xml:space="preserve">
+    <value>Ya existe una entrada con este nombre donde se crean las cuentas nuevas. Dé otro nombre a la cuenta.</value>
+  </data>
 </root>

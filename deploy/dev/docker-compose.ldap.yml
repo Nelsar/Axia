@@ -68,7 +68,25 @@ services:
       timeout: 5s
       retries: 30
 
+  # A Samba Active Directory domain controller — AXIA.TEST, DC=axia,DC=test — for working on what
+  # differs in AD, and for SambaAdTests. Not started unless asked for:
+  #
+  #   docker compose -f deploy/dev/docker-compose.ldap.yml --profile samba up -d samba
+  #   docker compose -f deploy/dev/docker-compose.ldap.yml cp samba:/export/ca.crt samba-ca.crt
+  #
+  # LDAPS on 127.0.0.1:1636, with a certificate for 127.0.0.1 and localhost from the CA copied out
+  # above. What is in it is in deploy/dev/samba/provision.sh.
+  samba:
+    build: ./samba
+    profiles: [samba]
+    hostname: dc1
+    ports:
+      - "127.0.0.1:1636:636"
+    volumes:
+      - samba-data:/var/lib/samba
+
 volumes:
   ldap-data:
   ldap-config:
   db-data:
+  samba-data:

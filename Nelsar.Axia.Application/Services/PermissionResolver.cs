@@ -85,8 +85,9 @@ internal class PermissionResolver : IPermissionResolver
         var roles = await _roleMappingResolver.ResolveRolesAsync(entry.Groups, providerId);
         var permissions = await _rolePermissions.GetPermissionsForRolesAsync(roles, cancellationToken);
 
-        // Privileged by the directory's own reckoning, whatever roles the entry maps to here:
-        // adminCount in Active Directory, or a group named in DirectoryProtection.
+        // Privileged by the directory's own reckoning, whatever roles the entry maps to here: in
+        // Active Directory a protected group's member or adminCount (see the provider), or a member
+        // of a group named in DirectoryProtection.
         var assessment = new EntryAssessment(
             permissions,
             IsProtected: entry.IsPrivileged || entry.Groups.Any(_protection.Protects),

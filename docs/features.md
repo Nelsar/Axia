@@ -231,8 +231,9 @@ Paste one record per line in `rawText`, give a regular expression with named gro
   claim when it joins; renaming does not rename the machine; **deleting revokes a joined machine's
   trust** and it must rejoin.
 - Enable/disable flips the `ACCOUNTDISABLE` bit of `userAccountControl` only.
-- Domain controllers (writable or read-only), critical system objects and computers with
-  `adminCount` are changed and deleted only by someone holding every permission: `403` otherwise.
+- Domain controllers (writable or read-only), critical system objects, and computers in a protected
+  group or with `adminCount` are changed and deleted only by someone holding every permission:
+  `403` otherwise.
 - Creating fails against OpenLDAP; see [Directories](directories.md#computers-1).
 
 ## Directories (providers)

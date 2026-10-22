@@ -13,8 +13,22 @@ The API's own state moves to PostgreSQL. **Upgrading from 0.2 takes one decision
 no longer assumed, so `Database:Provider` has to be set before the new version starts — see
 *Changed*.
 
+### Security
+
+- An administrator made after Active Directory last ran SDProp, or ever in Samba, which has none, is
+  protected like any other. Protection read `adminCount`, the mark SDProp leaves on members of
+  Domain Admins and the other protected groups; Windows sets it once an hour, Samba never on an
+  administrator added after the domain was provisioned, and until then anyone allowed to reset
+  passwords could reset theirs. Protected groups are now found by SID, and their members — however
+  nested, or by primary group — by asking the directory. The same goes for groups nested in a
+  protected group, computers in one, and units holding any of them.
+
 ### Added
 
+- Samba AD, as Active Directory, through `ProviderType: StandardLdap`. CI tests every pull request
+  against a live Samba 4.22 domain controller, built from `deploy/dev/samba` — the first tests
+  against a live directory rather than one faked at the provider boundary. See
+  [Directories → Samba AD](docs/directories.md#samba-ad).
 - PostgreSQL: `Database:Provider=PostgreSql`, with `ConnectionStrings:DefaultConnection` naming the
   server. See [Configuration](docs/configuration.md#database-and-connectionstrings).
 - `copy-database`, which copies everything the API keeps — directories with their encrypted bind
@@ -53,6 +67,18 @@ no longer assumed, so `Database:Provider` has to be set before the new version s
 - SQLite is still supported, for a single small instance and for the unit tests. Each database
   keeps its own migrations, in `Nelsar.Axia.Migrations.PostgreSql` and
   `Nelsar.Axia.Migrations.Sqlite`; a SQLite database from 0.2 is already up to date.
+
+### Fixed
+
+- Creating an account in Active Directory through `StandardLdap` — the provider for every platform
+  but Windows, and so for every container — creates an account. It wrote an `inetOrgPerson` named
+  `uid=…`, which AD refuses with a naming violation; it now writes AD's `user`, named by `cn`, with
+  the login in `sAMAccountName`, and switches it on once the password is set. A login AD cannot
+  hold — over 20 characters, or one of the characters it forbids — is refused before anything is
+  written.
+- Creating a group in Active Directory through `StandardLdap` creates a security group. It wrote a
+  `groupOfNames`, which AD accepts as an entry with no SID and no `groupType`: nothing Windows
+  grants access by.
 
 ## [0.2.1] - 2026-10-20
 

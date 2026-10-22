@@ -268,4 +268,10 @@
   <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
     <value>Күтпеген қатеге байланысты бұл жолды өңдеу мүмкін болмады. Толығырақ ақпарат сервер журналында.</value>
   </data>
+  <data name="LoginNotAnActiveDirectoryName" xml:space="preserve">
+    <value>Логин — мекенжайдың @ белгісіне дейінгі бөлігі — Active Directory тіркелгісінің атауы бола алмайды: ол 20 таңбадан аспауы және " / \ [ ] : ; | = , + * ? &lt; &gt; таңбаларын қамтымауы тиіс.</value>
+  </data>
+  <data name="AccountNameTaken" xml:space="preserve">
+    <value>Жаңа тіркелгілер жасалатын жерде осындай атты жазба бар. Басқа атау көрсетіңіз.</value>
+  </data>
 </root>

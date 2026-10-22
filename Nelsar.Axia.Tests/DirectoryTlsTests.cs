@@ -216,9 +216,19 @@ public sealed class DirectoryTlsTests : IDisposable
             // ExtendedResponse, resultCode protocolError (2), empty matchedDN and message.
             await stream.WriteAsync(new byte[] { 0x30, 0x0c, 0x02, 0x01, messageId, 0x78, 0x07, 0x0a, 0x01, 0x02, 0x04, 0x00, 0x04, 0x00 });
 
-            // Whatever the client sends after the refusal, until it hangs up.
-            while ((read = await stream.ReadAsync(buffer)) > 0)
-                received.AddRange(buffer.AsSpan(0, read).ToArray());
+            // Whatever the client sends after the refusal, until it hangs up — with a FIN, or, as
+            // Windows does when a socket is closed with data still unread, with a reset, which
+            // throws here instead of reading 0. Either is the end; whichever comes is timing.
+            try
+            {
+                while ((read = await stream.ReadAsync(buffer)) > 0)
+                    received.AddRange(buffer.AsSpan(0, read).ToArray());
+            }
+            catch (IOException)
+            {
+                // Expected when the client closes/reset the connection; treat as end of input.
+                return;
+            }
         });
         var log = new ListLogger();
 

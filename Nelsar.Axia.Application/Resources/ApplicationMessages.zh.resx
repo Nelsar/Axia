@@ -268,4 +268,10 @@
   <data name="BulkRowFailedUnexpectedly" xml:space="preserve">
     <value>由于意外错误，无法处理此行。详细信息请查看服务器日志。</value>
   </data>
+  <data name="LoginNotAnActiveDirectoryName" xml:space="preserve">
+    <value>登录名（地址中 @ 之前的部分）不能作为 Active Directory 帐户名：最多 20 个字符，且不能包含 " / \ [ ] : ; | = , + * ? &lt; &gt;。</value>
+  </data>
+  <data name="AccountNameTaken" xml:space="preserve">
+    <value>在创建新帐户的位置已存在同名条目。请为该帐户使用其他名称。</value>
+  </data>
 </root>
