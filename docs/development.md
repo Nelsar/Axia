@@ -101,12 +101,21 @@ Tests (xUnit, ~780) cover, beyond units:
 | HTTP behaviour | `*ControllerIntegrationTests` (via `ApiTestFactory`, environment `Testing`) |
 | Translations | `ResourceMessageTests` |
 | Databases: the provider setting, each one's migrations, moving between them | `DatabaseTests` (SQLite), `PostgreSqlTests` (a real server; skipped unless `AXIA_TEST_POSTGRES` names one, which CI does) |
+| Active Directory against a live one: accounts and groups created as AD's own, sign-in, password policy, protection without `adminCount` | `SambaAdTests` (the Samba DC in `deploy/dev/samba`; skipped unless `AXIA_TEST_SAMBA` names it, which CI does), `ProtectedSecurityIdentifiersTests` |
 
 To run the PostgreSQL tests locally, against the server in `deploy/dev` or any other the account
 may create databases on:
 
 ```bash
 AXIA_TEST_POSTGRES="Host=localhost;Username=nelsar_axia;Password=nelsar-axia-dev;Database=nelsar_axia" dotnet test --filter PostgreSqlTests
+```
+
+And the Samba tests, against the domain controller in `deploy/dev` (see
+[Local test directory](local-directory.md#samba-ad)), by `127.0.0.1` rather than `localhost`,
+which may resolve to `::1` first:
+
+```bash
+AXIA_TEST_SAMBA=127.0.0.1:1636 AXIA_TEST_SAMBA_CA=samba-ca.crt dotnet test --filter SambaAdTests
 ```
 
 The integration tests read `Nelsar.Axia.Api/appsettings.json` if present. One test expects

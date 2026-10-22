@@ -174,3 +174,45 @@ ldapsearch -x -LLL -H ldap://127.0.0.1 -D cn=admin,dc=example,dc=org -w adminpas
 ldapsearch -x -LLL -H ldap://127.0.0.1 -D cn=admin,dc=example,dc=org -w adminpassword \
   -b dc=example,dc=org -E pr=500/noprompt '(objectClass=computer)' dn | grep -c '^dn:'
 ```
+
+## Samba AD
+
+For what only a real Active Directory shows — accounts created as AD's `user`, security groups,
+`unicodePwd`, the password policy, protected groups found by SID — the same file has a Samba
+domain controller, behind a profile so it starts only when asked for:
+
+```bash
+docker compose -f deploy/dev/docker-compose.ldap.yml --profile samba up -d samba
+docker compose -f deploy/dev/docker-compose.ldap.yml cp samba:/export/ca.crt samba-ca.crt
+```
+
+The first start provisions the domain and takes about a minute
+(`docker compose … logs -f samba` shows `Provisioned AXIA.TEST.`).
+
+| | |
+| --- | --- |
+| Address | `ldaps://127.0.0.1:1636`, with a certificate for `127.0.0.1` and `localhost` from the CA copied out above |
+| Domain, base DN | `AXIA.TEST`, `DC=axia,DC=test` |
+| Administrator | `Administrator@axia.test` / `Axia-Admin-1` |
+| Accounts | `admin.demo`, `creator.demo`, `editor.demo`, `user.demo` in `axia-admins`, `axia-creators`, `axia-editors`; `it.admin` in Domain Admins without `adminCount`, as Samba leaves every administrator made after provisioning; `disabled.demo`, switched off. Every password `Axia-Demo-1`. |
+
+To point the API at it, in `appsettings.Development.json`:
+
+```jsonc
+"Ldap": {
+  "Server": "127.0.0.1",
+  "Port": 1636,
+  "Security": "Ldaps",
+  "TrustedCaCertificatePath": "samba-ca.crt",
+  "BaseDn": "DC=axia,DC=test",
+  "AdminUsername": "Administrator@axia.test",
+  "AdminPassword": "Axia-Admin-1",
+  "ProviderType": "StandardLdap"
+},
+"RoleMappings": {
+  "GroupDns": { "Admin": "CN=axia-admins,CN=Users,DC=axia,DC=test" }
+}
+```
+
+The bind account there is the domain's Administrator, which a real deployment should never use;
+see [Production → The bind account](production.md#the-bind-account).

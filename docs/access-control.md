@@ -131,11 +131,16 @@ check: **the target must not be more powerful than the caller.**
 | --- | --- |
 | An account whose permissions here are not a subset of yours | nobody but someone holding at least those |
 | A group mapped to a role that grants something you lack | the same |
-| An account or group with `adminCount=1` (AD: Domain Admins, Enterprise Admins, Administrators, Account/Server/Backup/Print Operators, … and their members) | only a caller holding **every** permission |
+| An account or group Active Directory protects: one of its protected groups (Domain Admins, Enterprise Admins, Schema Admins, Administrators, Account/Server/Backup/Print Operators, …), any member of one however nested, the built-in Administrator and `krbtgt`, and anything carrying `adminCount=1` | only a caller holding **every** permission |
 | A group listed in `DirectoryProtection:ProtectedGroups`, and its members | only a caller holding **every** permission |
 | The bind account (`Ldap:AdminUsername`) | **nobody** |
-| A computer that is a domain controller (writable or read-only), a critical system object, or has `adminCount=1` | only a caller holding **every** permission |
+| A computer that is a domain controller (writable or read-only), a critical system object, a member of a protected group, or has `adminCount=1` | only a caller holding **every** permission |
 | An organizational unit, to rename or move, judged by what is beneath it: a group mapped to a role, anything above, the bind account | as for what is beneath it |
+
+Membership is asked of the directory when it matters — by the groups' SIDs and AD's
+membership-chain rule — rather than read from `adminCount` alone. `adminCount` is set by SDProp,
+which in Windows runs once an hour, so a new domain administrator went unprotected until it next
+ran; Samba has no SDProp and never sets it on an administrator made after the domain was created.
 
 This applies to updating, resetting the password of, and deleting accounts (singly and in bulk),
 to changing, re-membering and deleting groups, to changing, enabling, disabling and deleting
@@ -153,7 +158,7 @@ Examples:
 - Someone with `groups.manage` cannot add themselves to the group mapped to Admin unless they
   already hold everything Admin holds.
 - A domain administrator whose groups map to no role is a plain `User` here, but their account is
-  still protected by `adminCount`.
+  still protected, because it belongs to Domain Admins.
 - Someone with `orgunits.manage` cannot move the unit that holds the group mapped to Admin — which
   would have let them, with `users.update`, reset an administrator's password while the mapping
   matched nobody, and move it back.

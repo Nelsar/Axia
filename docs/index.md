@@ -7,7 +7,7 @@ nav_exclude: true
 # Nelsar.Axia — open-source web console and REST API for Active Directory and LDAP
 
 **Nelsar.Axia** is a self-hosted web interface and REST API for managing **Active Directory**,
-**OpenLDAP** and other LDAP directories from the browser: users, groups, organizational units (OUs)
+**Samba AD**, **OpenLDAP** and other LDAP directories from the browser: users, groups, organizational units (OUs)
 and computer accounts, across several directories from one instance — with role-based access,
 an audit log and bulk user provisioning.
 

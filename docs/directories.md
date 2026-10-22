@@ -8,8 +8,9 @@ production.
 
 | Directory | Read, search, sign in | Manage | Notes |
 | --- | --- | --- | --- |
-| **OpenLDAP** | yes | users, groups, units, computers (with an AD-like schema) | The primary target of the write paths. |
-| **Active Directory** | yes | edit, delete, enable/disable, move, group membership, units, computers | Creating users and groups writes OpenLDAP-style entries. See [What the application writes](#what-the-application-writes). |
+| **OpenLDAP** | yes | users, groups, units, computers (with an AD-like schema) | |
+| **Active Directory** | yes | users, groups, units, computers | Accounts and groups are created as AD's own `user` and security `group`. |
+| **Samba AD** | yes | as Active Directory | Tested in CI against Samba 4.22. See [Samba AD](#samba-ad). |
 | **Novell eDirectory** | yes | as OpenLDAP | Less tested. |
 | Other LDAP v3 servers | likely | likely | Anything with `person` entries, simple bind and RFC 2696 paging. |
 
@@ -19,7 +20,7 @@ production.
 | --- | --- | --- |
 | Library | Novell LDAP (RFC 4511) | `System.DirectoryServices` |
 | OS | any | **Windows only**; startup is refused elsewhere |
-| Directories | AD, OpenLDAP, eDirectory | AD |
+| Directories | AD, Samba AD, OpenLDAP, eDirectory | AD |
 | Connection security | LDAPS, StartTLS, None | LDAPS, None (no StartTLS) |
 | Groups | full | `501 Not Implemented` |
 | Recommended | **yes** | no |
@@ -128,7 +129,7 @@ migration so that they kept working. The console marks them *not encrypted*.
   bound against. If two accounts share a login or an address, the first one found wins, so keep
   those unique.
 - Read attributes: `cn`, `displayName`, `mail`, `uid`, `sAMAccountName`, `userPrincipalName`,
-  `memberOf`, `objectClass`, `adminCount`.
+  `memberOf`, `objectClass`, `adminCount`, `objectSid`.
 - `GET /api/v1/users/{id}/attributes` returns every attribute of the entry, with credential-like
   attributes (passwords, LAPS) listed by name and their values withheld.
 
@@ -185,7 +186,27 @@ half-made account is deleted again.
 
 ### New accounts
 
-`POST /api/v1/users`, bulk create rows, and self-registration all write:
+`POST /api/v1/users`, bulk create rows, and self-registration all write an account, then set its
+password. Which kind of account is decided by the directory's root DSE: Active Directory, Windows'
+or Samba's, says so in `supportedCapabilities`.
+
+In Active Directory:
+
+```
+dn: CN=<name>,<Ldap:BaseDn>
+objectClass: top, person, organizationalPerson, user
+cn, displayName: <name>
+sn: <last word of name>
+mail: <e-mail>
+sAMAccountName: <local part of the e-mail>
+```
+
+AD creates it switched off; once the password is set, `userAccountControl` becomes `512`
+(`NORMAL_ACCOUNT`: switched on, password required). The login has to be a valid
+`sAMAccountName` — at most 20 characters, none of `" / \ [ ] : ; | = , + * ? < >` — and is refused
+with `400` before anything is written otherwise. A name already taken in the base DN is `409`.
+
+Elsewhere:
 
 ```
 dn: uid=<local part of the e-mail>,<Ldap:BaseDn>
@@ -196,14 +217,10 @@ mail: <e-mail>
 uid: <local part>
 ```
 
-then set the password.
-
 - New accounts always go to the **base DN**, not to a chosen OU. Move them afterwards with your
   directory's tools.
-- **Against Active Directory this is not a real AD user**: no `sAMAccountName`, no
-  `userAccountControl`, `uid` as the RDN. AD may refuse it, or create an `inetOrgPerson` that is
-  not usable as a normal account. Create AD accounts with AD's tools until this is addressed, and
-  try it in a test domain first.
+- If the password is refused, or the account cannot be switched on, the half-made entry is
+  deleted again.
 
 ### Account changes
 
@@ -218,10 +235,11 @@ Accounts are always addressed by DN, never by searching for a login or address a
 
 ### Groups
 
-- Create writes `objectClass: top, groupOfNames` with `cn`, `description` and at least one
-  `member` (`groupOfNames` requires one). In Active Directory that is a valid entry but **not a
-  security group**: no SID, no `groupType`, unusable for permissions. Create AD groups with AD's
-  tools.
+- Create, in Active Directory, writes `objectClass: top, group` with `cn`, `sAMAccountName` (the
+  same name), `groupType: -2147483646` — a global security group, what AD's own tools make — and
+  the members. Elsewhere `objectClass: top, groupOfNames` with `cn` and the members. Either way at
+  least one member is required, and a `description` if one is given.
+- Renaming an AD group changes its `cn`, not its `sAMAccountName` (its pre-Windows 2000 name).
 - Rename, move, description and membership work on AD `group` as well as `groupOfNames` and
   `groupOfUniqueNames`. Saving membership **replaces it wholesale** with the list sent.
 
@@ -255,8 +273,10 @@ trust**; it has to rejoin the domain.
 ### What is never changed
 
 - The bind account itself (`Ldap:AdminUsername`), by anyone.
-- Anything marked privileged (`adminCount=1`, or in `DirectoryProtection:ProtectedGroups`),
-  except by a caller who holds every permission.
+- Anything privileged — in Active Directory one of its protected groups, found by SID, or a member
+  of one however nested, or anything with `adminCount=1`; or a group in
+  `DirectoryProtection:ProtectedGroups` and its members — except by a caller who holds every
+  permission.
 
 See [Access control](access-control.md#protected-targets).
 
@@ -273,6 +293,33 @@ See [Access control](access-control.md#protected-targets).
 5. `UserSearchFilter`: the default works. Computers and contacts are excluded from sign-in by the
    API itself, whatever the filter says.
 6. `UserSearchPageSize` at or below AD's `MaxPageSize` (1000).
+
+### Samba AD
+
+A Samba domain controller is Active Directory to the API, through `ProviderType: StandardLdap`:
+the steps above apply, and so does everything this page says about AD. What differs:
+
+1. **LDAPS, or StartTLS.** Samba refuses a simple bind over plain LDAP by default
+   (`ldap server require strong auth = yes`), so `Security: None` fails at the bind; leave it so.
+2. **The certificate.** Samba makes a self-signed one on its first start, in
+   `/var/lib/samba/private/tls/`, for the server's own name only. Either connect by that name and
+   trust its `ca.pem` with `Ldap:TrustedCaCertificatePath`, or — better — give Samba a certificate
+   from your CA with every name the API may use (`tls certfile`, `tls keyfile`, `tls cafile` in
+   `smb.conf`).
+3. **Delegation** is set with `samba-tool dsacl set`, or with Windows' ADUC connected to the Samba
+   DC, as for Windows AD. The bind account still should not be a Domain Admin.
+4. **No SDProp.** Samba never sets `adminCount` on an administrator made after the domain was
+   created ([Samba bug 13954](https://bugzilla.samba.org/show_bug.cgi?id=13954)). The API does
+   not rely on it: protected groups are found by SID and their members by AD's membership-chain
+   rule, both of which Samba answers.
+5. **A reset password** does not end the old one at once: Samba accepts the previous password for
+   `old password allowed period` minutes, 60 by default.
+6. `ProviderType: ActiveDirectory` (Windows' `System.DirectoryServices`) is not tested against
+   Samba; use `StandardLdap`.
+
+[`deploy/dev/samba`](https://github.com/Nelsar/Axia/tree/main/deploy/dev/samba) builds a Samba
+domain controller with demo accounts; CI runs `SambaAdTests` against it on every pull request. See
+[Local test directory](local-directory.md#samba-ad).
 
 ### OpenLDAP
 

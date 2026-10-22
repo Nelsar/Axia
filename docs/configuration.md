@@ -148,9 +148,10 @@ fine and grants the role to nobody.
 | --- | --- | --- |
 | `DirectoryProtection:ProtectedGroups` | `[]` | DNs of groups that, together with their members, only a caller holding **every** permission may change. |
 
-Active Directory needs nothing here: `adminCount=1` already marks Domain Admins and the other
-protected groups and their members, and the application honours it. OpenLDAP marks nothing, so list
-the groups that make someone an administrator of the directory, and the group mapped to Admin.
+Active Directory, Windows' or Samba's, needs nothing here: the application recognises its protected
+groups by SID — Domain Admins, Enterprise Admins, Administrators and the rest — and protects them
+and their members, however nested. OpenLDAP marks nothing, so list the groups that make someone an
+administrator of the directory, and the group mapped to Admin.
 
 ## `Database` and `ConnectionStrings`
 

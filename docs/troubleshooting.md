@@ -137,7 +137,7 @@ Organizational units pages themselves work.
 
 | Response | Cause |
 | --- | --- |
-| `403` | You lack the permission, or the target is protected: it holds more than you, carries `adminCount`, is in `DirectoryProtection:ProtectedGroups`, or is the bind account. The log line for the refusal says which. |
+| `403` | You lack the permission, or the target is protected: it holds more than you, is in one of Active Directory's protected groups or carries `adminCount`, is in `DirectoryProtection:ProtectedGroups`, or is the bind account. The log line for the refusal says which. |
 | `409` | Already exists; or deleting a unit that still has entries; or an e-mail in use by another account. |
 | `502` "The directory rejected …" | The directory refused the write. Common: the bind account lacks the right (delegation/ACL); a schema violation (e.g. creating a computer on OpenLDAP, where `person` requires `sn`); a password the directory's policy rejects; a Global Catalog port, which is read-only. |
 | `502` on password change against AD | AD accepts `unicodePwd` only over an encrypted connection: use `Ldaps`. |

@@ -14,14 +14,14 @@
 [![React + TypeScript](https://img.shields.io/badge/console-React%20%2B%20TypeScript-3178C6.svg)](frontend/)
 
 **Nelsar.Axia** is a self-hosted web interface and REST API for managing **Active Directory**,
-**OpenLDAP** and other LDAP directories from the browser: users, groups, organizational units (OUs)
+**Samba AD**, **OpenLDAP** and other LDAP directories from the browser: users, groups, organizational units (OUs)
 and computer accounts, across several directories from one instance — with role-based access,
 an audit log and bulk user provisioning.
 
 Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
 [Apache 2.0](LICENSE).
 
-> **Status: MVP.** The API and console do what is described below, and 905 tests cover it. What is
+> **Status: MVP.** The API and console do what is described below, and 958 tests cover it. What is
 > not yet here is listed under [Not in scope yet](#not-in-scope-yet) — read it before deciding
 > whether this fits.
 
@@ -66,8 +66,9 @@ Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
   through the API without a restart.
 - **Nine interface languages**, including Arabic and Hebrew with a mirrored layout.
 
-Active Directory and OpenLDAP are both supported. The `StandardLdap` provider speaks standard LDAP
-(RFC 4511) over LDAPS or StartTLS and works against AD, OpenLDAP and eDirectory alike; a Windows-only `ActiveDirectory`
+Active Directory — Windows' or Samba's — and OpenLDAP are all supported. The `StandardLdap` provider
+speaks standard LDAP (RFC 4511) over LDAPS or StartTLS and works against AD, Samba AD, OpenLDAP and
+eDirectory alike, and CI tests it against a live Samba domain controller; a Windows-only `ActiveDirectory`
 provider using `System.DirectoryServices` also exists but manages fewer object types.
 
 | | |
@@ -245,9 +246,10 @@ that cannot yet say where its groups live.
 Whatever a role allows, nobody may act on an account or group that can do more than they can:
 - in this application — an editor can reset a colleague's password but not an administrator's,
   and holding `groups.manage` does not let anyone into a group mapped to a role they do not hold;
-- in the directory — an account or group Active Directory marks privileged (`adminCount`, which
-  covers Domain Admins and the other protected groups and their members) can only be changed by an
-  administrator of this application, and so can a domain controller's computer account. OpenLDAP
+- in the directory — an account or group Active Directory protects (Domain Admins and the other
+  protected groups, found by SID, and their members however nested — on Samba too, which never
+  marks them with `adminCount`) can only be changed by an administrator of this application, and
+  so can a domain controller's computer account. OpenLDAP
   marks nothing, so list the groups that make someone its administrator under
   `DirectoryProtection:ProtectedGroups`. An organizational unit counts as everything beneath it,
   since renaming or moving it moves all of that;
@@ -389,7 +391,7 @@ the tests if a message is left untranslated.
 dotnet test
 ```
 
-905 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
+958 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
 authorisation on every guarded use case, what may reach a log sink, multi-directory isolation,
 each database's migrations against the model, and translation completeness in every supported
 language.
