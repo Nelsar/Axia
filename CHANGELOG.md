@@ -7,7 +7,7 @@ configuration or the API in ways that need action on upgrade; its entry says wha
 
 How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
-## [Unreleased]
+## [0.3.0] - 2026-10-23
 
 PostgreSQL for the API's own state, Samba AD, and a Windows installer. Accounts and groups created
 in Active Directory are real ones, and administrators are protected whether or not the directory
@@ -240,6 +240,7 @@ Read before deploying: [SECURITY.md](SECURITY.md#known-limitations) and
 [Not in scope yet](README.md#not-in-scope-yet). Above all, a session cannot be ended before its
 token expires, and directory certificates are not checked for revocation.
 
+[0.3.0]: https://github.com/Nelsar/Axia/releases/tag/v0.3.0
 [0.2.1]: https://github.com/Nelsar/Axia/releases/tag/v0.2.1
 [0.2.0]: https://github.com/Nelsar/Axia/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Nelsar/Axia/releases/tag/v0.1.0
