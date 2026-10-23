@@ -138,13 +138,14 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
     steps:
+      # By name, an artifact's files land in msi/ itself, not in a folder named after it.
       - uses: actions/download-artifact@v8
         with:
-          pattern: msi-x64
+          name: msi-x64
           path: msi
       - uses: actions/download-artifact@v8
         with:
-          pattern: msi-arm64
+          name: msi-arm64
           path: msi
 
       # The packages are not signed yet. This is what lets anyone check that a downloaded one was
@@ -152,10 +153,10 @@ jobs:
       #   gh attestation verify Nelsar.Axia-x.y.z-x64.msi --repo Nelsar/Axia
       - uses: actions/attest-build-provenance@v4
         with:
-          subject-path: msi/*/*.msi
+          subject-path: msi/*.msi
 
       - name: Upload
-        run: gh release upload "$TAG" msi/*/*.msi --clobber --repo "$REPO"
+        run: gh release upload "$TAG" msi/*.msi --clobber --repo "$REPO"
 
       # SourceForge copies a release's files when the release is published or edited, and these
       # arrive minutes after it was published, so it never saw them. Listing them in the notes is
