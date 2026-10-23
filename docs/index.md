@@ -78,6 +78,8 @@ docker compose up
 
 It pulls the released images, for amd64 and arm64. When the API logs `Now listening on`, open <http://localhost:8080> and sign in as `admin.demo`
 with the password `Axia-Demo-1`. The other demo accounts, and the two ways to run it against your
-own directory, are in [Installation](installation.md). Before putting it in front of real users,
-read [Production deployment](production.md) and the
+own directory, are in [Installation](installation.md). On a Windows server without Docker, the
+[Windows installer](installation-windows.md) attached to each release puts the API and its console
+in place as a service. Before putting it in front of real users, read
+[Production deployment](production.md) and the
 [known limitations](https://github.com/Nelsar/Axia/blob/main/SECURITY.md#known-limitations).

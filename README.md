@@ -21,7 +21,7 @@ an audit log and bulk user provisioning.
 Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
 [Apache 2.0](LICENSE).
 
-> **Status: MVP.** The API and console do what is described below, and 958 tests cover it. What is
+> **Status: MVP.** The API and console do what is described below, and 959 tests cover it. What is
 > not yet here is listed under [Not in scope yet](#not-in-scope-yet) — read it before deciding
 > whether this fits.
 
@@ -139,6 +139,11 @@ API from the same origin and is the only thing published, on localhost only.
 It is for trying the project out. The directory, its demo passwords and the API's database live
 in local Docker volumes, and `docker compose down -v` removes all of it. To point the API at your
 own directory, run it as below.
+
+On a Windows server without Docker, the installer attached to each
+[release](https://github.com/Nelsar/Axia/releases) — `Nelsar.Axia-x.y.z-x64.msi` or `-arm64.msi`
+— installs the API and its console as a Windows service; see the
+[Windows installer](docs/installation-windows.md).
 
 ## Getting started
 
@@ -391,7 +396,7 @@ the tests if a message is left untranslated.
 dotnet test
 ```
 
-958 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
+959 tests. Beyond the usual, they pin the things that only fail quietly: layer boundaries,
 authorisation on every guarded use case, what may reach a log sink, multi-directory isolation,
 each database's migrations against the model, and translation completeness in every supported
 language.
