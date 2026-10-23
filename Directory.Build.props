@@ -3,6 +3,6 @@
        with frontend/package.json and the newest heading in CHANGELOG.md; see "Releasing" in
        CONTRIBUTING.md. Without it every build called itself 1.0.0. -->
   <PropertyGroup>
-    <Version>0.2.1</Version>
+    <Version>0.3.0</Version>
   </PropertyGroup>
 </Project>
