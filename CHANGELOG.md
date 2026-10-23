@@ -9,9 +9,10 @@ How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
 ## [Unreleased]
 
-The API's own state moves to PostgreSQL. **Upgrading from 0.2 takes one decision:** the database is
-no longer assumed, so `Database:Provider` has to be set before the new version starts — see
-*Changed*.
+PostgreSQL for the API's own state, Samba AD, and a Windows installer. Accounts and groups created
+in Active Directory are real ones, and administrators are protected whether or not the directory
+has marked them. **Upgrading from 0.2 takes one decision:** the database is no longer assumed, so
+`Database:Provider` has to be set before the new version starts — see *Changed*.
 
 ### Security
 
@@ -49,7 +50,8 @@ no longer assumed, so `Database:Provider` has to be set before the new version s
   API and its console as the `NelsarAxia` service, running as its own virtual account, with no
   Docker or .NET runtime to install first. Unattended installs take the directory and the admin
   group as `msiexec` properties; settings, keys, database and logs live in
-  `%ProgramData%\Nelsar.Axia` and survive upgrades and uninstalls. See
+  `%ProgramData%\Nelsar.Axia` and survive upgrades and uninstalls. Not signed yet; each carries a
+  build provenance attestation instead, which `gh attestation verify` checks. See
   [Windows installer](docs/installation-windows.md).
 - `--SettingsFile <path>` reads the settings from a file outside the folder of the binaries, and
   `init-settings <path>` creates that file with new keys, or brings one up to date without touching
@@ -67,6 +69,10 @@ no longer assumed, so `Database:Provider` has to be set before the new version s
 - SQLite is still supported, for a single small instance and for the unit tests. Each database
   keeps its own migrations, in `Nelsar.Axia.Migrations.PostgreSql` and
   `Nelsar.Axia.Migrations.Sqlite`; a SQLite database from 0.2 is already up to date.
+- Dependencies: every .NET 10 package at 10.0.13 — EF Core, the `Microsoft.Extensions` packages and
+  `System.DirectoryServices` were on 10.0.10 — and Npgsql's EF Core provider 10.0.3. The native
+  SQLite comes with EF Core again (2.1.13); the direct reference that held it above a vulnerable
+  version is gone.
 
 ### Fixed
 
