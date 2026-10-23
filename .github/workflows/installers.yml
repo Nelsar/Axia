@@ -131,6 +131,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      # For the build provenance below: the run's identity, and somewhere to keep the statement.
+      id-token: write
+      attestations: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
     steps:
       - uses: actions/download-artifact@v8
         with:
@@ -141,7 +147,28 @@ jobs:
           pattern: msi-arm64
           path: msi
 
+      # The packages are not signed yet. This is what lets anyone check that a downloaded one was
+      # built here, from the release's tag, by this workflow:
+      #   gh attestation verify Nelsar.Axia-x.y.z-x64.msi --repo Nelsar/Axia
+      - uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: msi/*/*.msi
+
       - name: Upload
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$TAG" msi/*/*.msi --clobber --repo "${{ github.repository }}"
+        run: gh release upload "$TAG" msi/*/*.msi --clobber --repo "$REPO"
+
+      # SourceForge copies a release's files when the release is published or edited, and these
+      # arrive minutes after it was published, so it never saw them. Listing them in the notes is
+      # an edit, which makes it look again — and says on GitHub what they are.
+      - name: List them in the release notes
+        run: |
+          gh release view "$TAG" --repo "$REPO" --json body --jq .body > notes.md
+          if ! grep -q '^## Windows installers' notes.md; then
+            cat >> notes.md <<EOF
+
+          ## Windows installers
+
+          \`Nelsar.Axia-${TAG#v}-x64.msi\` and \`Nelsar.Axia-${TAG#v}-arm64.msi\`: the API and its console as a Windows service, see [Windows installer](https://nelsar.github.io/Axia/installation-windows/). Not signed yet; \`gh attestation verify <file> --repo $REPO\` shows that a file was built by this repository's workflow from this tag.
+          EOF
+            gh release edit "$TAG" --repo "$REPO" --notes-file notes.md
+          fi

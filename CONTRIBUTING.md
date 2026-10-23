@@ -169,4 +169,7 @@ inherits, `frontend/package.json`, and the image tags the quick start runs in `d
    Publishing it starts the `Installers` workflow, which builds the Windows installers from the
    tag, installs, upgrades and removes the x64 one on its runner, and attaches
    `Nelsar.Axia-x.y.z-x64.msi` and `Nelsar.Axia-x.y.z-arm64.msi` to the release a few minutes
-   later. Should it fail, run it again from the Actions tab with the tag as its input.
+   later, with an attestation of their build provenance. It then adds a *Windows installers*
+   section to the release notes: the edit is also what makes SourceForge, which copied the release
+   when it was published, copy the installers too. Should it fail, run it again from the Actions
+   tab with the tag as its input; the section is added once.

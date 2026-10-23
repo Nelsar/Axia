@@ -18,7 +18,13 @@ Each [release](https://github.com/Nelsar/Axia/releases) carries two packages, bu
 | `Nelsar.Axia-x.y.z-arm64.msi` | 64-bit ARM |
 
 The packages are not signed yet, so SmartScreen warns when one is opened from a browser, and a
-policy that admits signed installers only will refuse them.
+policy that admits signed installers only will refuse them. What each one does carry is its build
+provenance: a statement, kept by GitHub, that this file was built by this repository's workflow from
+the release's tag. With the [GitHub CLI](https://cli.github.com/):
+
+```powershell
+gh attestation verify Nelsar.Axia-x.y.z-x64.msi --repo Nelsar/Axia
+```
 
 ## What goes where
 
