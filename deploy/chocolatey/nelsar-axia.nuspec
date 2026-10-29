@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>nelsar-axia</id>
+    <version>0.3.0</version>
+    <title>Nelsar.Axia</title>
+    <authors>Nelsar</authors>
+    <owners>Nelsar</owners>
+    <projectUrl>https://github.com/Nelsar/Axia</projectUrl>
+    <packageSourceUrl>https://github.com/Nelsar/Axia/tree/main/deploy/chocolatey</packageSourceUrl>
+    <docsUrl>https://nelsar.github.io/Axia/</docsUrl>
+    <bugTrackerUrl>https://github.com/Nelsar/Axia/issues</bugTrackerUrl>
+    <projectSourceUrl>https://github.com/Nelsar/Axia</projectSourceUrl>
+    <licenseUrl>https://github.com/Nelsar/Axia/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <iconUrl>https://raw.githubusercontent.com/Nelsar/Axia/v0.3.0/docs/brand/avatar.png</iconUrl>
+    <copyright>Nelsar</copyright>
+    <tags>active-directory ldap openldap samba admin web-interface rest-api helpdesk foss</tags>
+    <summary>Self-hosted web interface and REST API for Active Directory and OpenLDAP.</summary>
+    <description><![CDATA[Nelsar.Axia is a self-hosted web interface and REST API for managing Active Directory, Samba AD, OpenLDAP and other LDAP directories from the browser: users, groups, organizational units and computer accounts, with role-based access mapped from directory groups, an audit log and bulk provisioning.
+
+This package installs the Windows service `NelsarAxia` from the official MSI. The API and its console are served on one port, 8080 by default. Settings, keys, the database and logs live in `%ProgramData%\Nelsar.Axia` and are kept on upgrade and uninstall.
+
+## Package parameters
+
+Each parameter is passed to the MSI as the property of the same meaning. A parameter that is not given leaves the setting as it is.
+
+* `/Port:` - the port the service listens on (default 8080)
+* `/LdapServer:` - the directory server, such as `dc01.corp.example.com`
+* `/LdapBaseDn:` - the base DN, such as `DC=corp,DC=example,DC=com`
+* `/LdapUsername:` - the bind account, such as `svc-axia@corp.example.com`
+* `/AdminGroup:` - the DN of the directory group that gets the Admin role
+* `/DatabaseProvider:` - `Sqlite` (default) or `PostgreSql`
+* `/StartService` - start the service when the install finishes
+
+Example: `choco install nelsar-axia --params "'/LdapServer:dc01.corp.example.com /LdapBaseDn:DC=corp,DC=example,DC=com /StartService'"`
+
+The bind password is never taken as a parameter, because command lines end up in logs. Add it to `%ProgramData%\Nelsar.Axia\appsettings.json` after installing; see https://nelsar.github.io/Axia/installation-windows/.
+
+64-bit Windows only.]]></description>
+    <releaseNotes>https://github.com/Nelsar/Axia/releases/tag/v0.3.0</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

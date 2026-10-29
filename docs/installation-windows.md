@@ -26,6 +26,36 @@ the release's tag. With the [GitHub CLI](https://cli.github.com/):
 gh attestation verify Nelsar.Axia-x.y.z-x64.msi --repo Nelsar/Axia
 ```
 
+### Through Chocolatey
+
+[`deploy/chocolatey`](https://github.com/Nelsar/Axia/tree/main/deploy/chocolatey) holds a
+[Chocolatey](https://chocolatey.org/) package, `nelsar-axia`, for 64-bit Intel and AMD. It
+downloads the x64 MSI of its version from the release, refuses it unless its SHA-256 matches, and
+installs it the [unattended](#unattended) way. Package parameters stand for the MSI's properties:
+
+| Parameter | Property |
+| --- | --- |
+| `/Port:` | `PORT` |
+| `/LdapServer:` | `LDAP_SERVER` |
+| `/LdapBaseDn:` | `LDAP_BASEDN` |
+| `/LdapUsername:` | `LDAP_USERNAME` |
+| `/AdminGroup:` | `ADMIN_GROUP` |
+| `/DatabaseProvider:` | `DATABASE_PROVIDER` |
+| `/StartService` | `START_SERVICE=1` |
+
+Until it is published to the Chocolatey community repository, build it from a checkout, in an
+elevated PowerShell:
+
+```powershell
+cd deploy\chocolatey
+choco pack
+choco install nelsar-axia --source . -y --params "'/LdapServer:dc01.corp.example.com /LdapBaseDn:DC=corp,DC=example,DC=com /StartService'"
+```
+
+As with the MSI, the bind password is not a parameter: [finish the
+configuration](#finishing-the-configuration) afterwards. `choco upgrade` installs the newer MSI over
+the older one, and `choco uninstall nelsar-axia` removes it like an [uninstall](#uninstalling) does.
+
 ## What goes where
 
 | Where | What | On upgrade | On uninstall |

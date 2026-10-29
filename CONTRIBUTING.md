@@ -173,3 +173,16 @@ inherits, `frontend/package.json`, and the image tags the quick start runs in `d
    section to the release notes: the edit is also what makes SourceForge, which copied the release
    when it was published, copy the installers too. Should it fail, run it again from the Actions
    tab with the tag as its input; the section is added once.
+
+6. Once the installers are attached, bring the Chocolatey package in `deploy/chocolatey` to the
+   release in a pull request: the version in `nelsar-axia.nuspec` and its `releaseNotes` link, and
+   in `tools/chocolateyinstall.ps1` the version and the x64 installer's SHA-256, which
+   `gh release view vx.y.z --json assets` prints as its `digest`. Then build and push it from that
+   folder:
+
+   ```bash
+   choco pack
+   choco push nelsar-axia.x.y.z.nupkg --source https://push.chocolatey.org/
+   ```
+
+   The community repository holds each version for moderation before it is listed.

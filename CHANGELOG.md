@@ -7,6 +7,14 @@ configuration or the API in ways that need action on upgrade; its entry says wha
 
 How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
+## [Unreleased]
+
+### Added
+
+- A Chocolatey package, `nelsar-axia`, in `deploy/chocolatey`: it installs the x64 MSI of its
+  version, checked against its SHA-256, with the MSI's properties as package parameters. See
+  [Windows installer → Through Chocolatey](docs/installation-windows.md#through-chocolatey).
+
 ## [0.3.0] - 2026-10-23
 
 PostgreSQL for the API's own state, Samba AD, and a Windows installer. Accounts and groups created
@@ -240,6 +248,7 @@ Read before deploying: [SECURITY.md](SECURITY.md#known-limitations) and
 [Not in scope yet](README.md#not-in-scope-yet). Above all, a session cannot be ended before its
 token expires, and directory certificates are not checked for revocation.
 
+[Unreleased]: https://github.com/Nelsar/Axia/compare/v0.3.0...HEAD
 [0.3.0]: https://github.com/Nelsar/Axia/releases/tag/v0.3.0
 [0.2.1]: https://github.com/Nelsar/Axia/releases/tag/v0.2.1
 [0.2.0]: https://github.com/Nelsar/Axia/releases/tag/v0.2.0
