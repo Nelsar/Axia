@@ -138,7 +138,7 @@ jobs:
           sparse-checkout: .github/dockerhub
 
       - if: env.DOCKERHUB == 'true'
-        uses: peter-evans/dockerhub-description@v4
+        uses: peter-evans/dockerhub-description@v5
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
