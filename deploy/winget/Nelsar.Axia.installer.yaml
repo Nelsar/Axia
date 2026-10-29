@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
 
 PackageIdentifier: Nelsar.Axia
 PackageVersion: 0.3.0
@@ -18,4 +18,4 @@ Installers:
     InstallerSha256: CFC05E3A6E96EAC470F10BF8ECD0AA2575AE7828AC6F0F88D5A741DB4430279C
     ProductCode: '{3A475450-CEC3-48CF-96DC-6FFB3B4C413D}'
 ManifestType: installer
-ManifestVersion: 1.6.0
+ManifestVersion: 1.12.0
