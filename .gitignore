@@ -28,6 +28,9 @@ Nelsar.Axia.Api/appsettings*.json
 *.userprefs
 artifacts/
 
+# The Chocolatey package, built by `choco pack` in deploy/chocolatey.
+*.nupkg
+
 # Node / Vite
 node_modules/
 dist/
