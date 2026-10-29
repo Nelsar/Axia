@@ -14,6 +14,8 @@ How a release is cut is in [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 - A Chocolatey package, `nelsar-axia`, in `deploy/chocolatey`: it installs the x64 MSI of its
   version, checked against its SHA-256, with the MSI's properties as package parameters. See
   [Windows installer → Through Chocolatey](docs/installation-windows.md#through-chocolatey).
+- winget manifests for `Nelsar.Axia`, in `deploy/winget`, for x64 and arm64. See
+  [Windows installer → Through winget](docs/installation-windows.md#through-winget).
 
 ## [0.3.0] - 2026-10-23
 
