@@ -207,3 +207,12 @@ defaults:
         The LDAP pass-back attack explained — how a printer or web console can be made to hand
         over its stored bind password — and the rule that stops it: re-enter the password when the
         endpoint or encryption changes.
+  - scope:
+      path: blog/admincount-sdprop-admin-not-protected.md
+    values:
+      parent: Blog
+      nav_order: 7
+      description: >-
+        What adminCount and SDProp really do, the three ways relying on adminCount leaves admins
+        unprotected (the hourly gap, orphaned values, and Samba never setting it), and resolving
+        protected groups by SID instead.

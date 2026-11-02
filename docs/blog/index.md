@@ -16,3 +16,5 @@ stands on its own; Axia shows up only where it is the honest answer.
   — the memberof overlay, the cases it still gets wrong, and the reverse search that always works.
 - [The LDAP pass-back attack, and how to defend a web console](ldap-pass-back-attack.md)
   — how a stored bind password gets stolen by repointing the host, and the rule that stops it.
+- [adminCount and SDProp: why your newly promoted admin isn't protected](admincount-sdprop-admin-not-protected.md)
+  — what adminCount really means, the three ways it misleads, and resolving protection by SID.
