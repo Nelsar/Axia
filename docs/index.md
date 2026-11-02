@@ -15,6 +15,7 @@ Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under 
 
 [Try it in five minutes](#try-it-in-five-minutes){: .btn .btn-primary .mr-2 }
 [Read the documentation](README.md){: .btn .mr-2 }
+[Blog](blog/index.md){: .btn .mr-2 }
 [Source on GitHub](https://github.com/Nelsar/Axia){: .btn }
 
 ![The users screen: every account with the role it signs in with](screenshots/users.png)

@@ -145,3 +145,38 @@ defaults:
       nav_order: 13
       description: >-
         Nelsar.Axia architecture, building, testing, and the conventions the tests enforce.
+  - scope:
+      path: blog/index.md
+    values:
+      title: Blog
+      nav_order: 14
+      has_children: true
+      permalink: /blog/
+      description: >-
+        Notes on running Active Directory, Samba AD and OpenLDAP — delegation, directory internals
+        and the mistakes that are easy to make — from the people building Nelsar.Axia.
+  - scope:
+      path: blog/helpdesk-reset-ad-password-without-rsat.md
+    values:
+      parent: Blog
+      nav_order: 1
+      description: >-
+        Four ways to delegate password resets to helpdesk — OU delegation, a jump host, PowerShell
+        and a web tool — and the one security rule every one of them has to hold.
+  - scope:
+      path: blog/openldap-web-interface-options.md
+    values:
+      parent: Blog
+      nav_order: 2
+      description: >-
+        The web interfaces for OpenLDAP compared — phpLDAPadmin, LDAP Account Manager and
+        service-account tools — grouped by who signs in and who enforces permissions.
+  - scope:
+      path: blog/manage-samba-ad-from-the-browser.md
+    values:
+      parent: Blog
+      nav_order: 3
+      description: >-
+        Managing a Samba AD domain from a web UI — samba-tool, RSAT and LDAP tools — and the
+        three Samba specifics every one of them has to handle, including why new admins go
+        unprotected without SDProp.
