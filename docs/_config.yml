@@ -171,3 +171,12 @@ defaults:
       description: >-
         The web interfaces for OpenLDAP compared — phpLDAPadmin, LDAP Account Manager and
         service-account tools — grouped by who signs in and who enforces permissions.
+  - scope:
+      path: blog/manage-samba-ad-from-the-browser.md
+    values:
+      parent: Blog
+      nav_order: 3
+      description: >-
+        Managing a Samba AD domain from a web UI — samba-tool, RSAT and LDAP tools — and the
+        three Samba specifics every one of them has to handle, including why new admins go
+        unprotected without SDProp.
