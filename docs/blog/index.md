@@ -18,3 +18,5 @@ stands on its own; Axia shows up only where it is the honest answer.
   — how a stored bind password gets stolen by repointing the host, and the rule that stops it.
 - [adminCount and SDProp: why your newly promoted admin isn't protected](admincount-sdprop-admin-not-protected.md)
   — what adminCount really means, the three ways it misleads, and resolving protection by SID.
+- [LDAP authentication done right: the traps people hit](ldap-authentication-done-right.md)
+  — search-then-bind, the empty-password bypass, authorization from groups, and when to use OIDC.

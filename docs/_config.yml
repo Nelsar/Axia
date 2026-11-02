@@ -216,3 +216,12 @@ defaults:
         What adminCount and SDProp really do, the three ways relying on adminCount leaves admins
         unprotected (the hourly gap, orphaned values, and Samba never setting it), and resolving
         protected groups by SID instead.
+  - scope:
+      path: blog/ldap-authentication-done-right.md
+    values:
+      parent: Blog
+      nav_order: 8
+      description: >-
+        The traps in authenticating users against Active Directory and LDAP — search-then-bind,
+        the empty-password bypass, TLS, authorization from groups, re-checking the session, and
+        brute-force limits — and when to use OIDC instead.
