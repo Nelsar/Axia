@@ -180,3 +180,12 @@ defaults:
         Managing a Samba AD domain from a web UI — samba-tool, RSAT and LDAP tools — and the
         three Samba specifics every one of them has to handle, including why new admins go
         unprotected without SDProp.
+  - scope:
+      path: blog/set-ad-password-over-ldap-unicodepwd.md
+    values:
+      parent: Blog
+      nav_order: 4
+      description: >-
+        Setting an Active Directory password over LDAP: why userPassword stores plaintext and
+        changes nothing, how unicodePwd works (quoted, UTF-16LE, over TLS), and what
+        unwillingToPerform and constraintViolation mean.

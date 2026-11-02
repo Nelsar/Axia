@@ -10,3 +10,5 @@ stands on its own; Axia shows up only where it is the honest answer.
   — phpLDAPadmin, LAM and the service-account tools, grouped by who enforces permissions.
 - [Managing Samba AD from the browser](manage-samba-ad-from-the-browser.md)
   — the web options for a Samba domain, and the three Samba specifics each has to get right.
+- [Setting an Active Directory password over LDAP: unicodePwd vs userPassword](set-ad-password-over-ldap-unicodepwd.md)
+  — why userPassword fails silently, how unicodePwd works, and what the errors mean.
