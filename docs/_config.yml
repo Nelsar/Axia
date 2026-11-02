@@ -180,3 +180,48 @@ defaults:
         Managing a Samba AD domain from a web UI — samba-tool, RSAT and LDAP tools — and the
         three Samba specifics every one of them has to handle, including why new admins go
         unprotected without SDProp.
+  - scope:
+      path: blog/set-ad-password-over-ldap-unicodepwd.md
+    values:
+      parent: Blog
+      nav_order: 4
+      description: >-
+        Setting an Active Directory password over LDAP: why userPassword stores plaintext and
+        changes nothing, how unicodePwd works (quoted, UTF-16LE, over TLS), and what
+        unwillingToPerform and constraintViolation mean.
+  - scope:
+      path: blog/openldap-memberof-empty.md
+    values:
+      parent: Blog
+      nav_order: 5
+      description: >-
+        Why memberOf is empty in OpenLDAP: the memberof overlay, the three cases it still gets
+        wrong (backfill, object class, nesting), and the reverse group search that works without
+        it.
+  - scope:
+      path: blog/ldap-pass-back-attack.md
+    values:
+      parent: Blog
+      nav_order: 6
+      description: >-
+        The LDAP pass-back attack explained — how a printer or web console can be made to hand
+        over its stored bind password — and the rule that stops it: re-enter the password when the
+        endpoint or encryption changes.
+  - scope:
+      path: blog/admincount-sdprop-admin-not-protected.md
+    values:
+      parent: Blog
+      nav_order: 7
+      description: >-
+        What adminCount and SDProp really do, the three ways relying on adminCount leaves admins
+        unprotected (the hourly gap, orphaned values, and Samba never setting it), and resolving
+        protected groups by SID instead.
+  - scope:
+      path: blog/ldap-authentication-done-right.md
+    values:
+      parent: Blog
+      nav_order: 8
+      description: >-
+        The traps in authenticating users against Active Directory and LDAP — search-then-bind,
+        the empty-password bypass, TLS, authorization from groups, re-checking the session, and
+        brute-force limits — and when to use OIDC instead.
