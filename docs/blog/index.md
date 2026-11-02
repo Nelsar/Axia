@@ -12,3 +12,5 @@ stands on its own; Axia shows up only where it is the honest answer.
   — the web options for a Samba domain, and the three Samba specifics each has to get right.
 - [Setting an Active Directory password over LDAP: unicodePwd vs userPassword](set-ad-password-over-ldap-unicodepwd.md)
   — why userPassword fails silently, how unicodePwd works, and what the errors mean.
+- [Why memberOf is empty in OpenLDAP, and how to fix it](openldap-memberof-empty.md)
+  — the memberof overlay, the cases it still gets wrong, and the reverse search that always works.
