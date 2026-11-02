@@ -145,3 +145,21 @@ defaults:
       nav_order: 13
       description: >-
         Nelsar.Axia architecture, building, testing, and the conventions the tests enforce.
+  - scope:
+      path: blog/index.md
+    values:
+      title: Blog
+      nav_order: 14
+      has_children: true
+      permalink: /blog/
+      description: >-
+        Notes on running Active Directory, Samba AD and OpenLDAP — delegation, directory internals
+        and the mistakes that are easy to make — from the people building Nelsar.Axia.
+  - scope:
+      path: blog/helpdesk-reset-ad-password-without-rsat.md
+    values:
+      parent: Blog
+      nav_order: 1
+      description: >-
+        Four ways to delegate password resets to helpdesk — OU delegation, a jump host, PowerShell
+        and a web tool — and the one security rule every one of them has to hold.
