@@ -163,3 +163,11 @@ defaults:
       description: >-
         Four ways to delegate password resets to helpdesk — OU delegation, a jump host, PowerShell
         and a web tool — and the one security rule every one of them has to hold.
+  - scope:
+      path: blog/openldap-web-interface-options.md
+    values:
+      parent: Blog
+      nav_order: 2
+      description: >-
+        The web interfaces for OpenLDAP compared — phpLDAPadmin, LDAP Account Manager and
+        service-account tools — grouped by who signs in and who enforces permissions.
