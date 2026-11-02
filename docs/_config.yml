@@ -198,3 +198,12 @@ defaults:
         Why memberOf is empty in OpenLDAP: the memberof overlay, the three cases it still gets
         wrong (backfill, object class, nesting), and the reverse group search that works without
         it.
+  - scope:
+      path: blog/ldap-pass-back-attack.md
+    values:
+      parent: Blog
+      nav_order: 6
+      description: >-
+        The LDAP pass-back attack explained — how a printer or web console can be made to hand
+        over its stored bind password — and the rule that stops it: re-enter the password when the
+        endpoint or encryption changes.
