@@ -14,3 +14,5 @@ stands on its own; Axia shows up only where it is the honest answer.
   — why userPassword fails silently, how unicodePwd works, and what the errors mean.
 - [Why memberOf is empty in OpenLDAP, and how to fix it](openldap-memberof-empty.md)
   — the memberof overlay, the cases it still gets wrong, and the reverse search that always works.
+- [The LDAP pass-back attack, and how to defend a web console](ldap-pass-back-attack.md)
+  — how a stored bind password gets stolen by repointing the host, and the rule that stops it.
