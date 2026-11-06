@@ -56,6 +56,25 @@ As with the MSI, the bind password is not a parameter: [finish the
 configuration](#finishing-the-configuration) afterwards. `choco upgrade` installs the newer MSI over
 the older one, and `choco uninstall nelsar-axia` removes it like an [uninstall](#uninstalling) does.
 
+### Through winget
+
+[`deploy/winget`](https://github.com/Nelsar/Axia/tree/main/deploy/winget) holds the manifests of
+the package `Nelsar.Axia` for the Windows Package Manager, for both architectures. Once they are in
+the community repository, `winget install Nelsar.Axia` installs the MSI that matches the machine;
+the [properties](#unattended) go after `--custom`, which adds them to winget's own silent switches:
+
+```powershell
+winget install Nelsar.Axia --custom "LDAP_SERVER=dc01.corp.example.com START_SERVICE=1"
+```
+
+Until then, install from a checkout. winget takes a local manifest only once an administrator has
+allowed it:
+
+```powershell
+winget settings --enable LocalManifestFiles
+winget install --manifest deploy\winget
+```
+
 ## What goes where
 
 | Where | What | On upgrade | On uninstall |

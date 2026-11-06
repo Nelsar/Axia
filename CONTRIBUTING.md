@@ -186,3 +186,12 @@ inherits, `frontend/package.json`, and the image tags the quick start runs in `d
    ```
 
    The community repository holds each version for moderation before it is listed.
+
+7. In the same pull request, bring the winget manifests in `deploy/winget` to the release: the
+   `PackageVersion` in all three, and in `Nelsar.Axia.installer.yaml` the release date and, for each
+   architecture, the URL, the SHA-256 and the `ProductCode`, which changes with every version.
+   `wingetcreate update Nelsar.Axia --version x.y.z --urls <x64 url> <arm64 url>` fills these in
+   from the installers once the package is listed; `winget validate --manifest deploy\winget`
+   checks the result. Then submit them to
+   [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs) under
+   `manifests/n/Nelsar/Axia/x.y.z/`, or with `wingetcreate submit`.
