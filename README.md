@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-# Nelsar.Axia — open-source web console and REST API for Active Directory and LDAP
+# Nelsar.Axia — open-source, web-based Active Directory management tool with a web console and REST API
 
 [![CI](https://github.com/Nelsar/Axia/actions/workflows/ci.yml/badge.svg)](https://github.com/Nelsar/Axia/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/Nelsar/Axia/actions/workflows/codeql.yml/badge.svg)](https://github.com/Nelsar/Axia/actions/workflows/codeql.yml)
@@ -13,7 +13,7 @@
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4.svg)](https://dotnet.microsoft.com/)
 [![React + TypeScript](https://img.shields.io/badge/console-React%20%2B%20TypeScript-3178C6.svg)](frontend/)
 
-**Nelsar.Axia** is a self-hosted web interface and REST API for managing **Active Directory**,
+**Nelsar.Axia** is a self-hosted, **web-based Active Directory management tool** — a web console and REST API for managing **Active Directory**,
 **Samba AD**, **OpenLDAP** and other LDAP directories from the browser: users, groups, organizational units (OUs)
 and computer accounts, across several directories from one instance — with role-based access,
 an audit log and bulk user provisioning.
