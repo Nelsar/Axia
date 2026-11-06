@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-# Nelsar.Axia — open-source, web-based Active Directory management tool with a web console and REST API
+# Nelsar Axia — open-source, web-based Active Directory management tool with a web console and REST API
 
 [![CI](https://github.com/Nelsar/Axia/actions/workflows/ci.yml/badge.svg)](https://github.com/Nelsar/Axia/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/Nelsar/Axia/actions/workflows/codeql.yml/badge.svg)](https://github.com/Nelsar/Axia/actions/workflows/codeql.yml)
@@ -13,7 +13,7 @@
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4.svg)](https://dotnet.microsoft.com/)
 [![React + TypeScript](https://img.shields.io/badge/console-React%20%2B%20TypeScript-3178C6.svg)](frontend/)
 
-**Nelsar.Axia** is a self-hosted, **web-based Active Directory management tool** — a web console and REST API for managing **Active Directory**,
+**Nelsar Axia** is a self-hosted, **web-based Active Directory management tool** — a web console and REST API for managing **Active Directory**,
 **Samba AD**, **OpenLDAP** and other LDAP directories from the browser: users, groups, organizational units (OUs)
 and computer accounts, across several directories from one instance — with role-based access,
 an audit log and bulk user provisioning.
@@ -39,7 +39,7 @@ Built on .NET 10 (ASP.NET Core) with a React/TypeScript console. Licensed under
 
 ## How it compares
 
-| | Nelsar.Axia | ADUC / RSAT | phpLDAPadmin | Apache Directory Studio |
+| | Nelsar Axia | ADUC / RSAT | phpLDAPadmin | Apache Directory Studio |
 | --- | --- | --- | --- | --- |
 | Runs in a browser | yes | no — Windows desktop | yes | no — desktop |
 | REST API for automation | yes | no (PowerShell) | no | no |
