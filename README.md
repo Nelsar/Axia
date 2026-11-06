@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-# Nelsar.Axia — web-based Active Directory management tool with a web console and REST API
+# Nelsar.Axia — open-source, web-based Active Directory management tool with a web console and REST API
 
 [![CI](https://github.com/Nelsar/Axia/actions/workflows/ci.yml/badge.svg)](https://github.com/Nelsar/Axia/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/Nelsar/Axia/actions/workflows/codeql.yml/badge.svg)](https://github.com/Nelsar/Axia/actions/workflows/codeql.yml)
